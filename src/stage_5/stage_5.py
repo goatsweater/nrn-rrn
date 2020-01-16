@@ -1,6 +1,8 @@
 import click
+import geopandas as gpd
 import logging
 import os
+import shapely
 import sys
 from sqlalchemy import *
 
@@ -20,6 +22,12 @@ logger.addHandler(handler)
 class Stage:
     """Defines an NRN stage."""
 
+    """ 
+    Conditions of Satisfaction
+        - Should compare the geometries of the current data with the previous NRN vintage
+        - Should retain NID if there has been no geometry change between vintages 
+    """
+
     def __init__(self, source):
         self.stage = 5
         self.source = source.lower()
@@ -29,10 +37,19 @@ class Stage:
         if not os.path.exists(self.data_path):
             logger.exception("Input data not found: \"{}\".".format(self.data_path))
             sys.exit(1)
-            
+
+    def equals(self):
+        # self.nb_stage_5 = helpers.load_gpkg(self.data_path)
+        # print(self.nb_stage_5["roadseg"])
+
+        self.vintage = gpd.read_file("../../data/interim/nb_test.gpkg", layer="vintage")
+        self.new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+
+
     def execute(self):
         """Executes an NRN stage."""
 
+        self.equals()
 
 @click.command()
 @click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))

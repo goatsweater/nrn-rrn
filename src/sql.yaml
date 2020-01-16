@@ -61,3 +61,11 @@ attributes:
       j.provider,
       j.revdate,
       j.specvers HAVING count(*)<>2;
+not_equal:
+  query:
+    DROP TABLE IF EXISTS not_equal;
+    CREATE TABLE not_equal as
+    SELECT a.*
+    FROM test_2 a LEFT JOIN test_1 b
+    ON ST_Equals(a.geom, b.geom)
+    WHERE b.id IS NULL;
