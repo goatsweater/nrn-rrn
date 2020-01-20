@@ -2,8 +2,11 @@ import click
 import geopandas as gpd
 import logging
 import os
+import urllib.request
+import subprocess
 import shapely
 import sys
+import zipfile
 from sqlalchemy import *
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
@@ -22,12 +25,6 @@ logger.addHandler(handler)
 class Stage:
     """Defines an NRN stage."""
 
-    """ 
-    Conditions of Satisfaction
-        - Should compare the geometries of the current data with the previous NRN vintage
-        - Should retain NID if there has been no geometry change between vintages 
-    """
-
     def __init__(self, source):
         self.stage = 5
         self.source = source.lower()
@@ -38,18 +35,33 @@ class Stage:
             logger.exception("Input data not found: \"{}\".".format(self.data_path))
             sys.exit(1)
 
-    def equals(self):
-        # self.nb_stage_5 = helpers.load_gpkg(self.data_path)
-        # print(self.nb_stage_5["roadseg"])
+    def dl_latest_vintage(self):
+        """Downloads the latest provincial NRN dataset.
+        For now it is downloading the dataset from STC geoprod rather than locally."""
 
-        self.vintage = gpd.read_file("../../data/interim/nb_test.gpkg", layer="vintage")
-        self.new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+        # Download latest vintage dataset.
+        logger.info("Downloading latest provincial dataset.")
+        vintage = "https://geoprod.statcan.gc.ca/nrn_rrn/nb/NRN_RRN_NB_9_0_SHP.zip"
+        urllib.request.urlretrieve(vintage, '../../data/raw/vintage.zip')
+        with zipfile.ZipFile("../../data/raw/vintage.zip", "r") as zip_ref:
+            zip_ref.extractall("../../data/raw/vintage")
+
+        # Transform administrative boundary file to GeoPackage layer with crs EPSG:4617.
+        logger.info("Transforming latest provincial dataset.")
+        try:
+            subprocess.run("ogr2ogr ../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/NRN_NB_9_0_ROADSEG_tmp.shp "
+                           "../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/NRN_NB_9_0_ROADSEG.shp -t_srs EPSG:4617 "
+                           "-lco overwrite=yes ")
+        except subprocess.CalledProcessError as e:
+            logger.exception("Unable to transform data source to EPSG:4617.")
+            logger.exception("ogr2ogr error: {}".format(e))
+            sys.exit(1)
 
 
     def execute(self):
         """Executes an NRN stage."""
 
-        self.equals()
+        self.dl_latest_vintage()
 
 @click.command()
 @click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))

@@ -289,7 +289,7 @@ class Stage:
 
         for f in files:
             # Load yaml and store contents.
-            self.source_attributes[os.path.splitext(os.path.basename(f))[0]] = helpers.load_yaml(f)
+            self.source_attributes[os.path.splitext(ofreps.path.basename(f))[0]] = helpers.load_yaml(f)
 
     def compile_target_attributes(self):
         """Compiles the target (distribution format) yaml file into a dictionary."""
