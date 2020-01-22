@@ -73,21 +73,24 @@ class Stage:
         # new = self.dframes["roadseg"]
         # print(new)
 
-        new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
-        new["nid"] = [uuid.uuid4().hex for _ in range(len(new))]
-        old = gpd.read_file("../../data/interim/nb_test.gpkg", layer="old")
-        old["nid"] = [uuid.uuid4().hex for _ in range(len(old))]
+        # new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+        # new["nid"] = [uuid.uuid4().hex for _ in range(len(new))]
+        # old = gpd.read_file("../../data/interim/nb_test.gpkg", layer="old")
+        # old["nid"] = [uuid.uuid4().hex for _ in range(len(old))]
 
+        logger.info("Checking for road segment geometry equality.")
         # Returns True or False to a new column if geometry is equal.
-        new["equal"] = new.geom_equals(old)
+        self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.dframes["roadseg"])
 
-        new.to_file("../../data/interim/nb_test.gpkg", layer="new_equal", driver="GPKG")
+        logger.info("Writing test GPKG.")
+        # self.dframes["roadseg"].to_file("../../data/interim/nb_test.gpkg", layer="new_equal", driver="GPKG")
+        helpers.export_gpkg({"new_equal": self.dframes["roadseg"]}, self.data_path)
 
     def execute(self):
         """Executes an NRN stage."""
 
         self.load_gpkg()
-        # self.dl_latest_vintage()
+        self.dl_latest_vintage()
         self.roadseg_equality()
 
 @click.command()
