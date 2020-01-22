@@ -1,8 +1,10 @@
 import click
 import geopandas as gpd
+import numpy as np
 import logging
 import os
 import urllib.request
+import uuid
 import subprocess
 import shapely
 import sys
@@ -62,12 +64,31 @@ class Stage:
             logger.exception("ogr2ogr error: {}".format(e))
             sys.exit(1)
 
+        logger.info("Reading latest provincial dataset.")
+        self.old = gpd.read_file("../../data/raw/vintage/vintage.gpkg")
+
+    def roadseg_equality(self):
+        """Checks if roadseg features have equal geometry."""
+
+        # new = self.dframes["roadseg"]
+        # print(new)
+
+        new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+        new["nid"] = [uuid.uuid4().hex for _ in range(len(new))]
+        old = gpd.read_file("../../data/interim/nb_test.gpkg", layer="old")
+        old["nid"] = [uuid.uuid4().hex for _ in range(len(old))]
+
+        # Returns True or False to a new column if geometry is equal.
+        new["equal"] = new.geom_equals(old)
+
+        new.to_file("../../data/interim/nb_test.gpkg", layer="new_equal", driver="GPKG")
 
     def execute(self):
         """Executes an NRN stage."""
 
         self.load_gpkg()
-        self.dl_latest_vintage()
+        # self.dl_latest_vintage()
+        self.roadseg_equality()
 
 @click.command()
 @click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))
