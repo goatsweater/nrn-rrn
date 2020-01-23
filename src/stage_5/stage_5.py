@@ -68,6 +68,7 @@ class Stage:
 
         logger.info("Reading latest provincial dataset.")
         self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
+        self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
 
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
@@ -84,9 +85,18 @@ class Stage:
         # Returns True or False to a new column if geometry is equal.
         self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
 
-        logger.info("Writing test GPKG.")
-        # self.dframes["roadseg"].to_file("../../data/interim/nb_test.gpkg", layer="new_equal", driver="GPKG")
+        logger.info("Writing test ROADSEG GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
+
+    def ferryseg_equality(self):
+        """Checks if ferryseg features have equal geometry."""
+
+        logger.info("Checking for ferry segment geometry equality.")
+        # Returns True or False to a new column if geometry is equal.
+        self.dframes["ferryseg"]["equals"] = self.dframes["ferryseg"].geom_equals(self.vintage_ferryseg)
+
+        logger.info("Writing test FERRYSEG GPKG.")
+        helpers.export_gpkg({"ferryseg_equal": self.dframes["ferryseg"]}, self.data_path)
 
     def execute(self):
         """Executes an NRN stage."""
@@ -94,6 +104,7 @@ class Stage:
         self.load_gpkg()
         self.dl_latest_vintage()
         self.roadseg_equality()
+        self.ferryseg_equality()
 
 @click.command()
 @click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))
