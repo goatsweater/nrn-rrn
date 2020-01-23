@@ -3,7 +3,6 @@ import geopandas as gpd
 import logging
 import os
 import urllib.request
-import uuid
 import subprocess
 import sys
 import zipfile
@@ -65,6 +64,7 @@ class Stage:
         logger.info("Reading latest provincial dataset.")
         self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
         self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
+        self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
 
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
@@ -73,7 +73,7 @@ class Stage:
         # Returns True or False to a new column if geometry is equal.
         self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
 
-        logger.info("Writing test ROADSEG GPKG.")
+        logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
 
     def ferryseg_equality(self):
@@ -83,8 +83,18 @@ class Stage:
         # Returns True or False to a new column if geometry is equal.
         self.dframes["ferryseg"]["equals"] = self.dframes["ferryseg"].geom_equals(self.vintage_ferryseg)
 
-        logger.info("Writing test FERRYSEG GPKG.")
+        logger.info("Writing test ferry segment GPKG.")
         helpers.export_gpkg({"ferryseg_equal": self.dframes["ferryseg"]}, self.data_path)
+
+    def junction_equality(self):
+        """Checks if junction features have equal geometry."""
+
+        logger.info("Checking for junction geometry equality.")
+        # Returns True or False to a new column if geometry is equal.
+        self.dframes["junction"]["equals"] = self.dframes["junction"].geom_equals(self.vintage_junction)
+
+        logger.info("Writing test junction GPKG.")
+        helpers.export_gpkg({"junction_equal": self.dframes["junction"]}, self.data_path)
 
     def execute(self):
         """Executes an NRN stage."""
@@ -93,6 +103,7 @@ class Stage:
         self.dl_latest_vintage()
         self.roadseg_equality()
         self.ferryseg_equality()
+        self.junction_equality()
 
 @click.command()
 @click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))
