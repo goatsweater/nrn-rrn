@@ -78,13 +78,10 @@ class Stage:
         for index, row in self.dframes["roadseg"].iterrows():
 
             if row['equals'] == 1:
-                logger.warning("uuid {} has an identical geometry.".format(index))
+                logger.warning("Equal roadseg geometry detected for uuid: {}".format(index))
 
             else:
-                logger.warning("uuid {} does not have an identical geometry.".format(index))
-
-        sys.exit(1)
-
+                logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
 
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
@@ -96,6 +93,15 @@ class Stage:
         # Returns True or False to a new column if geometry is equal.
         self.dframes["ferryseg"]["equals"] = self.dframes["ferryseg"].geom_equals(self.vintage_ferryseg)
 
+        logger.info("Logging geometry equality.")
+        for index, row in self.dframes["ferryseg"].iterrows():
+
+            if row['equals'] == 1:
+                logger.warning("Equal ferryseg geometry detected for uuid: {}".format(index))
+
+            else:
+                logger.warning("Unequal ferryseg geometry detected for uuid: {}".format(index))
+
         logger.info("Writing test ferry segment GPKG.")
         helpers.export_gpkg({"ferryseg_equal": self.dframes["ferryseg"]}, self.data_path)
 
@@ -105,6 +111,15 @@ class Stage:
         logger.info("Checking for junction geometry equality.")
         # Returns True or False to a new column if geometry is equal.
         self.dframes["junction"]["equals"] = self.dframes["junction"].geom_equals(self.vintage_junction)
+
+        logger.info("Logging geometry equality.")
+        for index, row in self.dframes["junction"].iterrows():
+
+            if row['equals'] == 1:
+                logger.warning("Equal junction geometry detected for uuid: {}".format(index))
+
+            else:
+                logger.warning("Unequal junction geometry detected for uuid: {}".format(index))
 
         logger.info("Writing test junction GPKG.")
         helpers.export_gpkg({"junction_equal": self.dframes["junction"]}, self.data_path)
