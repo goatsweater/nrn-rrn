@@ -63,8 +63,8 @@ class Stage:
 
         logger.info("Reading latest provincial dataset.")
         self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
-        self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
-        self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
+        # self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
+        # self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
 
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
@@ -72,6 +72,19 @@ class Stage:
         logger.info("Checking for road segment geometry equality.")
         # Returns True or False to a new column if geometry is equal.
         self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
+
+
+        logger.info("Logging geometry equality.")
+        for index, row in self.dframes["roadseg"].iterrows():
+
+            if row['equals'] == 1:
+                logger.warning("uuid {} has an identical geometry.".format(index))
+
+            else:
+                logger.warning("uuid {} does not have an identical geometry.".format(index))
+
+        sys.exit(1)
+
 
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
