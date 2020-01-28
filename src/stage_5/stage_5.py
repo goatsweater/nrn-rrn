@@ -63,8 +63,8 @@ class Stage:
 
         logger.info("Reading latest provincial dataset.")
         self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
-        # self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
-        # self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
+        self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
+        self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
 
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
