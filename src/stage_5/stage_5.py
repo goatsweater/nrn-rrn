@@ -69,19 +69,31 @@ class Stage:
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
 
+        # self.nb_old = gpd.read_file("../../data/interim/nb_test.gpkg", layer="old")
+        # self.nb_new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+
         logger.info("Checking for road segment geometry equality.")
         # Returns True or False to a new column if geometry is equal.
         self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
-
+        # self.nb_new["equals"] = self.nb_new.geom_equals(self.nb_old)
 
         logger.info("Logging geometry equality.")
         for index, row in self.dframes["roadseg"].iterrows():
 
             if row['equals'] == 1:
                 logger.warning("Equal roadseg geometry detected for uuid: {}".format(index))
+                self.dframes["roadseg"]["nid"] = self.vintage_roadseg["nid"]
 
             else:
-                logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
+
+                if row["equals"] == 0:
+                    logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
+                    # self.dframes["roadseg"]["nid"] = "new_nid"
+
+        # self.nb_new.to_file("../../data/interim/nb_test.gpkg", layer="test", driver="GPKG")
+        print(self.dframes["roadseg"]["nid"])
+        sys.exit(1)
+
 
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
