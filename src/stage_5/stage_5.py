@@ -3,6 +3,7 @@ import geopandas as gpd
 import logging
 import os
 import urllib.request
+import uuid
 import subprocess
 import sys
 import zipfile
@@ -80,15 +81,21 @@ class Stage:
         logger.info("Logging geometry equality.")
         for index, row in self.dframes["roadseg"].iterrows():
 
+            # Logs uuid of equal geometry and applies the nid from vintage to newest data.
             if row['equals'] == 1:
                 logger.warning("Equal roadseg geometry detected for uuid: {}".format(index))
+
+                # Apply NID from latest vintage to newest data.
                 self.dframes["roadseg"]["nid"] = self.vintage_roadseg["nid"]
 
             else:
 
+                # Logs uuid of equal geometry.
                 if row["equals"] == 0:
                     logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
-                    # self.dframes["roadseg"]["nid"] = "new_nid"
+
+                    # This is temporary. The same NID will have to be applied to segments between junctions.
+                    self.dframes["roadseg"]["nid"] = [uuid.uuid4().hex for _ in range(len(self.dframes["roadseg"]))]
 
         # self.nb_new.to_file("../../data/interim/nb_test.gpkg", layer="test", driver="GPKG")
         print(self.dframes["roadseg"]["nid"])
