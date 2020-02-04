@@ -69,3 +69,7 @@ not_equal:
     FROM test_2 a LEFT JOIN test_1 b
     ON ST_Equals(a.geom, b.geom)
     WHERE b.id IS NULL;
+gen_nid:
+  query:
+    UPDATE stage_{0} a SET nid = b.nid FROM stage_{0}_linemerge b WHERE ST_Within(a.geom, b.geom) AND a.nid = '';
+    SELECT * FROM stage_{0};

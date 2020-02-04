@@ -7,7 +7,9 @@ import uuid
 import subprocess
 import sys
 import zipfile
+from geopandas_postgis import PostGIS
 from sqlalchemy import *
+from sqlalchemy.engine.url import URL
 from shapely.ops import split, snap, linemerge, unary_union
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
@@ -42,6 +44,25 @@ class Stage:
 
         self.dframes = helpers.load_gpkg(self.data_path)
 
+    def load_sql(self):
+
+        logger.info("Loading SQL yaml.")
+        self.sql = helpers.load_yaml("../sql.yaml")
+
+    def db_connect(self):
+
+        nrn_db = "nrn"
+
+        # postgres database url for geoprocessing
+        nrn_url = URL(
+            drivername='postgresql+psycopg2', host='localhost',
+            database=nrn_db, username='postgres',
+            port='5432', password='password'
+        )
+
+        # engine to connect to nrn database
+        self.engine = create_engine(nrn_url)
+
     def dl_latest_vintage(self):
         """Downloads the latest provincial NRN data set from Open Maps/FGP."""
 
@@ -68,53 +89,45 @@ class Stage:
         self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
         self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
 
-    def split_line_by_nearest_points(self, gdf_line, gdf_points, tolerance):
+    def line_merge(self, gdf_line):
         """
-        Split the union of lines with the union of points resulting
-        Parameters
-        ----------
-        gdf_line : geoDataFrame
-            geodataframe with multiple rows of connecting line segments
-        gdf_points : geoDataFrame
-            geodataframe with multiple rows of single points
-
-        Returns
-        -------
-        gdf_segments : geoDataFrame
-            geodataframe of segments
+        Generates continuous road segments between junction points.
         """
 
+        # Dissolves input road segments.
         gdf_line["diss"] = "1"
         line = gdf_line.dissolve(by="diss")
 
-        # union all geometries
+        # Union all geometries.
         line = gdf_line.geometry.unary_union
+
+        # Merge the lines so that there is one feature.
         line = linemerge(line)
-        coords = gdf_points.geometry.unary_union
 
-        # snap and split coords on line
-        # returns GeometryCollection
-        split_line = split(line, snap(coords, line, tolerance))
+        # Create the GeoDataFrame
+        line = [feature for feature in line]
 
-        # transform Geometry Collection to GeoDataFrame
-        segments = [feature for feature in split_line]
+        gdf_linemerge = gpd.GeoDataFrame(
+            list(range(len(line))), geometry=line)
+        gdf_linemerge.columns = ['index', 'geometry']
 
-        gdf_segments = gpd.GeoDataFrame(
-            list(range(len(segments))), geometry=segments)
-        gdf_segments.columns = ['index', 'geometry']
+        gdf_linemerge.crs = self.dframes["roadseg"].crs
 
-        return gdf_segments
+        # Apply a new NID to the merged road segments.
+        gdf_linemerge["nid"] = [uuid.uuid4().hex for _ in range(len(gdf_linemerge))]
+
+        return gdf_linemerge
 
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
 
         # self.nb_old = gpd.read_file("../../data/interim/nb_test.gpkg", layer="old")
         # self.nb_new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+        # self.vintage_roadseg = self.dframes["roadseg"]
 
         logger.info("Checking for road segment geometry equality.")
         # Returns True or False to a new column if geometry is equal.
         self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
-        # self.nb_new["equals"] = self.nb_new.geom_equals(self.nb_old)
 
         logger.info("Logging geometry equality.")
         for index, row in self.dframes["roadseg"].iterrows():
@@ -122,29 +135,38 @@ class Stage:
             # Logs uuid of equal geometry and applies the nid from vintage to newest data.
             if row['equals'] == 1:
                 logger.warning("Equal roadseg geometry detected for uuid: {}".format(index))
-
                 # Apply NID from latest vintage to newest data.
                 self.dframes["roadseg"]["nid"] = self.vintage_roadseg["nid"]
-                # self.dframes["roadseg"]["nid"] = "Equal"
 
             else:
 
                 # Logs uuid of equal geometry.
                 if row["equals"] == 0:
                     logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
-
                     self.dframes["roadseg"]["nid"] = ""
 
-                    # This is temporary. The same NID will have to be applied to segments between junctions.
-                    # self.dframes["roadseg"]["nid"] = [uuid.uuid4().hex for _ in range(len(self.dframes["roadseg"]))]
+        logger.info("Merging...")
+        line_merge = self.line_merge(self.dframes["roadseg"])
 
-        # self.nb_new.to_file("../../data/interim/nb_test.gpkg", layer="test", driver="GPKG")
+        logger.info("Importing roadseg geodataframe into PostGIS.")
+        self.dframes["roadseg"].postgis.to_postgis(con=self.engine, table_name="stage_{}".format(self.stage),
+                                                   geometry="LineString", if_exists="replace")
 
-        split_lines = self.split_line_by_nearest_points(self.dframes["roadseg"], self.dframes["junction"], tolerance=0.5)
+        logger.info("Importing merged geodataframe into PostGIS.")
+        line_merge.postgis.to_postgis(con=self.engine, table_name="stage_{}_linemerge".format(self.stage),
+                                                   geometry="LineString", if_exists="replace")
+
+        logger.info("Executing SQL injection for NID update.")
+        line_merge_update = self.sql["gen_nid"]["query"].format(self.stage)
+
+        logger.info("Creating new roadseg with NID.")
+        self.roadseg_merge = gpd.GeoDataFrame.from_postgis(line_merge_update, self.engine, geom_col="geom")
+
+        sys.exit(1)
 
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
-        helpers.export_gpkg({"split_lines": split_lines}, self.data_path)
+        helpers.export_gpkg({"line_merge": line_merge}, self.data_path)
 
         sys.exit(1)
 
@@ -190,6 +212,8 @@ class Stage:
         """Executes an NRN stage."""
 
         self.load_gpkg()
+        self.load_sql()
+        self.db_connect()
         self.dl_latest_vintage()
         self.roadseg_equality()
         self.ferryseg_equality()
