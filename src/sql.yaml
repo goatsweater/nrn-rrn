@@ -72,4 +72,5 @@ not_equal:
 gen_nid:
   query:
     UPDATE stage_{0} a SET nid = b.nid FROM stage_{0}_linemerge b WHERE ST_Within(a.geom, b.geom) AND a.nid = '';
+    UPDATE stage_{0} a SET nid = b.nid FROM stage_{0}_linemerge b WHERE ST_Within(b.geom, a.geom) AND a.nid = '';
     SELECT * FROM stage_{0};
