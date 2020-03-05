@@ -162,8 +162,6 @@ class Stage:
         logger.info("Creating new roadseg with NID.")
         self.roadseg_merge = gpd.GeoDataFrame.from_postgis(line_merge_update, self.engine, geom_col="geom")
 
-        sys.exit(1)
-
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
         helpers.export_gpkg({"line_merge": line_merge}, self.data_path)
