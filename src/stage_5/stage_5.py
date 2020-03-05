@@ -89,35 +89,6 @@ class Stage:
         self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
         self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
 
-    def line_merge(self, gdf_line):
-        """
-        Generates continuous road segments between junction points.
-        """
-
-        # Dissolves input road segments.
-        gdf_line["diss"] = "1"
-        line = gdf_line.dissolve(by="diss")
-
-        # Union all geometries.
-        line = gdf_line.geometry.unary_union
-
-        # Merge the lines so that there is one feature.
-        line = linemerge(line)
-
-        # Create the GeoDataFrame
-        line = [feature for feature in line]
-
-        gdf_linemerge = gpd.GeoDataFrame(
-            list(range(len(line))), geometry=line)
-        gdf_linemerge.columns = ['index', 'geometry']
-
-        gdf_linemerge.crs = self.dframes["roadseg"].crs
-
-        # Apply a new NID to the merged road segments.
-        gdf_linemerge["nid"] = [uuid.uuid4().hex for _ in range(len(gdf_linemerge))]
-
-        return gdf_linemerge
-
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
 
@@ -145,28 +116,9 @@ class Stage:
                     logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
                     self.dframes["roadseg"]["nid"] = ""
 
-        logger.info("Merging...")
-        line_merge = self.line_merge(self.dframes["roadseg"])
-
-        logger.info("Importing roadseg geodataframe into PostGIS.")
-        self.dframes["roadseg"].postgis.to_postgis(con=self.engine, table_name="stage_{}".format(self.stage),
-                                                   geometry="LineString", if_exists="replace")
-
-        logger.info("Importing merged geodataframe into PostGIS.")
-        line_merge.postgis.to_postgis(con=self.engine, table_name="stage_{}_linemerge".format(self.stage),
-                                                   geometry="LineString", if_exists="replace")
-
-        logger.info("Executing SQL injection for NID update.")
-        line_merge_update = self.sql["gen_nid"]["query"].format(self.stage)
-
-        logger.info("Creating new roadseg with NID.")
-        self.roadseg_merge = gpd.GeoDataFrame.from_postgis(line_merge_update, self.engine, geom_col="geom")
-
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
-        helpers.export_gpkg({"line_merge": line_merge}, self.data_path)
 
-        sys.exit(1)
 
     def ferryseg_equality(self):
         """Checks if ferryseg features have equal geometry."""
@@ -180,9 +132,11 @@ class Stage:
 
             if row['equals'] == 1:
                 logger.warning("Equal ferryseg geometry detected for uuid: {}".format(index))
+                self.dframes["ferryseg"]["nid"] = self.vintage_ferryseg["nid"]
 
             else:
                 logger.warning("Unequal ferryseg geometry detected for uuid: {}".format(index))
+                self.dframes["ferryseg"]["nid"] = ""
 
         logger.info("Writing test ferry segment GPKG.")
         helpers.export_gpkg({"ferryseg_equal": self.dframes["ferryseg"]}, self.data_path)
@@ -199,6 +153,7 @@ class Stage:
 
             if row['equals'] == 1:
                 logger.warning("Equal junction geometry detected for uuid: {}".format(index))
+                self.dframes["junction"]["nid"] = self.vintage_junction["nid"]
 
             else:
                 logger.warning("Unequal junction geometry detected for uuid: {}".format(index))
