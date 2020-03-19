@@ -44,25 +44,6 @@ class Stage:
 
         self.dframes = helpers.load_gpkg(self.data_path)
 
-    def load_sql(self):
-
-        logger.info("Loading SQL yaml.")
-        self.sql = helpers.load_yaml("../sql.yaml")
-
-    def db_connect(self):
-
-        nrn_db = "nrn"
-
-        # postgres database url for geoprocessing
-        nrn_url = URL(
-            drivername='postgresql+psycopg2', host='localhost',
-            database=nrn_db, username='postgres',
-            port='5432', password='password'
-        )
-
-        # engine to connect to nrn database
-        self.engine = create_engine(nrn_url)
-
     def dl_latest_vintage(self):
         """Downloads the latest provincial NRN data set from Open Maps/FGP."""
 
@@ -92,29 +73,43 @@ class Stage:
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
 
-        # self.nb_old = gpd.read_file("../../data/interim/nb_test.gpkg", layer="old")
-        # self.nb_new = gpd.read_file("../../data/interim/nb_test.gpkg", layer="new")
+        self.nb_old = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
+        self.nb_new = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new_2.1")
         # self.vintage_roadseg = self.dframes["roadseg"]
 
         logger.info("Checking for road segment geometry equality.")
         # Returns True or False to a new column if geometry is equal.
-        self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
+        # self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
+        self.nb_new["equals"] = self.nb_new.geom_equals(self.nb_old)
 
         logger.info("Logging geometry equality.")
-        for index, row in self.dframes["roadseg"].iterrows():
+        # for index, row in self.dframes["roadseg"].iterrows():
+        for index, row in self.nb_new.iterrows():
 
             # Logs uuid of equal geometry and applies the nid from vintage to newest data.
-            if row['equals'] == 1:
-                logger.warning("Equal roadseg geometry detected for uuid: {}".format(index))
+            if row["equals"] == True:
+                logger.warning("roadseg: EQUALITY detected for uuid: {}".format(index))
                 # Apply NID from latest vintage to newest data.
-                self.dframes["roadseg"]["nid"] = self.vintage_roadseg["nid"]
+                # self.nb_new["nid"] = self.nb_old["nid"]
 
             else:
 
                 # Logs uuid of equal geometry.
-                if row["equals"] == 0:
-                    logger.warning("Unequal roadseg geometry detected for uuid: {}".format(index))
-                    self.dframes["roadseg"]["nid"] = ""
+                if row["equals"] == False:
+                    logger.warning("roadseg: ADDITIONS detected for uuid: {}".format(index))
+                    # self.dframes["roadseg"]["nid"] = ""
+
+        # Deleted features
+        common = self.nb_old.merge(self.nb_new, on=['uuid'])
+        self.deleted = self.nb_old[(~self.nb_old.uuid.isin(common.uuid)) & (~self.nb_old.uuid.isin(common.uuid))]
+
+        for index, row in self.deleted.iterrows():
+
+            logger.warning("roadseg: DELETIONS detected for uuid: {}".format(index))
+
+        self.nb_new.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
+
+        sys.exit(1)
 
         logger.info("Writing test road segment GPKG.")
         helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
@@ -165,9 +160,7 @@ class Stage:
         """Executes an NRN stage."""
 
         self.load_gpkg()
-        self.load_sql()
-        self.db_connect()
-        self.dl_latest_vintage()
+        # self.dl_latest_vintage()
         self.roadseg_equality()
         self.ferryseg_equality()
         self.junction_equality()
