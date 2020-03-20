@@ -2,15 +2,12 @@ import click
 import geopandas as gpd
 import logging
 import os
+import pandas as pd
 import urllib.request
 import uuid
 import subprocess
 import sys
 import zipfile
-from geopandas_postgis import PostGIS
-from sqlalchemy import *
-from sqlalchemy.engine.url import URL
-from shapely.ops import split, snap, linemerge, unary_union
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 import helpers
@@ -73,41 +70,50 @@ class Stage:
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
 
-        self.nb_old = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
-        self.nb_new = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new_2.1")
+        self.nb_old = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_old")
+        self.nb_old["vintage"] = "old"
+        self.nb_old["nid"] = [uuid.uuid4().hex for _ in range(len(self.nb_old))]
+        self.nb_old_filter = self.nb_old.filter(items=['geometry', 'nid'])
+
+        self.nb_new = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
+        self.nb_new["vintage"] = "new"
         # self.vintage_roadseg = self.dframes["roadseg"]
 
-        logger.info("Checking for road segment geometry equality.")
-        # Returns True or False to a new column if geometry is equal.
-        # self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
-        self.nb_new["equals"] = self.nb_new.geom_equals(self.nb_old)
+        merged_add = pd.concat([self.nb_new, self.nb_old])
 
-        logger.info("Logging geometry equality.")
-        # for index, row in self.dframes["roadseg"].iterrows():
-        for index, row in self.nb_new.iterrows():
+        merged = pd.merge(self.nb_new, self.nb_old_filter, on="geometry")
 
-            # Logs uuid of equal geometry and applies the nid from vintage to newest data.
-            if row["equals"] == True:
-                logger.warning("roadseg: EQUALITY detected for uuid: {}".format(index))
-                # Apply NID from latest vintage to newest data.
-                # self.nb_new["nid"] = self.nb_old["nid"]
-
-            else:
-
-                # Logs uuid of equal geometry.
-                if row["equals"] == False:
-                    logger.warning("roadseg: ADDITIONS detected for uuid: {}".format(index))
-                    # self.dframes["roadseg"]["nid"] = ""
+        addition = merged_add[~merged_add.length.duplicated(keep=False)]
 
         # Deleted features
         common = self.nb_old.merge(self.nb_new, on=['uuid'])
         self.deleted = self.nb_old[(~self.nb_old.uuid.isin(common.uuid)) & (~self.nb_old.uuid.isin(common.uuid))]
 
+        for index, row in merged.iterrows():
+
+            if row["vintage"] == "new":
+                logger.warning("roadseg: EQUALITY detected for uuid: {}".format(index))
+                merged["nid_x"] = merged["nid_y"]
+
+        for index, row in addition.iterrows():
+
+            # Logs uuid of equal geometry.
+            if row["vintage"] == "new":
+                logger.warning("roadseg: ADDITION detected for uuid: {}".format(index))
+
         for index, row in self.deleted.iterrows():
 
-            logger.warning("roadseg: DELETIONS detected for uuid: {}".format(index))
+            logger.warning("roadseg: DELETION detected for uuid: {}".format(index))
 
-        self.nb_new.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
+        merged = pd.concat([merged, addition])
+
+        merged = merged[merged["vintage"]=="new"]
+
+        merged = merged.drop(["vintage", "nid_y", "nid"], axis=1)
+
+        merged = merged.rename(columns={"nid_x": "nid"})
+
+        merged.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
 
         sys.exit(1)
 
