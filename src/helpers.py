@@ -7,11 +7,14 @@ import os
 import pandas as pd
 import shutil
 import sqlite3
+import subprocess
 import sys
 import time
 import yaml
-from osgeo import ogr
-from shapely.geometry.point import Point
+from copy import deepcopy
+from geoalchemy2 import WKTElement, Geometry
+from osgeo import ogr, osr
+from shapely.geometry import LineString, Point
 
 
 logger = logging.getLogger()
@@ -33,10 +36,10 @@ class Timer:
         logger.info("Finished. Time elapsed: {}.".format(delta))
 
 
-def compile_default_values():
+def compile_default_values(lang="en"):
     """Compiles the default value for each field in each table."""
 
-    dft_vals = load_yaml(os.path.abspath("../field_domains_en.yaml"))["default"]
+    dft_vals = load_yaml(os.path.abspath("../field_domains_{}.yaml".format(lang)))["default"]
     dist_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
     defaults = dict()
 
@@ -102,8 +105,6 @@ def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../
         # Iterate dataframes.
         for table_name, df in dataframes.items():
 
-            logger.info("Writing to GeoPackage: \"{}\", layer: \"{}\".".format(output_path, table_name))
-
             # Remove pre-existing layer from GeoPackage.
             if table_name in [layer.GetName() for layer in con_ogr]:
 
@@ -114,14 +115,14 @@ def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../
                 con.cursor().execute("delete from gpkg_contents where table_name = '{}';".format(table_name))
                 con.commit()
 
-            # Set index to data column.
-            df.reset_index(drop=False, inplace=True)
+            # Write to GeoPackage.
+            logger.info("Writing to GeoPackage: \"{}\", layer: \"{}\".".format(output_path, table_name))
 
             # Spatial data.
             if "geometry" in dir(df):
 
                 # Open GeoPackage.
-                with fiona.open(output_path, "w", overwrite=True, layer=table_name, driver="GPKG", crs=df.crs,
+                with fiona.open(output_path, "w", overwrite=True, layer=table_name, driver="GPKG", crs=df.crs.to_wkt(),
                                 schema=gpd.io.file.infer_schema(df)) as gpkg:
 
                     # Write to GeoPackage.
@@ -145,152 +146,9 @@ def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../
         con.close()
         del con_ogr
 
-    except (ValueError, fiona.errors.FionaValueError, sqlite3.Error):
+    except (ValueError, fiona.errors.FionaValueError, fiona.errors.TransactionError, sqlite3.Error):
         logger.exception("Error raised when writing to GeoPackage: \"{}\".".format(output_path))
         sys.exit(1)
-
-
-def load_gpkg(gpkg_path):
-    """Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes."""
-
-    dframes = dict()
-    distribution_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
-    missing_flag = False
-
-    if os.path.exists(gpkg_path):
-
-        try:
-
-            # Create sqlite connection.
-            con = sqlite3.connect(gpkg_path)
-
-            # Load gpkg table names.
-            cur = con.cursor()
-            query = "select name from sqlite_master where type='table';"
-            gpkg_tables = list(zip(*cur.execute(query).fetchall()))[0]
-
-        except sqlite3.Error:
-            logger.exception("Unable to connect to GeoPackage: \"{}\".".format(gpkg_path))
-            sys.exit(1)
-
-        # Load GeoPackage layers into pandas or geopandas.
-        for table_name in distribution_format:
-
-            logger.info("Loading layer: \"{}\".".format(table_name))
-
-            try:
-
-                if table_name in gpkg_tables:
-
-                    # Spatial data.
-                    if distribution_format[table_name]["spatial"]:
-                        df = gpd.read_file(gpkg_path, layer=table_name, driver="GPKG")
-
-                    # Tabular data.
-                    else:
-                        df = pd.read_sql_query("select * from {}".format(table_name), con)
-
-                    # Set index field: uuid.
-                    df.set_index("uuid", inplace=True)
-
-                    # Store result.
-                    dframes[table_name] = df
-                    logger.info("Successfully loaded layer into dataframe: \"{}\".".format(table_name))
-
-                else:
-                    logger.warning("GeoPackage layer not found: \"{}\".".format(table_name))
-                    missing_flag = True
-
-            except (fiona.errors.DriverError, pd.io.sql.DatabaseError, sqlite3.Error):
-                logger.exception("Unable to load GeoPackage layer: \"{}\".".format(table_name))
-                sys.exit(1)
-
-    else:
-        logger.exception("GeoPackage does not exist: \"{}\".".format(gpkg_path))
-        sys.exit(1)
-
-    # Provide warning for missing GeoPackage layers.
-    if missing_flag:
-        logger.warning("Missing tables indicated. An exception may be raised later on if the table is required.")
-
-    return dframes
-
-
-def load_gpkg(gpkg_path):
-    """Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes."""
-
-    dframes = dict()
-    distribution_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
-    missing_flag = False
-
-    if os.path.exists(gpkg_path):
-
-        try:
-
-            # Create sqlite connection.
-            con = sqlite3.connect(gpkg_path)
-
-            # Load gpkg table names.
-            cur = con.cursor()
-            query = "select name from sqlite_master where type='table';"
-            gpkg_tables = list(zip(*cur.execute(query).fetchall()))[0]
-
-        except sqlite3.Error:
-            logger.exception("Unable to connect to GeoPackage: \"{}\".".format(gpkg_path))
-            sys.exit(1)
-
-        # Load GeoPackage layers into pandas or geopandas.
-        for table_name in distribution_format:
-
-            logger.info("Loading layer: \"{}\".".format(table_name))
-
-            try:
-
-                if table_name in gpkg_tables:
-
-                    # Spatial data.
-                    if distribution_format[table_name]["spatial"]:
-                        df = gpd.read_file(gpkg_path, layer=table_name, driver="GPKG")
-
-                    # Tabular data.
-                    else:
-                        df = pd.read_sql_query("select * from {}".format(table_name), con)
-
-                    # Set index field: uuid.
-                    df.set_index("uuid", inplace=True)
-
-                    # Store result.
-                    dframes[table_name] = df
-                    logger.info("Successfully loaded layer into dataframe.")
-
-                else:
-                    logger.warning("GeoPackage layer not found: \"{}\".".format(table_name))
-                    missing_flag = True
-
-            except (fiona.errors.DriverError, pd.io.sql.DatabaseError, sqlite3.Error):
-                logger.exception("Unable to load GeoPackage layer: \"{}\".".format(table_name))
-                sys.exit(1)
-
-    else:
-        logger.exception("GeoPackage does not exist: \"{}\".".format(gpkg_path))
-        sys.exit(1)
-
-    # Provide warning for missing GeoPackage layers.
-    if missing_flag:
-        logger.warning("Missing tables indicated. An exception may be raised later on if the table is required.")
-
-    return dframes
-
-
-def load_yaml(path):
-    """Loads and returns a yaml file."""
-
-    with open(path, "r", encoding="utf8") as f:
-
-        try:
-            return yaml.safe_load(f)
-        except (ValueError, yaml.YAMLError):
-            logger.exception("Unable to load yaml file: \"{}\".".format(path))
 
 
 def gdf_to_nx(gdf, keep_attributes=True, endpoints_only=False):
@@ -327,6 +185,106 @@ def gdf_to_nx(gdf, keep_attributes=True, endpoints_only=False):
     return g
 
 
+def gdf_to_postgis(gdf, name, engine, **kwargs):
+    """
+    Converts a GeoPandas GeoDataFrame to a PostGIS database table.
+    **kwargs: Keyword args for GeoPandas.GeoDataFrame.to_sql method.
+    """
+
+    logger.info("Loading GeoDataFrame into PostGIS via SQLAlchemy engine url: \"{}\".".format(repr(engine.url)))
+
+    # Copy input GeoDataFrame.
+    gdf = gdf.copy(deep=True)
+
+    # Compile geometry attributes
+    srid = gdf.crs.to_epsg()
+    geom_type = gdf.geom_type[0].upper()
+
+    # Store geometry as geom.
+    gdf["geom"] = gdf["geometry"].map(lambda geom: WKTElement(geom.wkt, srid=srid))
+    gdf.drop("geometry", axis=1, inplace=True)
+
+    # Call GeoPandas.GeoDataFrame.to_sql method.
+    gdf.to_sql(name=name, con=engine, dtype={"geom": Geometry(geometry_type=geom_type, srid=srid)}, **kwargs)
+
+
+def load_gpkg(gpkg_path):
+    """Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes."""
+
+    dframes = dict()
+    distribution_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
+    missing_flag = False
+
+    if os.path.exists(gpkg_path):
+
+        try:
+
+            # Create sqlite connection.
+            con = sqlite3.connect(gpkg_path)
+
+            # Load gpkg table names.
+            cur = con.cursor()
+            query = "select name from sqlite_master where type='table';"
+            gpkg_tables = list(zip(*cur.execute(query).fetchall()))[0]
+
+        except sqlite3.Error:
+            logger.exception("Unable to connect to GeoPackage: \"{}\".".format(gpkg_path))
+            sys.exit(1)
+
+        # Load GeoPackage layers into pandas or geopandas.
+        for table_name in distribution_format:
+
+            logger.info("Loading layer: \"{}\".".format(table_name))
+
+            try:
+
+                if table_name in gpkg_tables:
+
+                    # Spatial data.
+                    if distribution_format[table_name]["spatial"]:
+                        df = gpd.read_file(gpkg_path, layer=table_name, driver="GPKG")
+
+                    # Tabular data.
+                    else:
+                        df = pd.read_sql_query("select * from {}".format(table_name), con)
+
+                    # Set index field: uuid.
+                    df.index = df["uuid"]
+
+                    # Store result.
+                    dframes[table_name] = df.copy(deep=True)
+                    logger.info("Successfully loaded layer into dataframe: \"{}\".".format(table_name))
+
+                else:
+                    logger.warning("GeoPackage layer not found: \"{}\".".format(table_name))
+                    missing_flag = True
+
+            except (fiona.errors.DriverError, pd.io.sql.DatabaseError, sqlite3.Error):
+                logger.exception("Unable to load GeoPackage layer: \"{}\".".format(table_name))
+                sys.exit(1)
+
+    else:
+        logger.exception("GeoPackage does not exist: \"{}\".".format(gpkg_path))
+        sys.exit(1)
+
+    # Provide warning for missing GeoPackage layers.
+    if missing_flag:
+        logger.warning("Missing tables indicated. An exception may be raised later on if the table is required.")
+
+    return dframes
+
+
+def load_yaml(path):
+    """Loads and returns a yaml file."""
+
+    with open(path, "r", encoding="utf8") as f:
+
+        try:
+            return yaml.safe_load(f)
+        except (ValueError, yaml.YAMLError):
+            logger.exception("Unable to load yaml file: \"{}\".".format(path))
+
+
 def nx_to_gdf(g, nodes=True, edges=True):
     """Converts a networkx graph to pandas dataframe."""
 
@@ -356,3 +314,62 @@ def nx_to_gdf(g, nodes=True, edges=True):
         return gdf_nodes
     else:
         return gdf_edges
+
+
+def ogr2ogr(expression, log=None, max_attempts=5):
+    """Runs an ogr2ogr subprocess. Input expression must be a dictionary of ogr2ogr parameters."""
+
+    attempt = 1
+
+    if log:
+        logger.info(log)
+
+    while attempt <= max_attempts:
+
+        try:
+
+            # Format ogr2ogr command.
+            expression = "ogr2ogr {}".format(" ".join(map(str, expression.values())))
+
+            # Run subprocess.
+            subprocess.run(expression, shell=True, check=True)
+            break
+
+        except subprocess.CalledProcessError as e:
+
+            if attempt == max_attempts:
+                logger.exception("Unable to transform data source.")
+                logger.exception("ogr2ogr error: {}".format(e))
+                logger.warning("Maximum attempts reached. Exiting program.")
+                sys.exit(1)
+            else:
+                logger.warning("Attempt {} of {} failed. Retrying.".format(attempt, max_attempts))
+                attempt += 1
+                continue
+
+
+def reproject_gdf(gdf, epsg_source, epsg_target):
+    """Transforms a GeoDataFrame's geometry column between EPSGs."""
+
+    # Deep copy dataframe to avoid reprojecting original.
+    # Explicitly copy crs property since it is excluded from default copy method.
+    gdf = gpd.GeoDataFrame(gdf.copy(deep=True), crs=deepcopy(gdf.crs))
+
+    # Define transformation.
+    prj_source, prj_target = osr.SpatialReference(), osr.SpatialReference()
+    prj_source.ImportFromEPSG(epsg_source)
+    prj_target.ImportFromEPSG(epsg_target)
+    prj_transformer = osr.CoordinateTransformation(prj_source, prj_target)
+
+    # Transform Records.
+    if gdf.geom_type[0] == "LineString":
+        gdf["geometry"] = gdf["geometry"].map(lambda geom: LineString(prj_transformer.TransformPoints(geom.coords)))
+    elif gdf.geom_type[0] == "Point":
+        gdf["geometry"] = gdf["geometry"].map(lambda geom: Point(prj_transformer.TransformPoint(*geom.coords[0])))
+    else:
+        raise Exception("Geometry type not supported for EPSG transformation.")
+
+    # Update crs attribute.
+    gdf.crs = "epsg:{}".format(epsg_target)
+
+    return gdf
