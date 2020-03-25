@@ -6,8 +6,10 @@ import pandas as pd
 import urllib.request
 import uuid
 import subprocess
+import sqlite3
 import sys
 import zipfile
+from shapely.ops import split, snap
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 import helpers
@@ -71,9 +73,9 @@ class Stage:
         """Checks if roadseg features have equal geometry."""
 
         # self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
-        self.vintage_roadseg = self.dframes["roadseg"]
-        # self.vintage_roadseg = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_old")
-        # self.dframes["roadseg"] = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
+        # self.vintage_roadseg = self.dframes["roadseg"]
+        self.vintage_roadseg = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_old")
+        self.dframes["roadseg"] = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
 
         self.vintage_roadseg_filter = self.vintage_roadseg.filter(items=['geometry', 'nid'])
 
@@ -101,13 +103,39 @@ class Stage:
             for index, row in del_geom.iterrows():
                 logger.warning("roadseg: DELETION or CHANGE detected for uuid: {}".format(index))
 
-        sys.exit(1)
+        self.merged = pd.concat([equal_geom, add_geom], sort=True)
 
-        merged = pd.concat([equal_geom, add_geom], sort=True)
-
-        merged.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
+        self.merged.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
 
         # helpers.export_gpkg({"roadseg2": merged}, self.data_path)
+
+    def split_lines(self):
+
+        self.junction = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="junction2")
+        self.junction = self.junction.unary_union
+        self.dissolved = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="dissolved")
+        self.dissolved = self.dissolved.unary_union
+
+        # split = gpd.overlay(self.dissolved, self.junction, how='union').explode()
+
+        result = split(self.dissolved, self.junction)
+        print(len(result.wkt))
+        print(type(result))
+
+        gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(result))
+        gdf2 = gdf.explode()
+        print(gdf)
+        print(len(gdf))
+        print(len(gdf2))
+        print(gdf2)
+        gdf2.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="result", driver="GPKG")
+        # print(self.dissolved.intersects(self.junction))
+
+        # print(result.wkt)
+
+        # split.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="overlay", driver="GPKG")
+
+        sys.exit(1)
 
     def ferryseg_equality(self):
         """Checks if ferryseg features have equal geometry."""
@@ -153,9 +181,10 @@ class Stage:
     def execute(self):
         """Executes an NRN stage."""
 
-        self.load_gpkg()
+        # self.load_gpkg()
         # self.dl_latest_vintage()
-        self.roadseg_equality()
+        # self.roadseg_equality()
+        self.split_lines()
         self.ferryseg_equality()
         self.junction_equality()
 
