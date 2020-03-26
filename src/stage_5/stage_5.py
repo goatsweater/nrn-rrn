@@ -2,15 +2,14 @@ import click
 import geopandas as gpd
 import logging
 import os
+import pandas as pd
 import urllib.request
 import uuid
 import subprocess
+import sqlite3
 import sys
 import zipfile
-from geopandas_postgis import PostGIS
-from sqlalchemy import *
-from sqlalchemy.engine.url import URL
-from shapely.ops import split, snap, linemerge, unary_union
+from shapely.ops import split
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 import helpers
@@ -57,9 +56,9 @@ class Stage:
         # Transform latest vintage into crs EPSG:4617.
         logger.info("Transforming latest provincial dataset.")
         try:
-            subprocess.run('ogr2ogr -f "ESRI Shapefile" -t_srs EPSG:4617 '
-                           '../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617 '
-                           '../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en')
+            subprocess.run("ogr2ogr -f \"ESRI Shapefile\" -t_srs EPSG:4617 "
+                           "../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617 "
+                           "../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en", shell=True)
         except subprocess.CalledProcessError as e:
             logger.exception("Unable to transform data source to EPSG:4617.")
             logger.exception("ogr2ogr error: {}".format(e))
@@ -67,53 +66,80 @@ class Stage:
 
         logger.info("Reading latest provincial dataset.")
         self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
-        self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
-        self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
+        # self.vintage_ferryseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_FERRYSEG.shp")
+        # self.vintage_junction = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_JUNCTION.shp")
 
     def roadseg_equality(self):
         """Checks if roadseg features have equal geometry."""
 
-        self.nb_old = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
-        self.nb_new = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new_2.1")
+        # self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
         # self.vintage_roadseg = self.dframes["roadseg"]
+        self.vintage_roadseg = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadAOI_old")
+        self.dframes["roadseg"] = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadAOI")
 
-        logger.info("Checking for road segment geometry equality.")
-        # Returns True or False to a new column if geometry is equal.
-        # self.dframes["roadseg"]["equals"] = self.dframes["roadseg"].geom_equals(self.vintage_roadseg)
-        self.nb_new["equals"] = self.nb_new.geom_equals(self.nb_old)
+        self.vintage_roadseg_filter = self.vintage_roadseg.filter(items=['geometry', 'nid'])
 
-        logger.info("Logging geometry equality.")
-        # for index, row in self.dframes["roadseg"].iterrows():
-        for index, row in self.nb_new.iterrows():
+        # Equal geometry.
+        self.equal_geom = pd.merge(self.dframes["roadseg"], self.vintage_roadseg_filter, on="geometry")
 
-            # Logs uuid of equal geometry and applies the nid from vintage to newest data.
-            if row["equals"] == True:
+        join_out = pd.merge(self.dframes["roadseg"], self.vintage_roadseg_filter, how="outer", indicator=True)
+
+        # Added geometry.
+        add_geom = join_out[join_out["_merge"]=="left_only"]
+
+        # Deleted geometry.
+        del_geom = join_out[join_out["_merge"] == "right_only"]
+
+        if self.equal_geom is not None:
+            for index, row in self.equal_geom.iterrows():
                 logger.warning("roadseg: EQUALITY detected for uuid: {}".format(index))
-                # Apply NID from latest vintage to newest data.
-                # self.nb_new["nid"] = self.nb_old["nid"]
+                self.equal_geom["nid_x"] = self.equal_geom["nid_y"]
 
-            else:
+        if add_geom is not None:
+            for index, row in add_geom.iterrows():
+                logger.warning("roadseg: ADDITION detected for uuid: {}".format(index))
 
-                # Logs uuid of equal geometry.
-                if row["equals"] == False:
-                    logger.warning("roadseg: ADDITIONS detected for uuid: {}".format(index))
-                    # self.dframes["roadseg"]["nid"] = ""
+        if del_geom is not None:
+            for index, row in del_geom.iterrows():
+                logger.warning("roadseg: DELETION or CHANGE detected for uuid: {}".format(index))
 
-        # Deleted features
-        common = self.nb_old.merge(self.nb_new, on=['uuid'])
-        self.deleted = self.nb_old[(~self.nb_old.uuid.isin(common.uuid)) & (~self.nb_old.uuid.isin(common.uuid))]
+        merged = pd.concat([self.equal_geom, add_geom], sort=True)
 
-        for index, row in self.deleted.iterrows():
+        self.merge_add_geom = merged[merged["_merge"]=="left_only"]
 
-            logger.warning("roadseg: DELETIONS detected for uuid: {}".format(index))
+        self.merge_add_geom.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/add_geom.gpkg", driver="GPKG")
+        # sys.exit(1)
+        # helpers.export_gpkg({"roadseg2": merged}, self.data_path)
 
-        self.nb_new.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
+    def split_lines(self):
+
+        juncAOI = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="juncAOI")
+
+        # dissolve polygon here
+
+        # subprocess.run("python dissolve.py", shell=True)
+
+        dissolve = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/dissolve.gpkg", driver="GPKG")
+
+        juncAOI = juncAOI.unary_union
+        dissolve = dissolve.unary_union
+
+        logger.info("Splitting roadseg with junctions.")
+        result = split(dissolve, juncAOI)
+
+        segments = [feature for feature in result]
+
+        add_geom = gpd.GeoDataFrame(list(range(len(segments))), geometry=segments)
+
+        add_geom.columns = ['index', 'geometry']
+
+        add_geom["nid"] = [uuid.uuid4().hex for _ in range(len(add_geom))]
+
+        final = pd.concat([self.equal_geom, add_geom])
+
+        final.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", driver="GPKG", layer="output")
 
         sys.exit(1)
-
-        logger.info("Writing test road segment GPKG.")
-        helpers.export_gpkg({"roadseg_equal": self.dframes["roadseg"]}, self.data_path)
-
 
     def ferryseg_equality(self):
         """Checks if ferryseg features have equal geometry."""
@@ -162,6 +188,7 @@ class Stage:
         self.load_gpkg()
         # self.dl_latest_vintage()
         self.roadseg_equality()
+        self.split_lines()
         self.ferryseg_equality()
         self.junction_equality()
 
