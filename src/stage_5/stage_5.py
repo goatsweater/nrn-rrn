@@ -9,7 +9,7 @@ import subprocess
 import sqlite3
 import sys
 import zipfile
-from shapely.ops import split, snap
+from shapely.ops import split
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 import helpers
@@ -74,13 +74,13 @@ class Stage:
 
         # self.vintage_roadseg = gpd.read_file("../../data/raw/vintage/NRN_RRN_NB_9_0_SHP/NRN_NB_9_0_SHP_en/4617/NRN_NB_9_0_ROADSEG.shp")
         # self.vintage_roadseg = self.dframes["roadseg"]
-        self.vintage_roadseg = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_old")
-        self.dframes["roadseg"] = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="nb_new")
+        self.vintage_roadseg = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadAOI_old")
+        self.dframes["roadseg"] = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadAOI")
 
         self.vintage_roadseg_filter = self.vintage_roadseg.filter(items=['geometry', 'nid'])
 
         # Equal geometry.
-        equal_geom = pd.merge(self.dframes["roadseg"], self.vintage_roadseg_filter, on="geometry")
+        self.equal_geom = pd.merge(self.dframes["roadseg"], self.vintage_roadseg_filter, on="geometry")
 
         join_out = pd.merge(self.dframes["roadseg"], self.vintage_roadseg_filter, how="outer", indicator=True)
 
@@ -90,10 +90,10 @@ class Stage:
         # Deleted geometry.
         del_geom = join_out[join_out["_merge"] == "right_only"]
 
-        if equal_geom is not None:
-            for index, row in equal_geom.iterrows():
+        if self.equal_geom is not None:
+            for index, row in self.equal_geom.iterrows():
                 logger.warning("roadseg: EQUALITY detected for uuid: {}".format(index))
-                equal_geom["nid_x"] = equal_geom["nid_y"]
+                self.equal_geom["nid_x"] = self.equal_geom["nid_y"]
 
         if add_geom is not None:
             for index, row in add_geom.iterrows():
@@ -103,37 +103,41 @@ class Stage:
             for index, row in del_geom.iterrows():
                 logger.warning("roadseg: DELETION or CHANGE detected for uuid: {}".format(index))
 
-        self.merged = pd.concat([equal_geom, add_geom], sort=True)
+        merged = pd.concat([self.equal_geom, add_geom], sort=True)
 
-        self.merged.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="roadseg2", driver="GPKG")
+        self.merge_add_geom = merged[merged["_merge"]=="left_only"]
 
+        self.merge_add_geom.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/add_geom.gpkg", driver="GPKG")
+        # sys.exit(1)
         # helpers.export_gpkg({"roadseg2": merged}, self.data_path)
 
     def split_lines(self):
 
-        self.junction = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="junction2")
-        self.junction = self.junction.unary_union
-        self.dissolved = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="dissolved")
-        self.dissolved = self.dissolved.unary_union
+        juncAOI = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="juncAOI")
 
-        # split = gpd.overlay(self.dissolved, self.junction, how='union').explode()
+        # dissolve polygon here
 
-        result = split(self.dissolved, self.junction)
-        print(len(result.wkt))
-        print(type(result))
+        # subprocess.run("python dissolve.py", shell=True)
 
-        gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(result))
-        gdf2 = gdf.explode()
-        print(gdf)
-        print(len(gdf))
-        print(len(gdf2))
-        print(gdf2)
-        gdf2.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="result", driver="GPKG")
-        # print(self.dissolved.intersects(self.junction))
+        dissolve = gpd.read_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/dissolve.gpkg", driver="GPKG")
 
-        # print(result.wkt)
+        juncAOI = juncAOI.unary_union
+        dissolve = dissolve.unary_union
 
-        # split.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", layer="overlay", driver="GPKG")
+        logger.info("Splitting roadseg with junctions.")
+        result = split(dissolve, juncAOI)
+
+        segments = [feature for feature in result]
+
+        add_geom = gpd.GeoDataFrame(list(range(len(segments))), geometry=segments)
+
+        add_geom.columns = ['index', 'geometry']
+
+        add_geom["nid"] = [uuid.uuid4().hex for _ in range(len(add_geom))]
+
+        final = pd.concat([self.equal_geom, add_geom])
+
+        final.to_file("/home/kent/PycharmProjects/nrn-rrn/data/interim/nb.gpkg", driver="GPKG", layer="output")
 
         sys.exit(1)
 
@@ -181,9 +185,9 @@ class Stage:
     def execute(self):
         """Executes an NRN stage."""
 
-        # self.load_gpkg()
+        self.load_gpkg()
         # self.dl_latest_vintage()
-        # self.roadseg_equality()
+        self.roadseg_equality()
         self.split_lines()
         self.ferryseg_equality()
         self.junction_equality()
