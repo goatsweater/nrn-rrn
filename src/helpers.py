@@ -5,6 +5,7 @@ import logging
 import networkx as nx
 import os
 import pandas as pd
+import requests
 import shutil
 import sqlite3
 import subprocess
@@ -12,11 +13,44 @@ import sys
 import time
 import yaml
 from copy import deepcopy
+from geoalchemy2 import WKTElement, Geometry
+from itertools import compress
 from osgeo import ogr, osr
 from shapely.geometry import LineString, Point
 
 
 logger = logging.getLogger()
+
+
+class TempHandlerSwap:
+    """Temporarily swaps all stream handlers with a file handler."""
+
+    def __init__(self, class_logger, log_path):
+        self.logger = class_logger
+        self.log_path = log_path
+
+        # Store stream handlers.
+        self.stream_handlers = [h for h in self.logger.handlers if isinstance(h, logging.StreamHandler)]
+
+        # Define file handler.
+        self.file_handler = logging.FileHandler(self.log_path)
+        self.file_handler.setLevel(logging.INFO)
+        self.file_handler.setFormatter(self.logger.handlers[0].formatter)
+
+    def __enter__(self):
+        """Remove stream handlers and add file handler."""
+        logger.info("Temporarily redirecting stream logging to file: {}.".format(self.log_path))
+        for handler in self.stream_handlers:
+            self.logger.removeHandler(handler)
+        self.logger.addHandler(self.file_handler)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Remove file handler and add stream handlers."""
+        for handler in self.stream_handlers:
+            self.logger.addHandler(handler)
+        self.logger.removeHandler(self.file_handler)
+
+        logger.info("File logging complete; reverted logging to stream.")
 
 
 class Timer:
@@ -121,7 +155,7 @@ def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../
             if "geometry" in dir(df):
 
                 # Open GeoPackage.
-                with fiona.open(output_path, "w", overwrite=True, layer=table_name, driver="GPKG", crs=df.crs,
+                with fiona.open(output_path, "w", overwrite=True, layer=table_name, driver="GPKG", crs=df.crs.to_wkt(),
                                 schema=gpd.io.file.infer_schema(df)) as gpkg:
 
                     # Write to GeoPackage.
@@ -184,8 +218,64 @@ def gdf_to_nx(gdf, keep_attributes=True, endpoints_only=False):
     return g
 
 
-def load_gpkg(gpkg_path):
-    """Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes."""
+def gdf_to_postgis(gdf, name, engine, **kwargs):
+    """
+    Converts a GeoPandas GeoDataFrame to a PostGIS database table.
+    **kwargs: Keyword args for GeoPandas.GeoDataFrame.to_sql method.
+    """
+
+    logger.info("Loading GeoDataFrame into PostGIS via SQLAlchemy engine url: \"{}\".".format(repr(engine.url)))
+
+    # Copy input GeoDataFrame.
+    gdf = gdf.copy(deep=True)
+
+    # Compile geometry attributes
+    srid = gdf.crs.to_epsg()
+    geom_type = gdf.geom_type.iloc[0].upper()
+
+    # Store geometry as geom.
+    gdf["geom"] = gdf["geometry"].map(lambda geom: WKTElement(geom.wkt, srid=srid))
+    gdf.drop("geometry", axis=1, inplace=True)
+
+    # Call GeoPandas.GeoDataFrame.to_sql method.
+    gdf.to_sql(name=name, con=engine, dtype={"geom": Geometry(geometry_type=geom_type, srid=srid)}, **kwargs)
+
+
+def get_url(url, max_attempts=10, **kwargs):
+    """Attempts to retrieve a url."""
+
+    attempt = 1
+    while attempt <= max_attempts:
+
+        try:
+
+            logger.info("Connecting to url (attempt {} of {}): {}".format(attempt, max_attempts, url))
+
+            # Get url response.
+            response = requests.get(url, **kwargs)
+
+            return response
+
+        except (TimeoutError, requests.exceptions.RequestException) as e:
+
+            if attempt == max_attempts:
+                logger.warning("Failed to get url response.")
+                logger.exception(e)
+                logger.warning("Maximum attempts exhausted. Exiting program.")
+                sys.exit(1)
+            else:
+                logger.warning("Failed to get url response. Retrying...")
+                attempt += 1
+                time.sleep(5)
+                continue
+
+
+def load_gpkg(gpkg_path, find=False):
+    """
+    Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes.
+    Parameter find will creating a mapping for geopackage layer names which contain, but do not exactly match the
+    expected NRN layer names.
+    """
 
     dframes = dict()
     distribution_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
@@ -201,7 +291,17 @@ def load_gpkg(gpkg_path):
             # Load gpkg table names.
             cur = con.cursor()
             query = "select name from sqlite_master where type='table';"
-            gpkg_tables = list(zip(*cur.execute(query).fetchall()))[0]
+            layers = list(zip(*cur.execute(query).fetchall()))[0]
+
+            # Create table name mapping.
+            gpkg_tables = dict()
+            if find:
+                for table_name in distribution_format:
+                    results = [name.lower().find(table_name) >= 0 for name in layers]
+                    if any(results):
+                        gpkg_tables[table_name] = list(compress(layers, results))[0]
+            else:
+                gpkg_tables = {name: name for name in layers}
 
         except sqlite3.Error:
             logger.exception("Unable to connect to GeoPackage: \"{}\".".format(gpkg_path))
@@ -218,14 +318,15 @@ def load_gpkg(gpkg_path):
 
                     # Spatial data.
                     if distribution_format[table_name]["spatial"]:
-                        df = gpd.read_file(gpkg_path, layer=table_name, driver="GPKG")
+                        df = gpd.read_file(gpkg_path, layer=gpkg_tables[table_name], driver="GPKG")
 
                     # Tabular data.
                     else:
-                        df = pd.read_sql_query("select * from {}".format(table_name), con)
+                        df = pd.read_sql_query("select * from {}".format(gpkg_tables[table_name]), con)
 
                     # Set index field: uuid.
-                    df.index = df["uuid"]
+                    if "uuid" in df.columns:
+                        df.index = df["uuid"]
 
                     # Store result.
                     dframes[table_name] = df.copy(deep=True)
@@ -292,28 +393,45 @@ def nx_to_gdf(g, nodes=True, edges=True):
         return gdf_edges
 
 
-def ogr2ogr(expression, log=None):
+def ogr2ogr(expression, log=None, max_attempts=5):
     """Runs an ogr2ogr subprocess. Input expression must be a dictionary of ogr2ogr parameters."""
 
-    try:
+    # Write log.
+    if log:
+        logger.info(log)
 
-        if log:
-            logger.info(log)
+    # Format ogr2ogr command.
+    expression = "ogr2ogr {}".format(" ".join(map(str, expression.values())))
 
-        # Format ogr2ogr command.
-        expression = "ogr2ogr {}".format(" ".join(map(str, expression.values())))
+    # Execute ogr2ogr.
+    attempt = 1
+    while attempt <= max_attempts:
 
-        # Run subprocess.
-        subprocess.run(expression, shell=True, check=True)
+        try:
 
-    except subprocess.CalledProcessError as e:
-        logger.exception("Unable to transform data source.")
-        logger.exception("ogr2ogr error: {}".format(e))
-        sys.exit(1)
+            # Run subprocess.
+            subprocess.run(expression, shell=True, check=True)
+            break
+
+        except subprocess.CalledProcessError as e:
+
+            if attempt == max_attempts:
+                logger.exception("Unable to transform data source.")
+                logger.exception("ogr2ogr error: {}".format(e))
+                logger.warning("Maximum attempts reached. Exiting program.")
+                sys.exit(1)
+            else:
+                logger.warning("Attempt {} of {} failed. Retrying.".format(attempt, max_attempts))
+                attempt += 1
+                continue
 
 
 def reproject_gdf(gdf, epsg_source, epsg_target):
     """Transforms a GeoDataFrame's geometry column between EPSGs."""
+
+    # Return empty dataframe.
+    if not len(gdf):
+        return gdf
 
     # Deep copy dataframe to avoid reprojecting original.
     # Explicitly copy crs property since it is excluded from default copy method.
@@ -321,19 +439,29 @@ def reproject_gdf(gdf, epsg_source, epsg_target):
 
     # Define transformation.
     prj_source, prj_target = osr.SpatialReference(), osr.SpatialReference()
+    prj_source.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    prj_target.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     prj_source.ImportFromEPSG(epsg_source)
     prj_target.ImportFromEPSG(epsg_target)
     prj_transformer = osr.CoordinateTransformation(prj_source, prj_target)
 
     # Transform Records.
-    if gdf.geom_type[0] == "LineString":
-        gdf["geometry"] = gdf["geometry"].map(lambda geom: LineString(prj_transformer.TransformPoints(geom.coords)))
-    elif gdf.geom_type[0] == "Point":
-        gdf["geometry"] = gdf["geometry"].map(lambda geom: Point(prj_transformer.TransformPoint(*geom.coords[0])))
+    # Process: pass reversed xy coordinates to proj transformer, load result as shapely geometry.
+    if len(gdf.geom_type.unique()) > 1:
+        raise Exception("Multiple geometry types detected for dataframe.")
+
+    elif gdf.geom_type.iloc[0] == "LineString":
+        gdf["geometry"] = gdf["geometry"].map(
+            lambda geom: LineString(prj_transformer.TransformPoints(list(zip(*geom.coords.xy)))))
+
+    elif gdf.geom_type.iloc[0] == "Point":
+        gdf["geometry"] = gdf["geometry"].map(
+            lambda geom: Point(prj_transformer.TransformPoint(*list(zip(*geom.coords.xy))[0])))
+
     else:
         raise Exception("Geometry type not supported for EPSG transformation.")
 
     # Update crs attribute.
-    gdf.crs["init"] = "epsg:{}".format(epsg_target)
+    gdf.crs = "epsg:{}".format(epsg_target)
 
     return gdf

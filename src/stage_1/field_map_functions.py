@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import pandas as pd
 import re
+import sqlite3
 import sys
 import uuid
 from copy import deepcopy
@@ -10,6 +11,16 @@ from operator import attrgetter, itemgetter
 
 
 logger = logging.getLogger()
+
+
+# Define universally-accessible sqlite database.
+db = sqlite3.connect(":memory:")
+cur = db.cursor()
+
+# Create single-row counter table.
+cur.execute("create table counter (idx integer default 0);")
+cur.execute("insert into counter (idx) values (0);")
+db.commit()
 
 
 def apply_domain(val, domain, default):
@@ -190,8 +201,14 @@ def direct(val, cast_type=None):
     if val == "" or pd.isna(val):
         return np.nan
 
+    # Return direct value.
+    if cast_type is None:
+        return val
+
     # Cast data.
-    if cast_type in ("float", "int", "str"):
+    cast_types = ("float", "int", "str")
+
+    if cast_type in cast_types:
 
         try:
 
@@ -200,6 +217,43 @@ def direct(val, cast_type=None):
         except (TypeError, ValueError):
             logger.exception("Unable to cast value \"{}\" from {} to {}.".format(val, type(val), type(cast_type)))
             sys.exit(1)
+
+    else:
+        logger.exception("Invalid cast type \"{}\". Cast type must be one of {}."
+                         .format(cast_type, ", ".join(map("\"{}\"".format, cast_types))))
+        sys.exit(1)
+
+
+def gen_uuid(val):
+    """Returns a uuid4 hexadecimal string."""
+
+    return uuid.uuid4().hex
+
+
+def incrementor(val, column, start=1, step=1):
+    """
+    Returns and increments an integer from counter.{column}, starting from and incrementing by the given start and step
+    inputs.
+    """
+
+    # Validate inputs.
+    validate_dtypes("column", column, str)
+    validate_dtypes("start", start, int)
+    validate_dtypes("step", step, int)
+
+    # Add column, ignoring exception if already exists.
+    try:
+        cur.execute("alter table counter add {} integer default {};".format(column, start))
+    except sqlite3.OperationalError:
+        pass
+
+    # Retrieve count.
+    count = cur.execute("select {} from counter;".format(column)).fetchone()[0]
+
+    # Increment column.
+    cur.execute("update counter set {0} = {0}+{1};".format(column, step))
+
+    return count
 
 
 def regex_find(val, pattern, match_index, group_index, domain=None, strip_result=False, sub_inplace=None):
@@ -276,52 +330,34 @@ def regex_sub(val, pattern_from, pattern_to, domain=None):
     return re.sub(pattern_from, pattern_to, val, flags=re.I)
 
 
-def split_record(vals, field=None):
+def split_record(df, field):
     """
-    If vals = pandas dataframe: Splits records on the given field.
-    If vals = numpy ndarray: Returns value.
-
-    This function is executed in two separate parts due to the functionality of stage_1.apply_functions, which operates
-    on a series. Since splitting records in a series would not affect the original dataframe, the input series is simply
-    returned. This function is then called again within stage_1, once all mapping functions have been applied to the
-    target dataframe, to execute the row splitting.
-
-    It was decided to keep split_record as a callable field mapping function instead of creating a separate function
-    within stage_1 such that split_record can exist within a chain of other field mapping functions.
+    Splits pandas dataframe records on a nested field.
+    Returns 2 nid lookup tables, one for the first (left) and second (right) components in each record split, for the
+    purposes of repairing table linkages.
     """
 
-    # Return values.
-    if isinstance(vals, np.ndarray):
+    # Validate column count.
+    count = len(df[field][0])
+    if count != 2:
+        logger.exception("Invalid column count for split_records: {}. Only 2 columns are permitted.".format(count))
+        sys.exit(1)
 
-        return vals
+    # Explode dataframe on field.
+    df = df.explode(field).copy(deep=True)
 
-    # Split records.
-    else:
+    # Generate new nids.
+    new_nids = [uuid.uuid4().hex for _ in range(len(df))]
 
-        # Identify records to be split.
-        vals_split = vals.loc[vals[field].map(lambda val: val[0] != val[1])].copy(deep=True)
+    # Compile nids of the first and second component (l and r) of each split record as nid lookup dicts.
+    nid_lookup_l = dict(zip(df["nid"][0::2], new_nids[0::2]))
+    nid_lookup_r = dict(zip(df["nid"][1::2], new_nids[1::2]))
+    nid_lookup = {"l": nid_lookup_l, "r": nid_lookup_r}
 
-        if len(vals_split):
+    # Assign new nids.
+    df["nid"] = new_nids
 
-            # Keep first instance for original records.
-            vals[field] = vals[field].map(lambda val: val[0])
-
-            # Keep second instance for split records.
-            vals_split[field] = vals_split[field].map(lambda val: val[1])
-
-            # Append split records to dataframe.
-            vals = vals.append(vals_split, ignore_index=False)
-
-        # Store original nids.
-        nids_orig = vals["nid"].values.copy()
-
-        # Assign new nids.
-        vals["nid"] = [uuid.uuid4().hex for _ in range(len(vals))]
-
-        # Compile orig-new nid mapping.
-        nid_changes = dict(zip(nids_orig, vals["nid"].values))
-
-        return vals, nid_changes
+    return df, nid_lookup
 
 
 def validate_dtypes(val_name, val, dtypes):

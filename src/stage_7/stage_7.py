@@ -1,20 +1,20 @@
 import click
-import fiona
-import geopandas as gpd
+import json
 import logging
+import multiprocessing
 import numpy as np
 import os
 import pandas as pd
 import pathlib
+import re
 import shutil
 import sys
 import zipfile
-from itertools import chain
-from multiprocessing.pool import ThreadPool
+from datetime import datetime
 from operator import itemgetter
 from osgeo import ogr
-from scipy.spatial import Delaunay
-from shapely.geometry import Polygon
+from queue import Queue
+from threading import Thread
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 import helpers
@@ -36,11 +36,11 @@ logger.addHandler(handler)
 class Stage:
     """Defines an NRN stage."""
 
-    def __init__(self, source, major_version, minor_version):
+    def __init__(self, source):
         self.stage = 7
         self.source = source.lower()
-        self.major_version = major_version
-        self.minor_version = minor_version
+        self.major_version = None
+        self.minor_version = None
 
         # Configure and validate input data path.
         self.data_path = os.path.abspath("../../data/interim/{}.gpkg".format(self.source))
@@ -48,9 +48,10 @@ class Stage:
             logger.exception("Input data not found: \"{}\".".format(self.data_path))
             sys.exit(1)
 
-        # Configure and validate output data path.
+        # Configure and validate output data path. Only one directory source_change_logs can pre-exist in out dir.
         self.output_path = os.path.abspath("../../data/processed/{}".format(self.source))
-        if os.path.exists(self.output_path) and len(os.listdir(self.output_path)) != 0:
+        if os.path.exists(self.output_path) and \
+                "".join(os.listdir(self.output_path)) != "{}_change_logs".format(self.source):
             logger.exception("Output namespace already occupied: \"{}\".".format(self.output_path))
             sys.exit(1)
 
@@ -111,84 +112,115 @@ class Stage:
                     except (AttributeError, KeyError, ValueError):
                         logger.exception("Unable to configure field mapping for English-French domains.")
 
-    def define_kml_bboxes(self, table="roadseg"):
+    def configure_release_version(self):
+        """Configures the major and minor release versions for the current NRN vintage."""
+
+        logger.info("Configuring NRN release version.")
+        source = helpers.load_yaml("../downloads.yaml")["previous_nrn_vintage"]
+
+        # Retrieve metadata for previous NRN vintage.
+        logger.info("Retrieving metadata for previous NRN vintage.")
+        metadata_url = source["metadata_url"].replace("<id>", source["ids"][self.source])
+
+        # Get metadata from url.
+        metadata = helpers.get_url(metadata_url, timeout=30)
+
+        # Extract release year and version numbers from metadata.
+        metadata = json.loads(metadata.content)
+        release_year = int(metadata["result"]["metadata_created"][:4])
+        self.major_version, self.minor_version = list(
+            map(int, re.findall(r"\d+", metadata["result"]["resources"][0]["url"])[-2:]))
+
+        # Conditionally set major and minor version numbers.
+        if release_year == datetime.now().year:
+            self.minor_version += 1
+        else:
+            self.major_version += 1
+            self.minor_version = 0
+
+    def define_kml_groups(self):
         """
-        Defines a set of bounding box extents to divide the kml-bound input GeoDataFrame.
-        This is required due to the low feature / size limitations of kml.
+        Defines groups by which to segregate the kml-bound input GeoDataFrame.
+        This is required due to the low feature and size limitations of kml.
         """
 
-        logger.info("Defining KML bounding boxes.")
-        df = self.dframes["kml"]["en"][table]
+        logger.info("Defining KML groups.")
+        self.kml_groups = dict()
+        placenames, placenames_exceeded = None, None
 
-        # Retrieve total bbox.
-        total_bbox = df["geometry"].total_bounds
+        # Iterate languages.
+        for lang in ("en", "fr"):
 
-        # Calculate bboxes.
-        bbox_size = 0.1
-        bboxes = list()
+            logger.info("Defining KML groups for language: \"{}\".".format(lang))
 
-        x0, x1 = total_bbox[0], total_bbox[2]
-        while x0 < x1:
+            # Determine language-specific field names.
+            l_placenam, r_placenam = itemgetter("l_placenam", "r_placenam")(
+                helpers.load_yaml("distribution_formats/{}/kml.yaml".format(lang))["conform"]["roadseg"]["fields"])
 
-            y0, y1 = total_bbox[1], total_bbox[3]
-            while y0 < y1:
+            # Retrieve source dataframe.
+            df = self.dframes["kml"][lang]["roadseg"].copy(deep=True)
 
-                # Convert bbox to shapely polygon.
-                coords = [x0, y0, x0 + bbox_size, y0 + bbox_size]
-                bbox = Polygon([(itemgetter(*indexes)(coords)) for indexes in ((0, 1), (0, 3), (2, 3), (2, 1), (0, 1))])
-                bboxes.append(bbox)
+            # Compile placenames.
+            if placenames is None:
+                placenames = sorted(set(np.append(df[l_placenam].unique(), df[r_placenam].unique())))
+                placenames = pd.Series(placenames)
 
-                y0 += bbox_size
+            # Generate placenames dataframe.
+            # names: Conform placenames to valid file names.
+            # queries: Configure ogr2ogr -where query.
+            placenames_df = pd.DataFrame({
+                "names": map(lambda name: re.sub("[\W_]+", "_", name), placenames),
+                "queries": placenames.map(lambda name: "-where \"\\\"{0}\\\"='{2}' or \\\"{1}\\\"='{2}'\""
+                                          .format(l_placenam, r_placenam, name.replace("'", "''")))
+            })
 
-            x0 += bbox_size
+            # Identify placenames exceeding feature limit.
+            if placenames_exceeded is None:
+                logger.info("Identifying placenames with excessive feature totals.")
 
-        # Filter invalid bboxes.
+                limit = 1000
+                flags = np.vectorize(
+                    lambda name: len(df[(df[l_placenam] == name) | (df[r_placenam] == name)]) > limit)(
+                    placenames_df["names"])
+                placenames_exceeded = placenames_df[flags]["names"]
 
-        # Create GeoDataFrame from bboxes.
-        bboxes_df = gpd.GeoDataFrame(geometry=bboxes)
+            # Remove exceeding placenames from placenames dataframe.
+            placenames_df = placenames_df[~placenames_df["names"].isin(placenames_exceeded)]
 
-        # Create Delaunay tesselation from bboxes.
-        delaunay = Delaunay(np.concatenate([np.array(geom.exterior.coords) for geom in bboxes]))
+            # Add rowid field to simulate SQLite column.
+            df["ROWID"] = range(1, len(df) + 1)
 
-        # Compile input feature points.
-        feature_pts = np.concatenate([np.array(geom.coords) for geom in df["geometry"]])
+            # Compile limit-sized rowid ranges for each exceeding placename.
+            for placename in placenames_exceeded:
 
-        # Find simplices containing feature points.
-        indexes = list(set(delaunay.find_simplex(feature_pts)))
-        valid_simplices_idx = itemgetter(indexes)(delaunay.simplices)
+                logger.info("Separating features for limit-exceeding placename: \"{}\".".format(placename))
 
-        # Convert simplex indexes to coordinates.
-        valid_simplices_pts = list(map(lambda indexes: itemgetter(*indexes)(delaunay.points), valid_simplices_idx))
-        valid_simplices_pts_all = set(map(tuple, chain.from_iterable(valid_simplices_pts)))
+                # Compile rowids for placename.
+                rowids = df[(df[l_placenam] == placename) | (df[r_placenam] == placename)]["ROWID"].values
 
-        # Identify valid bboxes.
-        # Process: Subtract valid simplices coordinates from bbox coordinates.
-        valid_bboxes = bboxes_df[bboxes_df["geometry"].map(
-            lambda bbox: len(set(bbox.exterior.coords) - valid_simplices_pts_all) == 0)]
+                # Compile feature index bounds based on feature limit.
+                bounds = list(itemgetter([i*limit for i in range(0, int(len(rowids) / limit) +
+                                                                 (0 if (len(rowids) % limit == 0) else 1))])(rowids))
+                bounds.append(rowids[-1] + 1)
 
-        # Identify validity of uncertain bboxes (boundary bboxes which may or may not contain a simplex).
-        # Process: Subtract bbox coordinates from valid simplices coordinates, keep bboxes where at least one simplex
-        # has 0 remaining coordinates (i.e. the simplex is completely within the bbox).
+                # Configure placename sql statements for each feature bounds.
+                sql_statements = list(map(
+                    lambda vals: "(ROWID >= {0} and ROWID < {1}) and ({2} = '{4}' or {3} = '{4}')"
+                        .format(vals[1], bounds[vals[0] + 1], l_placenam, r_placenam, placename.replace("'", "''")),
+                    enumerate(bounds[:-1])
+                ))
 
-        # Create GeoDataFrame from simplices.
-        valid_simplices_df = pd.DataFrame({"coords": [set(map(tuple, simplex)) for simplex in valid_simplices_pts]})
+                # Add sql statements to placenames dataframe.
+                rows = pd.DataFrame({
+                    "names": map(lambda i: "{}_{}".format(placename, i), range(1, len(sql_statements) + 1)),
+                    "queries": map("-sql \"select * from roadseg where {}\" -dialect SQLITE".format, sql_statements)
+                })
 
-        # Compile uncertain bboxes.
-        bboxes_uncertain = bboxes_df.loc[bboxes_df["geometry"].map(
-            lambda bbox: len(set(bbox.exterior.coords) - valid_simplices_pts_all) == 1)]
-        bboxes_uncertain_values = bboxes_uncertain["geometry"].map(lambda bbox: set(bbox.exterior.coords)).values
+                # Append new rows to placenames dataframe.
+                placenames_df = placenames_df.append(rows).reset_index(drop=True)
 
-        # Identify valid bboxes.
-        valid_bboxes_uncertain = bboxes_uncertain[np.vectorize(
-            lambda bbox: valid_simplices_df["coords"].map(
-                lambda simplex: len(simplex - bbox) == 0).any())(bboxes_uncertain_values)]
-
-        # Append all valid bboxes.
-        valid_bboxes_all = valid_bboxes.append(valid_bboxes_uncertain, ignore_index=True)
-
-        # Store only bbox coords.
-        self.bboxes = valid_bboxes_all["geometry"].exterior.map(
-            lambda geom: "{} {} {} {}".format(*chain.from_iterable(itemgetter(0, 2)(geom.coords)))).to_list()
+            # Store results.
+            self.kml_groups[lang] = placenames_df
 
     def export_data(self):
         """Exports and packages all data."""
@@ -230,6 +262,7 @@ class Stage:
                     kwargs = {
                         "driver": "-f \"{}\"".format(export_specs["data"]["driver"]),
                         "append": "-append",
+                        "pre_args": "",
                         "dest": "\"{}\""
                             .format(os.path.join(export_dir, export_file if export_file else export_tables[table])),
                         "src": "\"{}\"".format(temp_path),
@@ -237,38 +270,34 @@ class Stage:
                         "nln": "-nln {}".format(export_tables[table]) if export_file else ""
                     }
 
-                    # Iterate bboxes if format=kml.
+                    # Iterate kml groups.
                     if frmt == "kml":
 
-                        total = len(self.bboxes)
-                        tasks = list()
+                        kml_groups = self.kml_groups[lang]
+                        total = len(kml_groups)
+                        tasks = Queue(maxsize=0)
 
                         # Configure ogr2ogr tasks.
-                        for index, bbox in enumerate(self.bboxes):
+                        for index, task in kml_groups.iterrows():
                             index += 1
 
                             # Configure logging message.
-                            log = "Transforming table: \"{}\" ({} of {}).".format(table, index, total)
+                            log = "Transforming table: \"{}\" ({} of {}: \"{}\").".format(table, index, total, task[0])
 
-                            # Configure ogr2ogr parameters.
-
-                            # Add modified output name to ogr2ogr parameters.
-                            if index == 1:
-                                kwargs["dest"] = "{}_1{}".format(*os.path.splitext(kwargs["dest"]))
-                            else:
-                                name, ext = os.path.splitext(kwargs["dest"])
-                                kwargs["dest"] = "{2}{3}{0}{1}".format(index, ext, *name.rpartition("_")[:-1])
-
-                            # Add bbox to ogr2ogr parameters.
-                            kwargs["clipsrc"] = "-clipsrc {}".format(bbox)
+                            # Add kml group name and query to ogr2ogr parameters.
+                            path, ext = os.path.splitext(kwargs["dest"])
+                            kwargs["dest"] = os.path.join(os.path.dirname(path), task[0]) + ext
+                            kwargs["pre_args"] = task[1]
 
                             # Store task.
-                            tasks.append((kwargs.copy(), log))
+                            tasks.put((kwargs.copy(), log))
 
                         # Execute tasks.
-                        with ThreadPool(4) as tpool:
-                            tpool.starmap(helpers.ogr2ogr, tasks)
-                        tpool.join()
+                        for t in range(multiprocessing.cpu_count()):
+                            worker = Thread(target=self.thread_ogr2ogr, args=(tasks,))
+                            worker.setDaemon(True)
+                            worker.start()
+                        tasks.join()
 
                     else:
 
@@ -285,6 +314,8 @@ class Stage:
                     del driver
 
     def format_path(self, path):
+        """Formats a path with class variables: source, major_version, minor_version."""
+
         upper = True if os.path.basename(path)[0].isupper() else False
 
         for key in ("source", "major_version", "minor_version"):
@@ -297,7 +328,7 @@ class Stage:
     def gen_french_dataframes(self):
         """
         Generate French equivalents of all dataframes.
-        Note: Only the data values areupdated, not the column names.
+        Note: Only the data values are updated, not the column names.
         """
 
         logger.info("Generating French dataframes.")
@@ -399,6 +430,15 @@ class Stage:
 
         self.dframes = helpers.load_gpkg(self.data_path)
 
+    def thread_ogr2ogr(self, tasks):
+        """Calls helpers.ogr2ogr via threads."""
+
+        while not tasks.empty():
+
+            task = tasks.get()
+            helpers.ogr2ogr(*task)
+            tasks.task_done()
+
     def zip_data(self):
         """Compresses all exported data directories to .zip format."""
 
@@ -449,25 +489,24 @@ class Stage:
         """Executes an NRN stage."""
 
         self.load_gpkg()
+        self.configure_release_version()
         self.compile_french_domain_mapping()
         self.gen_french_dataframes()
         self.gen_output_schemas()
-        self.define_kml_bboxes()
+        self.define_kml_groups()
         self.export_data()
         self.zip_data()
 
 
 @click.command()
 @click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))
-@click.argument("major_version")
-@click.argument("minor_version")
-def main(source, major_version, minor_version):
+def main(source):
     """Executes an NRN stage."""
 
     try:
 
         with helpers.Timer():
-            stage = Stage(source, major_version, minor_version)
+            stage = Stage(source)
             stage.execute()
 
     except KeyboardInterrupt:

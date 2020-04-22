@@ -27,50 +27,13 @@ class Stage:
     def __init__(self, source):
         self.stage = 6
         self.source = source.lower()
-        self.mods = list()
+        self.errors = list()
 
         # Configure and validate input data path.
         self.data_path = os.path.abspath("../../data/interim/{}.gpkg".format(self.source))
         if not os.path.exists(self.data_path):
             logger.exception("Input data not found: \"{}\".".format(self.data_path))
             sys.exit(1)
-
-    def export_gpkg(self):
-        """Exports the dataframes as GeoPackage layers."""
-
-        logger.info("Exporting dataframes to GeoPackage layers.")
-
-        # Export target dataframes to GeoPackage layers.
-        dframes = {name: df for name, df in self.dframes.items() if name in self.mods}
-
-        if len(dframes):
-            helpers.export_gpkg(dframes, self.data_path)
-        else:
-            logger.info("Export not required, no dataframe modifications detected.")
-
-    def filter_duplicates(self):
-        """
-        Filter duplicate records from addrange and strplaname, only if altnamlink does not exist.
-        This is intended to simplify tables and linkages.
-        """
-
-        if "altnamlink" not in self.dframes:
-
-            logger.info("Filtering duplicates from addrange and strplaname.")
-
-            # Filter duplicate records (ignoring uuid and nid columns).
-            for name, df in self.dframes.items():
-
-                if name in ("addrange", "strplaname"):
-
-                    # Drop duplicates.
-                    kwargs = {"subset": df.columns.difference(["uuid", "nid"]), "keep": "first", "inplace": False}
-                    new_df = df.drop_duplicates(**kwargs)
-
-                    # Replace original dataframe only if modifications were made.
-                    if len(df) != len(new_df):
-                        self.dframes[name] = new_df
-                        self.mods.append(name)
 
     def load_gpkg(self):
         """Loads input GeoPackage layers into dataframes."""
@@ -79,11 +42,24 @@ class Stage:
 
         self.dframes = helpers.load_gpkg(self.data_path)
 
+    def log_errors(self):
+        """Logs nid linkage errors."""
+
+        if len(self.errors):
+
+            logger.info("Writing error logs.")
+
+            log_path = os.path.abspath("../../data/interim/{}_stage_{}.log".format(self.source, self.stage))
+            with helpers.TempHandlerSwap(logger, log_path):
+
+                # Iterate and log errors.
+                for log in self.errors:
+                    logger.warning(log)
+
     def validate_nid_linkages(self):
         """Validate the nid linkages between all required dataframes."""
 
         logger.info("Validating nid linkages.")
-        errors = list()
 
         # Define linkages.
         linkages = {
@@ -131,23 +107,15 @@ class Stage:
 
                         # Compile invalid values and configure error messages.
                         flag_vals = "\n".join(list(set(source_ids) - set(target_ids)))
-                        errors.append("Invalid nid linkage. The following values from {}.{} are not present in "
-                                      "{}.nid: {}.".format(source, col, target, flag_vals))
-
-        # Log error messages.
-        if len(errors):
-            logger.info("Invalid nid linkages identified.")
-
-            for error in errors:
-                logger.info(error)
+                        self.errors.append("Invalid nid linkage. The following values from {}.{} are not present in "
+                                           "{}.nid:\n{}.".format(source, col, target, flag_vals))
 
     def execute(self):
         """Executes an NRN stage."""
 
         self.load_gpkg()
-        self.filter_duplicates()
         self.validate_nid_linkages()
-        self.export_gpkg()
+        self.log_errors()
 
 
 @click.command()

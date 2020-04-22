@@ -18,6 +18,11 @@ import helpers
 logger = logging.getLogger()
 
 
+# Compile default field values and dtypes.
+defaults_all = helpers.compile_default_values()
+dtypes_all = helpers.compile_dtypes()
+
+
 def identify_duplicate_lines(df):
     """Identifies the uuids of duplicate line geometries."""
 
@@ -31,7 +36,7 @@ def identify_duplicate_lines(df):
     # Compile uuids of flagged records.
     errors = df_same_len[mask].index.values
 
-    return errors
+    return {"errors": errors}
 
 
 def identify_duplicate_points(df):
@@ -46,10 +51,10 @@ def identify_duplicate_points(df):
     # Compile uuids of flagged records.
     errors = df[mask].index.values
 
-    return errors
+    return {"errors": errors}
 
 
-def identify_isolated_lines(ferryseg, roadseg):
+def identify_isolated_lines(roadseg, ferryseg):
     """Identifies the uuids of isolated road segments from the merged dataframe of road and ferry segments."""
 
     # Concatenate ferryseg and roadseg dataframes.
@@ -76,7 +81,7 @@ def identify_isolated_lines(ferryseg, roadseg):
     # Compile flagged records as errors.
     errors = flag_uuids
 
-    return errors
+    return {"errors": errors}
 
 
 def validate_deadend_disjoint_proximity(junction, roadseg):
@@ -133,7 +138,7 @@ def validate_deadend_disjoint_proximity(junction, roadseg):
             source_uuid,
             ", ".join(map("\"{}\"".format, [target_uuids] if isinstance(target_uuids, str) else target_uuids))))
 
-    return errors
+    return {"errors": errors}
 
 
 def validate_ferry_road_connectivity(ferryseg, roadseg, junction):
@@ -169,13 +174,14 @@ def validate_ferry_road_connectivity(ferryseg, roadseg, junction):
     # Compile uuids of flagged records.
     errors[2] = ferryseg[ferry_multi_intersect].index.values
 
-    return errors
+    return {"errors": errors}
 
 
 def validate_line_endpoint_clustering(df):
     """Validates the quantity of points clustered near the endpoints of line segments."""
 
     # Validation: ensure line segments have <= 3 points within 83 meters of either endpoint, inclusively.
+    errors = None
 
     # Transform records to a meter-based crs: EPSG:3348.
     df = helpers.reproject_gdf(df, 4617, 3348)
@@ -183,18 +189,40 @@ def validate_line_endpoint_clustering(df):
     # Filter out records with <= 3 points or length < 83 meters.
     df_subset = df[~df["geometry"].map(lambda geom: len(geom.coords) <= 3 or geom.length < 83)]
 
-    # Identify invalid records.
-    # Process: either of the following must be true:
-    # a) The distance of the 4th point along the linestring is < 83 meters.
-    # b) The total linestring length minus the distance of the 4th-last point along the linestring is < 83 meters.
-    flags = np.vectorize(lambda geom: (geom.project(Point(geom.coords[3])) < 83) or
-                                      ((geom.length - geom.project(Point(geom.coords[-4]))) < 83)
-                         )(df_subset["geometry"])
+    if len(df_subset):
 
-    # Compile uuids of flagged records.
-    errors = df_subset[flags].index.values
+        # Identify invalid records.
+        # Process: either of the following must be true:
+        # a) The distance of the 4th point along the linestring is < 83 meters.
+        # b) The total linestring length minus the distance of the 4th-last point along the linestring is < 83 meters.
+        flags = np.vectorize(lambda geom: (geom.project(Point(geom.coords[3])) < 83) or
+                                          ((geom.length - geom.project(Point(geom.coords[-4]))) < 83)
+                             )(df_subset["geometry"])
 
-    return errors
+        # Compile uuids of flagged records.
+        errors = df_subset[flags].index.values
+
+    return {"errors": errors}
+
+
+def validate_line_length(df):
+    """Validates the minimum feature length of line geometries."""
+
+    errors = None
+
+    # Filter records to 0.0002 degrees length (approximately 22.2 meters).
+    # Purely intended to reduce processing.
+    df_sub = df[df.length <= 0.0002]
+
+    if len(df_sub):
+
+        # Transform records to a meter-based crs: EPSG:3348.
+        df_sub = helpers.reproject_gdf(df_sub, 4617, 3348)
+
+        # Validation: ensure line segments are >= 2 meters in length.
+        errors = df_sub[df_sub.length < 2].index.values
+
+    return {"errors": errors}
 
 
 def validate_line_merging_angle(df):
@@ -212,7 +240,7 @@ def validate_line_merging_angle(df):
                                df["geometry"].map(lambda geom: len(geom.coords)).iteritems()])
 
     # Construct x- and y-coordinate series aligned to the series of points.
-    # Disregard z-values.
+    # Disregard z-coordinates.
     pts_x, pts_y, pts_z = np.concatenate([np.array(geom.coords) for geom in df["geometry"]]).T
 
     # Join the uuids, x-, and y-coordinates.
@@ -227,7 +255,7 @@ def validate_line_merging_angle(df):
     # Exit function if no shared points exists (b/c therefore no line merges exist).
     if not len(uuids_grouped):
 
-        return list()
+        errors = None
 
     else:
 
@@ -238,11 +266,42 @@ def validate_line_merging_angle(df):
         for uuid, geom in df["geometry"].iteritems():
             pts_uuid[uuid] = list(map(lambda coord: coord[:2], itemgetter(0, 1, -2, -1)(geom.coords)))
 
-        # Retrieve the next point for each grouped uuid associated with each point.
-        pts_grouped = pd.Series(np.vectorize(lambda uuids, index: map(
-            lambda uuid: pts_uuid[uuid][1] if pts_uuid[uuid][0] == index else pts_uuid[uuid][-2], uuids))(
-            uuids_grouped, uuids_grouped.index))\
-            .map(lambda vals: list(vals))
+        # Explode grouped uuids. Maintain index point as both index and column.
+        uuids_grouped_ex = uuids_grouped.explode().reset_index(drop=False).set_index(["x", "y"], drop=False)
+
+        # Compile next-to-endpoint points.
+        # Process: Flag uuids according to duplication status within their group. For unique uuids, configure the
+        # next-to-endpoint point based on whichever endpoint matches the common group point. For duplicated uuids
+        # (which represent self-loops), the first duplicate takes the second point, the second duplicate takes the
+        # second-last point - thereby avoiding the same next-to-point being taken twice for self-loop intersections.
+        dup_flags = {
+            "dup_none": ~uuids_grouped_ex.duplicated(keep=False),
+            "dup_first": uuids_grouped_ex.duplicated(keep="first"),
+            "dup_last": uuids_grouped_ex.duplicated(keep="last")
+        }
+        dup_results = {
+            "dup_none": pd.Series(np.vectorize(
+                lambda uuid, index: pts_uuid[uuid][1] if pts_uuid[uuid][0] == index else pts_uuid[uuid][-2],
+                otypes=[tuple])(uuids_grouped_ex[dup_flags["dup_none"]]["uuid"],
+                                uuids_grouped_ex[dup_flags["dup_none"]].index)).values,
+            "dup_first": pd.Series(np.vectorize(
+                lambda uuid, index: pts_uuid[uuid][1],
+                otypes=[tuple])(uuids_grouped_ex[dup_flags["dup_first"]]["uuid"],
+                                uuids_grouped_ex[dup_flags["dup_first"]].index)).values,
+            "dup_last": pd.Series(np.vectorize(
+                lambda uuid, index: pts_uuid[uuid][-2],
+                otypes=[tuple])(uuids_grouped_ex[dup_flags["dup_last"]]["uuid"],
+                                uuids_grouped_ex[dup_flags["dup_last"]].index)).values
+        }
+
+        uuids_grouped_ex["pt"] = None
+        uuids_grouped_ex.loc[dup_flags["dup_none"], "pt"] = dup_results["dup_none"]
+        uuids_grouped_ex.loc[dup_flags["dup_first"], "pt"] = dup_results["dup_first"]
+        uuids_grouped_ex.loc[dup_flags["dup_last"], "pt"] = dup_results["dup_last"]
+
+        # Aggregate exploded groups.
+        uuids_grouped_ex.reset_index(drop=True, inplace=True)
+        pts_grouped = uuids_grouped_ex.groupby(["x", "y"])["pt"].agg(list)
 
         # Compile the permutations of points for each point group.
         # Recover source point as index.
@@ -265,20 +324,10 @@ def validate_line_merging_angle(df):
             lambda pt_groups, pt_ref: any(map(lambda pts: get_invalid_angle(pts[0], pts[1], pt_ref), pt_groups)))(
             pts_grouped, pts_grouped.index)
 
-        # Compile the original crs coordinates of all flagged intersections.
+        # Compile the uuid groups as errors.
+        errors = uuids_grouped[flags].values
 
-        # Filter flagged intersection points (stored as index).
-        flagged_pts = pts_grouped[flags].index.values
-
-        # Revert to original crs: EPSG:4617.
-        flagged_pts = gpd.GeoDataFrame(geometry=gpd.GeoSeries(map(Point, flagged_pts)))
-        flagged_pts.crs = dict()
-        flagged_pts = helpers.reproject_gdf(flagged_pts, 3348, 4617)
-
-        # Compile resulting points as errors.
-        errors = list(map(lambda pt: pt.coords[0][:2], flagged_pts["geometry"]))
-
-        return errors
+    return {"errors": errors}
 
 
 def validate_line_proximity(df):
@@ -310,7 +359,7 @@ def validate_line_proximity(df):
                                      df["geometry"].map(lambda geom: len(geom.coords)).iteritems()])
 
     # Construct x- and y-coordinate series aligned to the series of segment endpoints.
-    # Disregard z-values.
+    # Disregard z-coordinates.
     endpoint_x, endpoint_y, endpoint_z = np.concatenate([itemgetter(0, -1)(geom.coords) for geom in df["geometry"]]).T
 
     # Join the uuids, x-, and y-coordinates.
@@ -359,23 +408,7 @@ def validate_line_proximity(df):
             source_uuid,
             ", ".join(map("\"{}\"".format, [target_uuids] if isinstance(target_uuids, str) else target_uuids))))
 
-    return errors
-
-
-def validate_min_length(df):
-    """Validates the minimum feature length of line geometries."""
-
-    # Filter records to 0.0002 degrees length (approximately 22.2 meters).
-    # Purely intended to reduce processing.
-    df_sub = df[df.length <= 0.0002]
-
-    # Transform records to a meter-based crs: EPSG:3348.
-    df_sub = helpers.reproject_gdf(df_sub, 4617, 3348)
-
-    # Validation: ensure line segments are >= 2 meters in length.
-    errors = df_sub[df_sub.length < 2].index.values
-
-    return errors
+    return {"errors": errors}
 
 
 def validate_point_proximity(df):
@@ -410,16 +443,14 @@ def validate_point_proximity(df):
             source_uuid,
             ", ".join(map("\"{}\"".format, [target_uuids] if isinstance(target_uuids, str) else target_uuids))))
 
-    return errors
+    return {"errors": errors}
 
 
-def validate_road_structures(roadseg, junction, default):
-    """
-    Validates the structid and structtype attributes of road segments.
-    Parameter default should be a dictionary with a key for each of structid and structtype for roadseg.
-    """
+def validate_road_structures(roadseg, junction):
+    """Validates the structid and structtype attributes of road segments."""
 
     errors = dict()
+    defaults = defaults_all["roadseg"]
 
     # Validation 1: ensure dead end road segments have structtype = "None" or the default field value.
 
@@ -428,7 +459,7 @@ def validate_road_structures(roadseg, junction, default):
                                      junction[junction["junctype"] == "Dead End"]["geometry"].values])))
 
     # Compile road segments with potentially invalid structtype.
-    roadseg_invalid = roadseg[~roadseg["structtype"].isin(["None", default["structtype"]])]
+    roadseg_invalid = roadseg[~roadseg["structtype"].isin(["None", defaults["structtype"]])]
 
     # Compile truly invalid road segments.
     roadseg_invalid = roadseg_invalid[roadseg_invalid["geometry"].map(
@@ -444,7 +475,7 @@ def validate_road_structures(roadseg, junction, default):
     structids = roadseg["structid"].unique()
 
     # Remove default value.
-    structids = structids[np.where(structids != default["structid"])]
+    structids = structids[np.where(structids != defaults["structid"])]
 
     if len(structids):
 
@@ -477,7 +508,7 @@ def validate_road_structures(roadseg, junction, default):
     errors[4] = list()
 
     # Compile road segments with valid structtype.
-    segments = roadseg[~roadseg["structtype"].isin(["None", default["structtype"]])]
+    segments = roadseg[~roadseg["structtype"].isin(["None", defaults["structtype"]])]
 
     # Convert dataframe to networkx graph.
     # Drop all columns except uuid, structid, structtype, and geometry to reduce processing.
@@ -492,7 +523,7 @@ def validate_road_structures(roadseg, junction, default):
 
         # Validation 3.
         structids = set(nx.get_edge_attributes(s, "structid").values())
-        if len(structids) > 1 or default["structid"] in structids:
+        if len(structids) > 1 or defaults["structid"] in structids:
 
             # Compile error properties.
             uuids = list(set(nx.get_edge_attributes(s, "uuid").values()))
@@ -508,4 +539,4 @@ def validate_road_structures(roadseg, junction, default):
             errors[4].append("Structure: {}. Structure uuids: {}. Structure types: {}.".format(
                 index, ", ".join(map("\"{}\"".format, uuids)), ", ".join(map("\"{}\"".format, structtypes))))
 
-    return errors
+    return {"errors": errors}
