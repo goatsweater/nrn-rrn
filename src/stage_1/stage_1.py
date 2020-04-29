@@ -392,8 +392,8 @@ class Stage:
         gpkg_path = [f for f in zipfile.ZipFile("../../data/interim/nrn_old.zip", "r").namelist() if
                      f.endswith(".gpkg")][0]
 
-        with zipfile.ZipFile("../../data/interim/nrn_old.zip", "r") as zip:
-            with zip.open(gpkg_path) as zsrc, open("../../data/interim/nrn_old.gpkg", "wb") as zdest:
+        with zipfile.ZipFile("../../data/interim/nrn_old.zip", "r") as zip_f:
+            with zip_f.open(gpkg_path) as zsrc, open("../../data/interim/nrn_old.gpkg", "wb") as zdest:
                 shutil.copyfileobj(zsrc, zdest)
 
         # Load previous NRN vintage into dataframes.
@@ -698,7 +698,7 @@ class Stage:
 
 
 @click.command()
-@click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt parks_canada".split(), False))
+@click.argument("source", type=click.Choice("ab bc mb nb nl ns nt nu on pe qc sk yt".split(), False))
 def main(source):
     """Executes an NRN stage."""
 

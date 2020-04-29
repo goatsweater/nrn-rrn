@@ -13,7 +13,6 @@ import sys
 import time
 import yaml
 from copy import deepcopy
-from geoalchemy2 import WKTElement, Geometry
 from itertools import compress
 from osgeo import ogr, osr
 from shapely.geometry import LineString, Point
@@ -218,29 +217,6 @@ def gdf_to_nx(gdf, keep_attributes=True, endpoints_only=False):
     return g
 
 
-def gdf_to_postgis(gdf, name, engine, **kwargs):
-    """
-    Converts a GeoPandas GeoDataFrame to a PostGIS database table.
-    **kwargs: Keyword args for GeoPandas.GeoDataFrame.to_sql method.
-    """
-
-    logger.info("Loading GeoDataFrame into PostGIS via SQLAlchemy engine url: \"{}\".".format(repr(engine.url)))
-
-    # Copy input GeoDataFrame.
-    gdf = gdf.copy(deep=True)
-
-    # Compile geometry attributes
-    srid = gdf.crs.to_epsg()
-    geom_type = gdf.geom_type.iloc[0].upper()
-
-    # Store geometry as geom.
-    gdf["geom"] = gdf["geometry"].map(lambda geom: WKTElement(geom.wkt, srid=srid))
-    gdf.drop("geometry", axis=1, inplace=True)
-
-    # Call GeoPandas.GeoDataFrame.to_sql method.
-    gdf.to_sql(name=name, con=engine, dtype={"geom": Geometry(geometry_type=geom_type, srid=srid)}, **kwargs)
-
-
 def get_url(url, max_attempts=10, **kwargs):
     """Attempts to retrieve a url."""
 
@@ -270,11 +246,12 @@ def get_url(url, max_attempts=10, **kwargs):
                 continue
 
 
-def load_gpkg(gpkg_path, find=False):
+def load_gpkg(gpkg_path, find=False, layers=None):
     """
     Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes.
     Parameter find will creating a mapping for geopackage layer names which contain, but do not exactly match the
     expected NRN layer names.
+    Parameter layers accepts a list of table names to load instead of loading all GeoPackage layers.
     """
 
     dframes = dict()
@@ -282,6 +259,10 @@ def load_gpkg(gpkg_path, find=False):
     missing_flag = False
 
     if os.path.exists(gpkg_path):
+
+        # Filter layers to load.
+        if layers:
+            distribution_format = {k: v for k, v in distribution_format.items() if k in layers}
 
         try:
 
