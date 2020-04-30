@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: National Road Network \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-30 11:06-0400\n"
+"POT-Creation-Date: 2020-04-30 18:27-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,13 +38,13 @@ msgstr "Table des matières"
 msgid "Overview"
 msgstr "Aperçu"
 
-#: ../../data_product_specs.rst:19 ../../data_product_specs.rst:254
-#: ../../data_product_specs.rst:318 ../../data_product_specs.rst:414
+#: ../../data_product_specs.rst:19 ../../data_product_specs.rst:249
+#: ../../data_product_specs.rst:313 ../../data_product_specs.rst:414
 msgid "Title"
 msgstr "Titre"
 
-#: ../../data_product_specs.rst:21 ../../data_product_specs.rst:114
-#: ../../data_product_specs.rst:256
+#: ../../data_product_specs.rst:21 ../../data_product_specs.rst:108
+#: ../../data_product_specs.rst:251
 msgid "National Road Network"
 msgstr "Réseau routier national"
 
@@ -53,19 +53,22 @@ msgid "Reference date"
 msgstr "Date de référence"
 
 #: ../../data_product_specs.rst:26
-#, fuzzy
-msgid "Creation date of the data product specifications: 2007-05-31"
+msgid "Creation date of the data product specifications:"
 msgstr "Date de création des spécifications de produit:"
 
-#: ../../data_product_specs.rst:29 ../../data_product_specs.rst:430
+#: ../../data_product_specs.rst:28
+msgid "2007-05-31"
+msgstr ""
+
+#: ../../data_product_specs.rst:31 ../../data_product_specs.rst:430
 msgid "Responsible party"
 msgstr "Responsable du produit"
 
-#: ../../data_product_specs.rst:31
+#: ../../data_product_specs.rst:33
 msgid "GeoBase"
 msgstr "GéoBase"
 
-#: ../../data_product_specs.rst:33
+#: ../../data_product_specs.rst:34
 msgid "Statistics Canada"
 msgstr "Statistique Canada"
 
@@ -73,41 +76,41 @@ msgstr "Statistique Canada"
 msgid "Statistical Geomatics Centre"
 msgstr "Centre de géomatique statistique"
 
-#: ../../data_product_specs.rst:37
+#: ../../data_product_specs.rst:36
 msgid "170, Tunney’s Pasture Driveway,"
 msgstr "170, Promenade Tunney’s Pasture"
 
-#: ../../data_product_specs.rst:39
+#: ../../data_product_specs.rst:37
 msgid "Ottawa (Ontario), Canada"
 msgstr ""
 
-#: ../../data_product_specs.rst:41
+#: ../../data_product_specs.rst:38
 msgid "K1A 0T6"
 msgstr ""
 
-#: ../../data_product_specs.rst:43
+#: ../../data_product_specs.rst:40
 msgid "Telephone: 1-800-263-1136"
 msgstr "Téléphone: 1-800-263-1136"
 
-#: ../../data_product_specs.rst:45
+#: ../../data_product_specs.rst:41
 msgid "Fax: 1-514-283-9350"
 msgstr "Télécopieur : 1-514-283-9350"
 
-#: ../../data_product_specs.rst:47
+#: ../../data_product_specs.rst:42
 msgid "E-mail: STATCAN.infostats-infostats.STATCAN@canada.ca"
 msgstr "Courriel: STATCAN.infostats-infostats.STATCAN@canada.ca"
 
-#: ../../data_product_specs.rst:49
+#: ../../data_product_specs.rst:43
 msgid "Website: http://www.geobase.ca"
 msgstr "Site internet : http://www.geobase.ca"
 
-#: ../../data_product_specs.rst:52 ../../data_product_specs.rst:674
+#: ../../data_product_specs.rst:46 ../../data_product_specs.rst:674
 #: ../../data_product_specs.rst:704 ../../data_product_specs.rst:732
 #: ../../data_product_specs.rst:758
 msgid "Language"
 msgstr "Langue"
 
-#: ../../data_product_specs.rst:54
+#: ../../data_product_specs.rst:48
 msgid ""
 "Languages in which the data product specifications are available in "
 "accordance with the ISO 639-2 standard: eng – english fra – french"
@@ -115,15 +118,15 @@ msgstr ""
 "Langues dans lesquelles les spécifications de produit sont disponibles "
 "conformément à la norme ISO 639-2:eng – anglais fra – français"
 
-#: ../../data_product_specs.rst:59
+#: ../../data_product_specs.rst:53
 msgid "Terms and definitions"
 msgstr "Termes et définitions"
 
-#: ../../data_product_specs.rst:62
+#: ../../data_product_specs.rst:56
 msgid "Attribute"
 msgstr "Attribut"
 
-#: ../../data_product_specs.rst:62
+#: ../../data_product_specs.rst:56
 msgid ""
 "Characteristic of a feature. For example, number of lanes or pavement "
 "status."
@@ -131,21 +134,21 @@ msgstr ""
 "Caractéristique d’une entité. Par exemple, nombre de voies ou type de "
 "chaussée."
 
-#: ../../data_product_specs.rst:65
+#: ../../data_product_specs.rst:59
 msgid "Dataset"
 msgstr "Jeu de données"
 
-#: ../../data_product_specs.rst:65
+#: ../../data_product_specs.rst:59
 msgid "Data collection identifiable for a Canadian Province or Territory."
 msgstr ""
 "Collection de données identifiable pour une province ou un territoire "
 "canadien."
 
-#: ../../data_product_specs.rst:68
+#: ../../data_product_specs.rst:62
 msgid "Entity"
 msgstr "Entité"
 
-#: ../../data_product_specs.rst:68
+#: ../../data_product_specs.rst:62
 msgid ""
 "Digital representation of a real world phenomenon. For example, the "
 "digital representation of King Street is an entity."
@@ -153,103 +156,103 @@ msgstr ""
 "Représentation numérique d’un phénomène réel. Par exemple, la "
 "représentation numérique de la rue King est une entité."
 
-#: ../../data_product_specs.rst:71
+#: ../../data_product_specs.rst:65
 msgid "Object"
 msgstr "Objet"
 
-#: ../../data_product_specs.rst:71
+#: ../../data_product_specs.rst:65
 msgid "An object is an instance of a class."
 msgstr "Un objet est une instance d’une classe."
 
-#: ../../data_product_specs.rst:74
+#: ../../data_product_specs.rst:68
 msgid "Abbreviations and acronyms"
 msgstr "Abréviations et acronymes"
 
-#: ../../data_product_specs.rst:76
+#: ../../data_product_specs.rst:70
 msgid "CRSID"
-msgstr ""
+msgstr "CRSID"
+
+#: ../../data_product_specs.rst:72
+msgid "Coordinate Reference System Identifier"
+msgstr "Coordinate Reference System Identifier"
+
+#: ../../data_product_specs.rst:73
+msgid "CCOG"
+msgstr "COCG"
+
+#: ../../data_product_specs.rst:75
+msgid "Canadian Council on Geomatics"
+msgstr "Conseil canadien de géomatique"
+
+#: ../../data_product_specs.rst:76
+msgid "GDF"
+msgstr "GDF"
 
 #: ../../data_product_specs.rst:78
-msgid "Coordinate Reference System Identifier"
-msgstr ""
+msgid "Geographic Data File"
+msgstr "Geographic Data File"
 
 #: ../../data_product_specs.rst:79
-msgid "CCOG"
-msgstr ""
+msgid "GML"
+msgstr "GML"
 
 #: ../../data_product_specs.rst:81
-msgid "Canadian Council on Geomatics"
-msgstr ""
+msgid "Geography Markup Language"
+msgstr "Geography Markup Language"
 
 #: ../../data_product_specs.rst:82
-msgid "GDF"
-msgstr ""
+msgid "GPKG"
+msgstr "GPKG"
 
 #: ../../data_product_specs.rst:84
-msgid "Geographic Data File"
-msgstr ""
+msgid "Open Geospatial Consortium Geopackage"
+msgstr "Open Geospatial Consortium Geopackage"
 
 #: ../../data_product_specs.rst:85
-msgid "GML"
-msgstr ""
+msgid "GPS"
+msgstr "GPS"
 
 #: ../../data_product_specs.rst:87
-msgid "Geography Markup Language"
-msgstr ""
-
-#: ../../data_product_specs.rst:88
-msgid "GPKG"
-msgstr ""
-
-#: ../../data_product_specs.rst:90
-msgid "Open Geospatial Consortium Geopackage"
-msgstr ""
-
-#: ../../data_product_specs.rst:91
-msgid "GPS"
-msgstr ""
-
-#: ../../data_product_specs.rst:93
 msgid "Global Positioning System"
 msgstr "Système mondial de localisation (Global Positioning System)"
 
-#: ../../data_product_specs.rst:94
+#: ../../data_product_specs.rst:88
 msgid "IACG"
 msgstr "CMOIG"
 
-#: ../../data_product_specs.rst:96
+#: ../../data_product_specs.rst:90
 msgid "Inter-Agency Committee on Geomatics"
 msgstr "Comité mixte des organismes intéressés à la géomatique"
 
-#: ../../data_product_specs.rst:97
+#: ../../data_product_specs.rst:91
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
-#: ../../data_product_specs.rst:99
+#: ../../data_product_specs.rst:93
 msgid "Identifier"
 msgstr "Identifiant"
 
-#: ../../data_product_specs.rst:100
+#: ../../data_product_specs.rst:94
 msgid "ISO"
-msgstr ""
+msgstr "ISO"
 
-#: ../../data_product_specs.rst:102
+#: ../../data_product_specs.rst:96
 msgid "International Organization for Standardization"
 msgstr "Organisation internationale de normalisation"
 
-#: ../../data_product_specs.rst:103
+#: ../../data_product_specs.rst:97
 msgid "KML"
-msgstr ""
+msgstr "KML"
 
-#: ../../data_product_specs.rst:105
+#: ../../data_product_specs.rst:99
 msgid "Keyhole Markup Language"
-msgstr ""
+msgstr "Keyhole Markup Language"
 
-#: ../../data_product_specs.rst:106
+#: ../../data_product_specs.rst:100
 msgid "NAD83CSRS"
 msgstr "NAD83SCRS"
 
-#: ../../data_product_specs.rst:108
+#: ../../data_product_specs.rst:102
 msgid ""
 "North American Datum 1983 (Canadian Spatial Reference System) NID "
 "National Identifier"
@@ -257,48 +260,48 @@ msgstr ""
 "Système de référence nord-américain de 1983 (Système canadien de "
 "référence spatiale)"
 
-#: ../../data_product_specs.rst:109
+#: ../../data_product_specs.rst:103
 msgid "NRCan"
 msgstr "RNCan"
 
-#: ../../data_product_specs.rst:111
+#: ../../data_product_specs.rst:105
 msgid "Natural Resources Canada"
 msgstr "Ressources naturelles Canada"
 
-#: ../../data_product_specs.rst:112 ../../data_product_specs.rst:167
-#: ../../data_product_specs.rst:261
+#: ../../data_product_specs.rst:106 ../../data_product_specs.rst:162
+#: ../../data_product_specs.rst:256
 msgid "NRN"
 msgstr "RRN"
 
-#: ../../data_product_specs.rst:115
+#: ../../data_product_specs.rst:109
 msgid "OGC"
-msgstr ""
+msgstr "OGC"
 
-#: ../../data_product_specs.rst:117
+#: ../../data_product_specs.rst:111
 msgid "Open Geospatial Consortium"
-msgstr ""
+msgstr "Open Geospatial Consortium"
 
-#: ../../data_product_specs.rst:118
+#: ../../data_product_specs.rst:112
 msgid "TC"
-msgstr ""
+msgstr "TC"
 
-#: ../../data_product_specs.rst:120
+#: ../../data_product_specs.rst:114
 msgid "Technical Committee"
 msgstr "Comité technique"
 
-#: ../../data_product_specs.rst:121
+#: ../../data_product_specs.rst:115
 msgid "XML"
-msgstr ""
+msgstr "XML"
 
-#: ../../data_product_specs.rst:123
+#: ../../data_product_specs.rst:117
 msgid "Extensible Markup Language"
-msgstr ""
+msgstr "Extensible Markup Language"
 
-#: ../../data_product_specs.rst:126
+#: ../../data_product_specs.rst:120
 msgid "Informal description of the data product"
 msgstr "Description informelle du produit"
 
-#: ../../data_product_specs.rst:128
+#: ../../data_product_specs.rst:122
 msgid ""
 "The National Road Network (NRN) product contains quality geospatial data "
 "(current, accurate, consistent and maintained) of Canadian road "
@@ -323,7 +326,7 @@ msgstr ""
 "routière fonctionnelle, État revêtement, Nombre de voies, Type de "
 "structure, Numéro de route, Nom de route, Numéro de sortie."
 
-#: ../../data_product_specs.rst:135
+#: ../../data_product_specs.rst:129
 msgid ""
 "The maintenance of the NRN data is done within the framework of "
 "intergovernmental partnership agreements (federal, provincial, "
@@ -342,7 +345,7 @@ msgstr ""
 " Les données produites forment une vue homogène et standardisée pour "
 "l’ensemble du territoire canadien."
 
-#: ../../data_product_specs.rst:140
+#: ../../data_product_specs.rst:134
 msgid ""
 "The NRN conceptual model was elaborated in collaboration with interested "
 "data providers and is adopted by the Canadian Council on Geomatics "
@@ -361,11 +364,11 @@ msgstr ""
 "classes, nom d’attributs et définitions) est en grande partie extrait de"
 " l’ISO 14825."
 
-#: ../../data_product_specs.rst:146
+#: ../../data_product_specs.rst:140
 msgid "Specification Scope"
 msgstr "Portée des spécification"
 
-#: ../../data_product_specs.rst:148
+#: ../../data_product_specs.rst:142
 msgid ""
 "This section describes the scope referred to by information provided in "
 "subsequent sections which describe the product."
@@ -373,17 +376,17 @@ msgstr ""
 "Cette section décrit la portée à laquelle fait référence "
 "l’information des sections subséquentes qui décrivent le produit."
 
-#: ../../data_product_specs.rst:151
+#: ../../data_product_specs.rst:145
 msgid "Scope identification"
 msgstr "Identification de la portée"
 
-#: ../../data_product_specs.rst:153 ../../data_product_specs.rst:349
+#: ../../data_product_specs.rst:147 ../../data_product_specs.rst:348
 #: ../../data_product_specs.rst:643 ../../data_product_specs.rst:790
 #: ../../data_product_specs.rst:800
 msgid "Global"
 msgstr "Globale"
 
-#: ../../data_product_specs.rst:156
+#: ../../data_product_specs.rst:150
 msgid ""
 "\"Global\" means that this scope refers to all parts of this data product"
 " specifications."
@@ -391,145 +394,153 @@ msgstr ""
 "N.B.: \"Globale\" signifie que la portée réfère à toutes les parties "
 "des spécifications de produit"
 
-#: ../../data_product_specs.rst:159
+#: ../../data_product_specs.rst:153
 msgid "Level"
 msgstr "Niveau"
 
-#: ../../data_product_specs.rst:161
+#: ../../data_product_specs.rst:155
 msgid ""
 "This scope refers to the following level according to the ISO 19115 "
-"standard and CAN/CGSB - 171.100- 2009 standards: 006 - series"
+"standard and CAN/CGSB - 171.100- 2009 standards:"
 msgstr ""
 "Cette portée fait référence au niveau suivant de la norme ISO 19115 et"
 " de la norme CAN/CGSB-171.100- 2009.006 - séries"
 
-#: ../../data_product_specs.rst:165
+#: ../../data_product_specs.rst:157
+msgid "006 - series"
+msgstr "006 - séries"
+
+#: ../../data_product_specs.rst:160
 msgid "Level name"
 msgstr "Nom du niveau"
 
-#: ../../data_product_specs.rst:170
+#: ../../data_product_specs.rst:165
 msgid "Extent"
 msgstr "Étendue"
 
-#: ../../data_product_specs.rst:172
+#: ../../data_product_specs.rst:167
 msgid "This section describes the spatial and temporal extent of the scope."
-msgstr ""
+msgstr "Cette section décrit l’étendue spatiale et temporelle de la portée."
 
-#: ../../data_product_specs.rst:175 ../../data_product_specs.rst:355
+#: ../../data_product_specs.rst:170 ../../data_product_specs.rst:354
 #: ../../data_product_specs.rst:606 ../../data_product_specs.rst:623
 msgid "Description"
 msgstr "Description"
 
-#: ../../data_product_specs.rst:177
+#: ../../data_product_specs.rst:172
 msgid "Canadian landmass"
 msgstr "Masse continentale canadienne"
 
-#: ../../data_product_specs.rst:179
+#: ../../data_product_specs.rst:174
 msgid ""
 "NRN data are seamless between datasets and form a continuous network over"
 " the Canadian landmass."
 msgstr ""
+"Les données du RRN sont continues entre les jeux de données et constituent un "
+"réseau ininterrompu couvrant l’ensemble de la masse continentale canadienne."
 
-#: ../../data_product_specs.rst:182
+#: ../../data_product_specs.rst:177
 msgid "Vertical extent"
 msgstr "Étendue verticale"
 
-#: ../../data_product_specs.rst:184
+#: ../../data_product_specs.rst:179
 msgid ""
 "The NRN data are two-dimensional. There is no elevation (z) associated "
 "with the data."
 msgstr ""
+"Les données RRN sont bidimensionnelles. Il n’y a pas d’élévation (z) "
+"associée aux données."
 
-#: ../../data_product_specs.rst:187
+#: ../../data_product_specs.rst:182
 msgid "Minimum value"
 msgstr "Valeur minimale"
 
-#: ../../data_product_specs.rst:189 ../../data_product_specs.rst:194
-#: ../../data_product_specs.rst:199 ../../data_product_specs.rst:204
+#: ../../data_product_specs.rst:184 ../../data_product_specs.rst:189
+#: ../../data_product_specs.rst:194 ../../data_product_specs.rst:199
 #: ../../data_product_specs.rst:565 ../../data_product_specs.rst:570
 #: ../../data_product_specs.rst:575 ../../data_product_specs.rst:795
 msgid "Not applicable"
 msgstr "Ne s’applique pas"
 
-#: ../../data_product_specs.rst:192
+#: ../../data_product_specs.rst:187
 msgid "Maximum value"
 msgstr "Valeur maximale"
 
-#: ../../data_product_specs.rst:197
+#: ../../data_product_specs.rst:192
 msgid "Unit of measure"
 msgstr "Unité de mesure"
 
-#: ../../data_product_specs.rst:202
+#: ../../data_product_specs.rst:197
 msgid "Vertical datum"
 msgstr "Datum vertical"
 
-#: ../../data_product_specs.rst:207
+#: ../../data_product_specs.rst:202
 msgid "Horizontal extent"
 msgstr "Étendue horizontale"
 
-#: ../../data_product_specs.rst:209
+#: ../../data_product_specs.rst:204
 msgid "The geographic extent is given by the following geographic bounding box:"
 msgstr ""
 "L’étendue géographique est décrite par les coordonnées de boîte "
 "englobante suivante:"
 
-#: ../../data_product_specs.rst:212
+#: ../../data_product_specs.rst:207
 msgid "West bound longitude"
 msgstr "Longitude limitrophe ouest"
 
-#: ../../data_product_specs.rst:214
+#: ../../data_product_specs.rst:209
 msgid "-141.0"
 msgstr ""
 
-#: ../../data_product_specs.rst:217
+#: ../../data_product_specs.rst:212
 msgid "East bound longitude"
 msgstr "Longitude limitrophe est"
 
-#: ../../data_product_specs.rst:219
+#: ../../data_product_specs.rst:214
 msgid "-52.6"
 msgstr ""
 
-#: ../../data_product_specs.rst:222
+#: ../../data_product_specs.rst:217
 msgid "South bound latitude"
 msgstr "Latitude limitrophe sud"
 
-#: ../../data_product_specs.rst:224
+#: ../../data_product_specs.rst:219
 msgid "+41.7"
 msgstr ""
 
-#: ../../data_product_specs.rst:227
+#: ../../data_product_specs.rst:222
 msgid "North bound latitude"
 msgstr "Latitude limitrophe nord"
 
-#: ../../data_product_specs.rst:229
+#: ../../data_product_specs.rst:224
 msgid "+76.5"
 msgstr ""
 
-#: ../../data_product_specs.rst:232
+#: ../../data_product_specs.rst:227
 msgid "Temporal extent"
 msgstr "Étendue temporelle"
 
-#: ../../data_product_specs.rst:234
+#: ../../data_product_specs.rst:229
 msgid "The temporal extent is given by the following period of time:"
 msgstr "L'étendue temporelle est définie par la période de temps suivante."
 
-#: ../../data_product_specs.rst:237
+#: ../../data_product_specs.rst:232
 msgid "Beginning date"
 msgstr "Date de début"
 
-#: ../../data_product_specs.rst:239
+#: ../../data_product_specs.rst:234
 msgid "1979-07"
 msgstr ""
 
-#: ../../data_product_specs.rst:242
+#: ../../data_product_specs.rst:237
 msgid "Ending date"
 msgstr "Date de fin"
 
-#: ../../data_product_specs.rst:244
+#: ../../data_product_specs.rst:239
 msgid "Today"
 msgstr "Aujourd’hui"
 
-#: ../../data_product_specs.rst:247
+#: ../../data_product_specs.rst:242
 msgid ""
 "\"Today\" means the current date of publication of an instance of the "
 "NRN. That is, an instance of the NRN may include the road network that is"
@@ -539,19 +550,19 @@ msgstr ""
 "instance du RRN. C’est-à-dire, une instance du RRN peut inclure un "
 "réseau routier qui est actuel à la date de publication."
 
-#: ../../data_product_specs.rst:251
+#: ../../data_product_specs.rst:246
 msgid "Data Product identification"
 msgstr "Identification du produit"
 
-#: ../../data_product_specs.rst:259
+#: ../../data_product_specs.rst:254
 msgid "Alternate title"
 msgstr "Titre alternatif"
 
-#: ../../data_product_specs.rst:264
+#: ../../data_product_specs.rst:259
 msgid "Abstract"
 msgstr "Résumé"
 
-#: ../../data_product_specs.rst:266 ../../data_product_specs.rst:357
+#: ../../data_product_specs.rst:261 ../../data_product_specs.rst:356
 msgid ""
 "The NRN product is distributed in the form of thirteen provincial or "
 "territorial datasets and consists of two linear entities (Road Segment "
@@ -572,7 +583,7 @@ msgstr ""
 "revêtement, Nombre de voies, Type de structure, Numéro de route, Nom de"
 " route, Numéro de sortie."
 
-#: ../../data_product_specs.rst:272
+#: ../../data_product_specs.rst:267
 msgid ""
 "The development of the NRN was realized by means of individual meetings "
 "and national workshops with interested data providers from the federal, "
@@ -583,7 +594,7 @@ msgstr ""
 "de données intéressés des gouvernements fédéraux, provinciaux, "
 "territoriaux et municipaux."
 
-#: ../../data_product_specs.rst:275
+#: ../../data_product_specs.rst:270
 msgid ""
 "In 2005, the NRN edition 2.0 was alternately adopted by members from the "
 "Inter-Agency Committee on Geomatics (IACG) and the Canadian Council on "
@@ -594,18 +605,18 @@ msgstr ""
 "les membres du Conseil canadien de géomatique (COCG). Son contenu "
 "s'appuie en grande partie sur la norme ISO 14825 de ISO/TC 204."
 
-#: ../../data_product_specs.rst:279
+#: ../../data_product_specs.rst:274
 msgid "Purpose"
 msgstr "But"
 
-#: ../../data_product_specs.rst:281
+#: ../../data_product_specs.rst:276
 msgid ""
 "The National Road Network (NRN) provides quality geospatial and "
 "attributive data (current, accurate, consistent), homogeneous and "
 "normalized of the entire Canadian road network."
 msgstr ""
 
-#: ../../data_product_specs.rst:283
+#: ../../data_product_specs.rst:278
 msgid ""
 "The NRN data serve as a foundation for several applications. This common "
 "geometric base is maintained on a regular basis by closest to the source "
@@ -616,47 +627,49 @@ msgid ""
 "supplementary data."
 msgstr ""
 
-#: ../../data_product_specs.rst:286
+#: ../../data_product_specs.rst:281
 msgid "Topic category"
 msgstr "Catégories"
 
-#: ../../data_product_specs.rst:288
+#: ../../data_product_specs.rst:283
 msgid ""
 "Main topics for the product, as defined by the ISO 19115 standard or "
 "CAN/CGSB 171.100-2009:"
 msgstr ""
+"Thèmes principaux du produit, tels que définis selon la norme ISO 19115 ou CAN/CGSB-171.100-2009."
+
+#: ../../data_product_specs.rst:285
+msgid "013 – location"
+msgstr "013 – localisation"
+
+#: ../../data_product_specs.rst:287
+msgid "018 – transportation"
+msgstr "018 – transport"
 
 #: ../../data_product_specs.rst:290
-msgid "013 – location"
-msgstr ""
-
-#: ../../data_product_specs.rst:292
-msgid "018 – transportation"
-msgstr ""
-
-#: ../../data_product_specs.rst:295
 msgid "Spatial representation type"
 msgstr "Type de représentation spatiale"
 
-#: ../../data_product_specs.rst:297
+#: ../../data_product_specs.rst:292
 msgid ""
 "Type of spatial representation for the product, as defined by the ISO "
 "19115 standard:"
 msgstr ""
+"Type de représentation spatiale du produit, tel que défini dans la norme ISO 19115:"
 
-#: ../../data_product_specs.rst:299
+#: ../../data_product_specs.rst:294
 msgid "001 - vector"
-msgstr ""
+msgstr "001 - vectorielle"
 
-#: ../../data_product_specs.rst:302
+#: ../../data_product_specs.rst:297
 msgid "Spatial resolution"
 msgstr "Résolution spatiale"
 
-#: ../../data_product_specs.rst:303
+#: ../../data_product_specs.rst:298
 msgid "Spatial resolution denominator of the data: 10 000"
 msgstr "Dénominateur de la résolution spatiale des données: 10 000"
 
-#: ../../data_product_specs.rst:306
+#: ../../data_product_specs.rst:301
 msgid ""
 "The nominal spatial resolution is only a general estimate since the data "
 "originate from multiple sources (GPS, existing federal, provincial or "
@@ -667,23 +680,23 @@ msgstr ""
 "fédérales, provinciales ou municipales) mais est estimée être de "
 "l’ordre de 1/10 000."
 
-#: ../../data_product_specs.rst:310
+#: ../../data_product_specs.rst:305
 msgid "Geographic description"
 msgstr "Description géographique"
 
-#: ../../data_product_specs.rst:313 ../../data_product_specs.rst:411
+#: ../../data_product_specs.rst:308 ../../data_product_specs.rst:411
 msgid "Authority"
 msgstr "Autorité"
 
-#: ../../data_product_specs.rst:315
+#: ../../data_product_specs.rst:310
 msgid "International Organization for Standardization (ISO)"
 msgstr "Organisation internationale de normalisation (ISO)"
 
-#: ../../data_product_specs.rst:320
+#: ../../data_product_specs.rst:315
 msgid "Standard for codes of geographical regions:"
 msgstr "Norme des codes de régions géographiques:"
 
-#: ../../data_product_specs.rst:322
+#: ../../data_product_specs.rst:317
 msgid ""
 "ISO 3166-1:1997 Codes for the representation of names of countries and "
 "their subdivisions – Part 1: Country codes"
@@ -691,37 +704,46 @@ msgstr ""
 "ISO 3166-1:1997 Codes pour la représentation des noms de pays et de "
 "leurs subdivisions – Partie 1 : Codes pays"
 
-#: ../../data_product_specs.rst:325 ../../data_product_specs.rst:419
+#: ../../data_product_specs.rst:320 ../../data_product_specs.rst:419
 msgid "Date"
 msgstr "Date"
 
-#: ../../data_product_specs.rst:327
-msgid "Reference date of the ISO 3166-1 standard: 1997-10-01"
+#: ../../data_product_specs.rst:322
+msgid "Reference date of the ISO 3166-1 standard:"
 msgstr ""
 
-#: ../../data_product_specs.rst:330 ../../data_product_specs.rst:424
+#: ../../data_product_specs.rst:324
+msgid "1997-10-01"
+msgstr "Date de référence de la norme ISO 3166-1:"
+
+#: ../../data_product_specs.rst:327 ../../data_product_specs.rst:424
 msgid "Date type code"
 msgstr "Type de date"
 
-#: ../../data_product_specs.rst:332
+#: ../../data_product_specs.rst:329
 msgid "Type of date according to ISO 19115 standard: 002 - publication"
 msgstr "Type de date selon la norme ISO 19115: 002 - publication"
 
-#: ../../data_product_specs.rst:335 ../../data_product_specs.rst:435
+#: ../../data_product_specs.rst:332 ../../data_product_specs.rst:435
 msgid "Code"
 msgstr "Code"
 
-#: ../../data_product_specs.rst:337
+#: ../../data_product_specs.rst:334
 msgid ""
 "Code of the geographical region covered by the product according to the "
-"ISO 3166-1 standard: CA – Canada"
+"ISO 3166-1 standard:"
 msgstr ""
+"Code de la région géographique couverte par le produit selon la liste de codes de la norme ISO 3166-1:"
 
-#: ../../data_product_specs.rst:340
+#: ../../data_product_specs.rst:336
+msgid "CA – Canada"
+msgstr "CA – Canada"
+
+#: ../../data_product_specs.rst:339
 msgid "Extent type code"
 msgstr "Type de code"
 
-#: ../../data_product_specs.rst:342
+#: ../../data_product_specs.rst:341
 msgid ""
 "Extent type code of the delimitation polygon according to the ISO 19115 "
 "standard:"
@@ -729,27 +751,31 @@ msgstr ""
 "Type de code du polygone de délimitation de l’étendue selon la norme "
 "ISO 19115:"
 
-#: ../../data_product_specs.rst:344
+#: ../../data_product_specs.rst:343
 msgid "1 - inclusive (the delimitation polygon is inclusive)"
 msgstr "1 - inclusion (le polygone de délimitation est inclusif)"
 
-#: ../../data_product_specs.rst:347 ../../data_product_specs.rst:396
+#: ../../data_product_specs.rst:346 ../../data_product_specs.rst:396
 #: ../../data_product_specs.rst:450 ../../data_product_specs.rst:598
 #: ../../data_product_specs.rst:615 ../../data_product_specs.rst:641
 #: ../../data_product_specs.rst:788 ../../data_product_specs.rst:798
 msgid "Reference to specification scope"
 msgstr "Référence vers la portée des spécifications"
 
-#: ../../data_product_specs.rst:352
+#: ../../data_product_specs.rst:351
 msgid "Data Content and Structure"
 msgstr "Contenu et structure de l'information"
 
-#: ../../data_product_specs.rst:363
+#: ../../data_product_specs.rst:362
 msgid ""
 "Addressing information (address range, street name and place name) linked"
 " to Road Segment entities are also distributed in three distinct tables "
 "(Address Range, Street and Place Names and Alternate Name Link)."
 msgstr ""
+"Les informations d’adressage (intervalle d’adresse, nom de rue et nom de "
+"lieu) liées aux entités segment routier sont également distribuées dans "
+"trois tables distinctes (intervalle d’adresse, noms de rue et de lieu et "
+"lien nom de rue non officiel)."
 
 #: ../../data_product_specs.rst:366
 msgid "Data modelling schema used"
@@ -765,6 +791,7 @@ msgid ""
 "*National Road Network, edition 2.0.1, Conceptual Data Model, Segmented "
 "View* accessible on the GeoBase portal (www.geobase.ca)."
 msgstr ""
+"Le modèle conceptuel des données du RRN est décrit dans le document intitulé Réseau routier national, édition 2.0.1, Modèle conceptuel des données, vue segmentées disponible sur le portail GéoBase (www.geobase.ca)."
 
 #: ../../data_product_specs.rst:374 ../../data_product_specs.rst:489
 msgid ""
@@ -772,6 +799,7 @@ msgid ""
 "conceptual model in what concerned the management of object metadata and "
 "the addition of certain attributes to the entity Road Segment."
 msgstr ""
+"L’implantation physique du produit RRN diffère du modèle conceptuel en ce qui a trait à la gestion des métadonnées d’objet et à l’ajout de certains attributs à l’entité segment routier."
 
 #: ../../data_product_specs.rst:377 ../../data_product_specs.rst:492
 msgid ""
@@ -784,12 +812,14 @@ msgid ""
 "the sources used for revision. Otherwise, Object Metadata attributes "
 "describe the sources used for creation."
 msgstr ""
+"Pour les métadonnées d’objet, le modèle conceptuel prévoit deux séries distinctes d’attributs de métadonnées décrivant les sources respectives utilisées pour créer et réviser les données. Seules les dates distinctes de création et de révision ont été implantées. Lorsqu’une date de révision est indiquée et qu’une modification attributive ou géométrique a été appliquée à l’objet (par rapport à l’édition précédente du jeu de données), la série d’attributs de métadonnées d’objet décrit alors les sources utilisées pour la révision. Autrement, les métadonnées d’objet décrivent les sources utilisées pour la création des données."
 
 #: ../../data_product_specs.rst:383 ../../data_product_specs.rst:498
 msgid ""
 "The street name, place name and address range were also added as "
 "attributes on the geometry of the entity Road Segment."
 msgstr ""
+"Le nom de rue, nom de lieu et l’intervalle d’adresse ont été aussi ajoutés en attribut sur la géométrie de l’entité segment routier."
 
 #: ../../data_product_specs.rst:385
 msgid ""
@@ -798,6 +828,7 @@ msgid ""
 "into the physical model of the NRN data product according to the "
 "distribution formats GML, KML and Shape (www.geobase.ca)."
 msgstr ""
+"Le document *Réseau routier national, édition 2.0.1, Formats de distribution du produit* illustre également la matérialisation du modèle conceptuel du Catalogue d’entités dans le modèle physique des données du produit RRN selon les formats de distribution GML, KML et Shape (www.geobase.ca)."
 
 #: ../../data_product_specs.rst:390
 msgid "Feature catalogue"
@@ -808,11 +839,13 @@ msgid ""
 "The feature catalogue entitled *National Road Network, edition 2.0.1, "
 "Feature Catalogue* can be found on the GeoBase portal (www.geobase.ca)."
 msgstr ""
+"
+Le catalogue d’entités intitulé *Réseau routier national, édition 2.0.1, Catalogue d’entités* est disponible sur le portail GéoBase (www.geobase.ca)."
 
 #: ../../data_product_specs.rst:398 ../../data_product_specs.rst:452
 #: ../../data_product_specs.rst:600 ../../data_product_specs.rst:617
 msgid "Global (see 2.1)"
-msgstr ""
+msgstr "Globale"
 
 #: ../../data_product_specs.rst:401
 msgid "Reference System"
@@ -860,6 +893,7 @@ msgid ""
 "OGP – International Organisation of Oil and Gas Producers URL: "
 "http://www.epsg.org"
 msgstr ""
+"OGP – International Organisation of Oil and Gas Producers URL: http://www.epsg.org"
 
 #: ../../data_product_specs.rst:437
 msgid "Coordinate reference system identifier (CRSID): 4617"
@@ -964,6 +998,7 @@ msgid ""
 "*National Road Network, edition 2.0.1, Conceptual Data Model, Segmented "
 "View* accessible on the GeoBase portal (www.geobase.ca)."
 msgstr ""
+"Le modèle conceptuel des données du RRN est disponible dans le document intitulé *Réseau routier national, édition 2.0.1, Modèle conceptuel des données segmentées* sur le portail GéoBase (www.geobase.ca)."
 
 #: ../../data_product_specs.rst:501
 msgid "Domain consistency"
@@ -975,12 +1010,14 @@ msgid ""
 " the definition of the authorized domain values defined in the feature "
 "catalogue."
 msgstr ""
+"Les valeurs attributives sont validées à l’aide d’un schéma XML contenant la définition des domaines de valeurs autorisées définis dans le catalogue d’entités."
 
 #: ../../data_product_specs.rst:506
 msgid ""
 "Authorized combinations of attribute values are validated by means of in-"
 "house software."
 msgstr ""
+"Les combinaisons de valeurs d’attribut autorisées sont validées à l’aide d’un logiciel développé à l’interne."
 
 #: ../../data_product_specs.rst:509
 msgid "Format consistency"
@@ -1002,6 +1039,7 @@ msgid ""
 "The spatial relations of the entities of NRN datasets are systematically "
 "validated by means of in-house software."
 msgstr ""
+"Les relations spatiales des entités des jeux de données RRN sont validées systématiquement à l’aide de logiciels développés à l’interne."
 
 #: ../../data_product_specs.rst:519
 msgid ""
@@ -1011,6 +1049,7 @@ msgid ""
 "(NID), geometrical incoherence (\"spikes\") and network continuity of "
 "route number, route name, street name and address ranges."
 msgstr ""
+"La validation réalisée consiste à détecter et à corriger dans la mesure du possible : la duplication d’entités, la connexion entre les entités linéaires et ponctuelles du réseau routier, la cardinalité entre les segments et les jonctions, l’assignation des identifiants (IDN), les incohérences géométriques (« spikes ») ainsi que la continuité des réseaux de numéro de route, nom de route, nom de rue et des intervalles d’adresse."
 
 #: ../../data_product_specs.rst:524
 msgid "Positional accuracy"
@@ -1045,6 +1084,8 @@ msgid ""
 "\\sigma_c = 0.7071 (\\sigma_x^2 + \\sigma_y^2)  \\sigma_x : standard "
 "deviation in the X-axis  \\sigma_y : standard deviation in the Y-axis"
 msgstr ""
+"\\sigma_c = 0.7071 (\\sigma_x^2 + \\sigma_y^2)  \\sigma_x : écart-type "
+"dans l’axe X  \\sigma_y : écart-type dans l’axe Y"
 
 #: ../../data_product_specs.rst:543
 msgid "CircularMapAccuracyStandard:"
@@ -1250,7 +1291,7 @@ msgstr "Nom du format"
 
 #: ../../data_product_specs.rst:660
 msgid "GML – Geography Markup Language"
-msgstr ""
+msgstr "GML – Geography Markup Language"
 
 #: ../../data_product_specs.rst:665
 msgid "2.1.2"
@@ -1267,6 +1308,7 @@ msgid ""
 "Specifications, 17 September 2002, OGC Document Number 02-069 "
 "(http://portal.opengeospatial.org/files/?artifact_id=11339)"
 msgstr ""
+"Geography Markup Language – GML – 2.1.2, OpenGIS® Implementation Specifications, 17 September 2002, OGC Document Number 02-069 (http://portal.opengeospatial.org/files/?artifact_id=11339)"
 
 #: ../../data_product_specs.rst:676 ../../data_product_specs.rst:706
 #: ../../data_product_specs.rst:734 ../../data_product_specs.rst:760
@@ -1289,7 +1331,7 @@ msgstr "Information sur le format de livraison KML"
 
 #: ../../data_product_specs.rst:688
 msgid "KML – Keyhole Markup Language"
-msgstr ""
+msgstr "KML – Keyhole Markup Language"
 
 #: ../../data_product_specs.rst:693
 msgid "2.1"
@@ -1321,7 +1363,7 @@ msgstr "Information sur le format de livraison SHAPE"
 
 #: ../../data_product_specs.rst:718
 msgid "Shape – ESRI |trade|"
-msgstr ""
+msgstr "Shape – ESRI |trade|"
 
 #: ../../data_product_specs.rst:723
 msgid "01"
@@ -1339,7 +1381,7 @@ msgstr "Information sur le format de livraison Geopackage"
 
 #: ../../data_product_specs.rst:746
 msgid "GPKG – OGC Geopackage"
-msgstr ""
+msgstr "GPKG – OGC Geopackage"
 
 #: ../../data_product_specs.rst:750
 msgid "1.0.1"
@@ -1347,7 +1389,7 @@ msgstr ""
 
 #: ../../data_product_specs.rst:755
 msgid "OGC GeoPackage (https://www.geopackage.org/spec101/index.html)"
-msgstr ""
+msgstr "OGC GeoPackage (https://www.geopackage.org/spec101/index.html)"
 
 #: ../../data_product_specs.rst:767
 msgid "Delivery medium information"
@@ -1395,4 +1437,3 @@ msgstr ""
 #: ../../data_product_specs.rst:793
 msgid "Metadata"
 msgstr "Métadonnées"
-
