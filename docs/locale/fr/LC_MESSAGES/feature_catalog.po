@@ -1,0 +1,3072 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020, Statistics Canada
+# This file is distributed under the same license as the National Road
+# Network package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: National Road Network \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-29 16:02-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: ../../feature_catalog.rst:3
+msgid "Feature Catalog - Segmented View"
+msgstr ""
+
+#: ../../feature_catalog.rst:8
+msgid ""
+"The description of features and attributes provided in this catalogue is "
+"largely based on the standard *ISO 14825 — Intelligent transport systems "
+"— Geographic Data Files (GDF) — Overall data specification* resulting "
+"from technical committee ISO / TC 204."
+msgstr ""
+
+#: ../../feature_catalog.rst:12
+msgid ""
+"This catalogue was adapted from the international standard *ISO 19110 — "
+"Geographic information — Methodology for feature cataloguing* prepared by"
+" technical committee ISO/TC 211."
+msgstr ""
+
+#: ../../feature_catalog.rst:16
+msgid "Contents"
+msgstr ""
+
+#: ../../feature_catalog.rst:19
+msgid "Acronyms and Abbreviations"
+msgstr ""
+
+#: ../../feature_catalog.rst:21
+msgid "CMAS:"
+msgstr ""
+
+#: ../../feature_catalog.rst:23
+msgid "Circular Map Accuracy Standard DEM: Digital Elevation Model"
+msgstr ""
+
+#: ../../feature_catalog.rst:24
+msgid "GPS:"
+msgstr ""
+
+#: ../../feature_catalog.rst:26
+msgid "Global Positioning System"
+msgstr ""
+
+#: ../../feature_catalog.rst:27
+msgid "ID:"
+msgstr ""
+
+#: ../../feature_catalog.rst:29
+msgid "Identifier"
+msgstr ""
+
+#: ../../feature_catalog.rst:30
+msgid "ISO/TC:"
+msgstr ""
+
+#: ../../feature_catalog.rst:32
+msgid ""
+"International Organisation for Standardisation, Technical Committee "
+"NatProvTer: National, Provincial, or Territorial"
+msgstr ""
+
+#: ../../feature_catalog.rst:34
+msgid "NID:"
+msgstr ""
+
+#: ../../feature_catalog.rst:36
+msgid "National Identifier"
+msgstr ""
+
+#: ../../feature_catalog.rst:37
+msgid "NRCan:"
+msgstr ""
+
+#: ../../feature_catalog.rst:39
+msgid "Natural Resources Canada"
+msgstr ""
+
+#: ../../feature_catalog.rst:40
+msgid "NRN:"
+msgstr ""
+
+#: ../../feature_catalog.rst:42
+msgid "National Road Network UUID: Universal Unique Identifier"
+msgstr ""
+
+#: ../../feature_catalog.rst:45
+msgid "Terms and Definitions"
+msgstr ""
+
+#: ../../feature_catalog.rst:48
+msgid "Attribute"
+msgstr ""
+
+#: ../../feature_catalog.rst:48
+msgid ""
+"Characteristic of a feature. For example, number of lanes or pavement "
+"status."
+msgstr ""
+
+#: ../../feature_catalog.rst:52
+msgid "Class"
+msgstr ""
+
+#: ../../feature_catalog.rst:51
+msgid ""
+"Description of a set of objects that share the same attributes, "
+"operations, methods, relationships, and semantics. A class does not "
+"always have an associated geometry (e.g., address range class)."
+msgstr ""
+
+#: ../../feature_catalog.rst:55
+msgid "Feature"
+msgstr ""
+
+#: ../../feature_catalog.rst:55
+msgid "Digital representation of a real world phenomenon."
+msgstr ""
+
+#: ../../feature_catalog.rst:59
+msgid "Ferry Connection"
+msgstr ""
+
+#: ../../feature_catalog.rst:58
+msgid ""
+"The average route a ferryboat takes when transporting vehicles between "
+"two fixed locations on the Road Network. Two Junctions always bound a "
+"Ferry Connection."
+msgstr ""
+
+#: ../../feature_catalog.rst:62
+msgid "Network Linear Element"
+msgstr ""
+
+#: ../../feature_catalog.rst:62
+msgid "Abstract class of a Road Element and Ferry Connection."
+msgstr ""
+
+#: ../../feature_catalog.rst:65
+msgid "Object"
+msgstr ""
+
+#: ../../feature_catalog.rst:65
+msgid "An object is an instance of a class."
+msgstr ""
+
+#: ../../feature_catalog.rst:70
+msgid "Road Element"
+msgstr ""
+
+#: ../../feature_catalog.rst:68
+msgid ""
+"A road is a linear section of the earth designed for or the result of "
+"vehicular movement. A Road Element is the representation of a road "
+"between Junctions. A Road Element is always bounded by two Junctions. A "
+"Road Element is composed of one or more than one contiguous Road "
+"Segments."
+msgstr ""
+
+#: ../../feature_catalog.rst:73
+msgid "Segment"
+msgstr ""
+
+#: ../../feature_catalog.rst:73
+msgid ""
+"Portion of a Network Linear Element that has a common set of defined "
+"characteristics (attributes)."
+msgstr ""
+
+#: ../../feature_catalog.rst:78
+msgid "Universal Unique Identifier (UUID)"
+msgstr ""
+
+#: ../../feature_catalog.rst:76
+msgid ""
+"The definition and method used for the generation of a Universal Unique "
+"Identifier is defined in the document National Vector Data – "
+"Identification Rules available on the GeoBase portal (www.geobase.ca), "
+"under the National Road Network Data section."
+msgstr ""
+
+#: ../../feature_catalog.rst:81 ../../feature_catalog.rst:379
+#: ../../feature_catalog.rst:506 ../../feature_catalog.rst:614
+#: ../../feature_catalog.rst:669 ../../feature_catalog.rst:985
+#: ../../feature_catalog.rst:1405 ../../feature_catalog.rst:1457
+msgid "Object Metadata"
+msgstr ""
+
+#: ../../feature_catalog.rst:83
+msgid ""
+"The attributes described in the section object metadata apply to all "
+"feature classes (except for Alternate Name Link)."
+msgstr ""
+
+#: ../../feature_catalog.rst:87
+msgid "Acquisition Technique"
+msgstr ""
+
+#: ../../feature_catalog.rst:89
+msgid ""
+"The type of data source or technique used to populate (create or revise) "
+"the dataset."
+msgstr ""
+
+#: ../../feature_catalog.rst
+msgid "Domain"
+msgstr ""
+
+#: ../../feature_catalog.rst:94 ../../feature_catalog.rst:121
+#: ../../feature_catalog.rst:148 ../../feature_catalog.rst:182
+#: ../../feature_catalog.rst:239 ../../feature_catalog.rst:272
+#: ../../feature_catalog.rst:291 ../../feature_catalog.rst:327
+#: ../../feature_catalog.rst:367 ../../feature_catalog.rst:434
+#: ../../feature_catalog.rst:478 ../../feature_catalog.rst:529
+#: ../../feature_catalog.rst:553 ../../feature_catalog.rst:650
+#: ../../feature_catalog.rst:694 ../../feature_catalog.rst:719
+#: ../../feature_catalog.rst:753 ../../feature_catalog.rst:824
+#: ../../feature_catalog.rst:841 ../../feature_catalog.rst:940
+#: ../../feature_catalog.rst:960 ../../feature_catalog.rst:976
+#: ../../feature_catalog.rst:1010 ../../feature_catalog.rst:1042
+#: ../../feature_catalog.rst:1074 ../../feature_catalog.rst:1171
+#: ../../feature_catalog.rst:1448
+msgid "Code"
+msgstr ""
+
+#: ../../feature_catalog.rst:94 ../../feature_catalog.rst:121
+#: ../../feature_catalog.rst:148 ../../feature_catalog.rst:182
+#: ../../feature_catalog.rst:239 ../../feature_catalog.rst:272
+#: ../../feature_catalog.rst:291 ../../feature_catalog.rst:327
+#: ../../feature_catalog.rst:367 ../../feature_catalog.rst:434
+#: ../../feature_catalog.rst:478 ../../feature_catalog.rst:529
+#: ../../feature_catalog.rst:553 ../../feature_catalog.rst:650
+#: ../../feature_catalog.rst:694 ../../feature_catalog.rst:719
+#: ../../feature_catalog.rst:753 ../../feature_catalog.rst:824
+#: ../../feature_catalog.rst:841 ../../feature_catalog.rst:940
+#: ../../feature_catalog.rst:960 ../../feature_catalog.rst:976
+#: ../../feature_catalog.rst:1010 ../../feature_catalog.rst:1042
+#: ../../feature_catalog.rst:1074 ../../feature_catalog.rst:1110
+#: ../../feature_catalog.rst:1171 ../../feature_catalog.rst:1196
+#: ../../feature_catalog.rst:1232 ../../feature_catalog.rst:1448
+msgid "Label"
+msgstr ""
+
+#: ../../feature_catalog.rst:94 ../../feature_catalog.rst:121
+#: ../../feature_catalog.rst:182 ../../feature_catalog.rst:239
+#: ../../feature_catalog.rst:272 ../../feature_catalog.rst:291
+#: ../../feature_catalog.rst:327 ../../feature_catalog.rst:367
+#: ../../feature_catalog.rst:478 ../../feature_catalog.rst:529
+#: ../../feature_catalog.rst:553 ../../feature_catalog.rst:650
+#: ../../feature_catalog.rst:694 ../../feature_catalog.rst:719
+#: ../../feature_catalog.rst:753 ../../feature_catalog.rst:824
+#: ../../feature_catalog.rst:841 ../../feature_catalog.rst:940
+#: ../../feature_catalog.rst:960 ../../feature_catalog.rst:976
+#: ../../feature_catalog.rst:1010 ../../feature_catalog.rst:1042
+#: ../../feature_catalog.rst:1074 ../../feature_catalog.rst:1110
+#: ../../feature_catalog.rst:1196 ../../feature_catalog.rst:1232
+#: ../../feature_catalog.rst:1448
+msgid "Definition"
+msgstr ""
+
+#: ../../feature_catalog.rst:96 ../../feature_catalog.rst:123
+#: ../../feature_catalog.rst:274 ../../feature_catalog.rst:293
+#: ../../feature_catalog.rst:329 ../../feature_catalog.rst:369
+#: ../../feature_catalog.rst:480 ../../feature_catalog.rst:531
+#: ../../feature_catalog.rst:721 ../../feature_catalog.rst:826
+#: ../../feature_catalog.rst:962 ../../feature_catalog.rst:978
+#: ../../feature_catalog.rst:1450
+msgid "-1"
+msgstr ""
+
+#: ../../feature_catalog.rst:96 ../../feature_catalog.rst:123
+#: ../../feature_catalog.rst:274 ../../feature_catalog.rst:293
+#: ../../feature_catalog.rst:329 ../../feature_catalog.rst:369
+#: ../../feature_catalog.rst:480 ../../feature_catalog.rst:531
+#: ../../feature_catalog.rst:721 ../../feature_catalog.rst:826
+#: ../../feature_catalog.rst:962 ../../feature_catalog.rst:978
+#: ../../feature_catalog.rst:1450
+msgid "Unknown"
+msgstr ""
+
+#: ../../feature_catalog.rst:96 ../../feature_catalog.rst:123
+#: ../../feature_catalog.rst:293 ../../feature_catalog.rst:369
+msgid "Impossible to determine."
+msgstr ""
+
+#: ../../feature_catalog.rst:97 ../../feature_catalog.rst:275
+#: ../../feature_catalog.rst:294 ../../feature_catalog.rst:330
+#: ../../feature_catalog.rst:370 ../../feature_catalog.rst:532
+#: ../../feature_catalog.rst:722 ../../feature_catalog.rst:827
+#: ../../feature_catalog.rst:942 ../../feature_catalog.rst:979
+#: ../../feature_catalog.rst:1012 ../../feature_catalog.rst:1044
+#: ../../feature_catalog.rst:1076
+msgid "0"
+msgstr ""
+
+#: ../../feature_catalog.rst:97 ../../feature_catalog.rst:275
+#: ../../feature_catalog.rst:294 ../../feature_catalog.rst:330
+#: ../../feature_catalog.rst:370 ../../feature_catalog.rst:532
+#: ../../feature_catalog.rst:722 ../../feature_catalog.rst:827
+#: ../../feature_catalog.rst:942 ../../feature_catalog.rst:979
+#: ../../feature_catalog.rst:1012 ../../feature_catalog.rst:1044
+#: ../../feature_catalog.rst:1076 ../../feature_catalog.rst:1112
+#: ../../feature_catalog.rst:1198 ../../feature_catalog.rst:1234
+msgid "None"
+msgstr ""
+
+#: ../../feature_catalog.rst:97 ../../feature_catalog.rst:827
+#: ../../feature_catalog.rst:942 ../../feature_catalog.rst:979
+#: ../../feature_catalog.rst:1012 ../../feature_catalog.rst:1044
+#: ../../feature_catalog.rst:1076 ../../feature_catalog.rst:1112
+#: ../../feature_catalog.rst:1198 ../../feature_catalog.rst:1234
+msgid "No value applies."
+msgstr ""
+
+#: ../../feature_catalog.rst:98 ../../feature_catalog.rst:124
+#: ../../feature_catalog.rst:150 ../../feature_catalog.rst:184
+#: ../../feature_catalog.rst:241 ../../feature_catalog.rst:276
+#: ../../feature_catalog.rst:295 ../../feature_catalog.rst:331
+#: ../../feature_catalog.rst:371 ../../feature_catalog.rst:436
+#: ../../feature_catalog.rst:481 ../../feature_catalog.rst:533
+#: ../../feature_catalog.rst:555 ../../feature_catalog.rst:652
+#: ../../feature_catalog.rst:696 ../../feature_catalog.rst:723
+#: ../../feature_catalog.rst:755 ../../feature_catalog.rst:828
+#: ../../feature_catalog.rst:843 ../../feature_catalog.rst:943
+#: ../../feature_catalog.rst:963 ../../feature_catalog.rst:980
+#: ../../feature_catalog.rst:1013 ../../feature_catalog.rst:1045
+#: ../../feature_catalog.rst:1077 ../../feature_catalog.rst:1173
+#: ../../feature_catalog.rst:1451
+msgid "1"
+msgstr ""
+
+#: ../../feature_catalog.rst:98 ../../feature_catalog.rst:184
+msgid "Other"
+msgstr ""
+
+#: ../../feature_catalog.rst:98
+msgid "All possible values not explicitly mentioned in the domain."
+msgstr ""
+
+#: ../../feature_catalog.rst:99 ../../feature_catalog.rst:125
+#: ../../feature_catalog.rst:151 ../../feature_catalog.rst:185
+#: ../../feature_catalog.rst:242 ../../feature_catalog.rst:277
+#: ../../feature_catalog.rst:296 ../../feature_catalog.rst:332
+#: ../../feature_catalog.rst:372 ../../feature_catalog.rst:437
+#: ../../feature_catalog.rst:482 ../../feature_catalog.rst:534
+#: ../../feature_catalog.rst:556 ../../feature_catalog.rst:653
+#: ../../feature_catalog.rst:697 ../../feature_catalog.rst:724
+#: ../../feature_catalog.rst:756 ../../feature_catalog.rst:829
+#: ../../feature_catalog.rst:844 ../../feature_catalog.rst:944
+#: ../../feature_catalog.rst:964 ../../feature_catalog.rst:981
+#: ../../feature_catalog.rst:1014 ../../feature_catalog.rst:1046
+#: ../../feature_catalog.rst:1078 ../../feature_catalog.rst:1174
+#: ../../feature_catalog.rst:1452
+msgid "2"
+msgstr ""
+
+#: ../../feature_catalog.rst:99
+msgid "GPS"
+msgstr ""
+
+#: ../../feature_catalog.rst:99
+msgid "Data collected using a GPS device."
+msgstr ""
+
+#: ../../feature_catalog.rst:100 ../../feature_catalog.rst:152
+#: ../../feature_catalog.rst:186 ../../feature_catalog.rst:243
+#: ../../feature_catalog.rst:278 ../../feature_catalog.rst:297
+#: ../../feature_catalog.rst:333 ../../feature_catalog.rst:373
+#: ../../feature_catalog.rst:438 ../../feature_catalog.rst:557
+#: ../../feature_catalog.rst:654 ../../feature_catalog.rst:698
+#: ../../feature_catalog.rst:757 ../../feature_catalog.rst:830
+#: ../../feature_catalog.rst:945 ../../feature_catalog.rst:965
+#: ../../feature_catalog.rst:1015 ../../feature_catalog.rst:1047
+#: ../../feature_catalog.rst:1079 ../../feature_catalog.rst:1175
+#: ../../feature_catalog.rst:1453
+msgid "3"
+msgstr ""
+
+#: ../../feature_catalog.rst:100
+msgid "Orthoimage"
+msgstr ""
+
+#: ../../feature_catalog.rst:100
+msgid "Satellite imagery orthorectified."
+msgstr ""
+
+#: ../../feature_catalog.rst:101 ../../feature_catalog.rst:153
+#: ../../feature_catalog.rst:187 ../../feature_catalog.rst:279
+#: ../../feature_catalog.rst:298 ../../feature_catalog.rst:334
+#: ../../feature_catalog.rst:374 ../../feature_catalog.rst:439
+#: ../../feature_catalog.rst:558 ../../feature_catalog.rst:655
+#: ../../feature_catalog.rst:758 ../../feature_catalog.rst:946
+#: ../../feature_catalog.rst:1016 ../../feature_catalog.rst:1048
+#: ../../feature_catalog.rst:1080 ../../feature_catalog.rst:1176
+msgid "4"
+msgstr ""
+
+#: ../../feature_catalog.rst:101
+msgid "Orthophoto"
+msgstr ""
+
+#: ../../feature_catalog.rst:101
+msgid "Aerial photo orthorectified."
+msgstr ""
+
+#: ../../feature_catalog.rst:102 ../../feature_catalog.rst:154
+#: ../../feature_catalog.rst:375 ../../feature_catalog.rst:440
+#: ../../feature_catalog.rst:559 ../../feature_catalog.rst:759
+#: ../../feature_catalog.rst:947 ../../feature_catalog.rst:1017
+#: ../../feature_catalog.rst:1049 ../../feature_catalog.rst:1177
+msgid "5"
+msgstr ""
+
+#: ../../feature_catalog.rst:102
+msgid "Vector Data"
+msgstr ""
+
+#: ../../feature_catalog.rst:102
+msgid "Vector digital data."
+msgstr ""
+
+#: ../../feature_catalog.rst:103 ../../feature_catalog.rst:155
+#: ../../feature_catalog.rst:441 ../../feature_catalog.rst:560
+#: ../../feature_catalog.rst:760 ../../feature_catalog.rst:948
+#: ../../feature_catalog.rst:1018 ../../feature_catalog.rst:1050
+#: ../../feature_catalog.rst:1178
+msgid "6"
+msgstr ""
+
+#: ../../feature_catalog.rst:103
+msgid "Paper Map"
+msgstr ""
+
+#: ../../feature_catalog.rst:103
+msgid "Conventional sources of information like maps or plans."
+msgstr ""
+
+#: ../../feature_catalog.rst:104 ../../feature_catalog.rst:156
+#: ../../feature_catalog.rst:442 ../../feature_catalog.rst:561
+#: ../../feature_catalog.rst:761 ../../feature_catalog.rst:949
+#: ../../feature_catalog.rst:1019 ../../feature_catalog.rst:1051
+#: ../../feature_catalog.rst:1179
+msgid "7"
+msgstr ""
+
+#: ../../feature_catalog.rst:104
+msgid "Field Completion"
+msgstr ""
+
+#: ../../feature_catalog.rst:104
+msgid "Information gathered from people directly on the field."
+msgstr ""
+
+#: ../../feature_catalog.rst:105 ../../feature_catalog.rst:157
+#: ../../feature_catalog.rst:443 ../../feature_catalog.rst:562
+#: ../../feature_catalog.rst:762 ../../feature_catalog.rst:1020
+#: ../../feature_catalog.rst:1052 ../../feature_catalog.rst:1180
+msgid "8"
+msgstr ""
+
+#: ../../feature_catalog.rst:105
+msgid "Raster Data"
+msgstr ""
+
+#: ../../feature_catalog.rst:105
+msgid "Data resulting from a scanning process."
+msgstr ""
+
+#: ../../feature_catalog.rst:106 ../../feature_catalog.rst:158
+#: ../../feature_catalog.rst:444 ../../feature_catalog.rst:563
+#: ../../feature_catalog.rst:763 ../../feature_catalog.rst:1021
+#: ../../feature_catalog.rst:1053 ../../feature_catalog.rst:1181
+msgid "9"
+msgstr ""
+
+#: ../../feature_catalog.rst:106
+msgid "Digital Elevation Model"
+msgstr ""
+
+#: ../../feature_catalog.rst:106
+msgid "Data coming from a Digital Elevation Model (DEM)."
+msgstr ""
+
+#: ../../feature_catalog.rst:107 ../../feature_catalog.rst:159
+#: ../../feature_catalog.rst:445 ../../feature_catalog.rst:564
+#: ../../feature_catalog.rst:764 ../../feature_catalog.rst:1022
+#: ../../feature_catalog.rst:1054 ../../feature_catalog.rst:1182
+msgid "10"
+msgstr ""
+
+#: ../../feature_catalog.rst:107
+msgid "Aerial Photo"
+msgstr ""
+
+#: ../../feature_catalog.rst:107
+msgid "Aerial photography not orthorectified."
+msgstr ""
+
+#: ../../feature_catalog.rst:108 ../../feature_catalog.rst:160
+#: ../../feature_catalog.rst:446 ../../feature_catalog.rst:565
+#: ../../feature_catalog.rst:765 ../../feature_catalog.rst:1023
+#: ../../feature_catalog.rst:1055 ../../feature_catalog.rst:1183
+msgid "11"
+msgstr ""
+
+#: ../../feature_catalog.rst:108
+msgid "Raw Imagery Data"
+msgstr ""
+
+#: ../../feature_catalog.rst:108
+msgid "Satellite imagery not orthorectified."
+msgstr ""
+
+#: ../../feature_catalog.rst:109 ../../feature_catalog.rst:161
+#: ../../feature_catalog.rst:447 ../../feature_catalog.rst:566
+#: ../../feature_catalog.rst:766 ../../feature_catalog.rst:1024
+#: ../../feature_catalog.rst:1056 ../../feature_catalog.rst:1184
+msgid "12"
+msgstr ""
+
+#: ../../feature_catalog.rst:109
+msgid "Computed"
+msgstr ""
+
+#: ../../feature_catalog.rst:109
+msgid "Geometric information that has been computed (not captured)."
+msgstr ""
+
+#: ../../feature_catalog.rst:113
+msgid "Coverage"
+msgstr ""
+
+#: ../../feature_catalog.rst:115
+msgid ""
+"This value indicates if this set of metadata covers the full length of "
+"the Network Linear Element or only a portion of it."
+msgstr ""
+
+#: ../../feature_catalog.rst:124
+msgid "Complete"
+msgstr ""
+
+#: ../../feature_catalog.rst:124
+msgid "Metadata applies on the entire geometry or attribute event."
+msgstr ""
+
+#: ../../feature_catalog.rst:125
+msgid "Partial"
+msgstr ""
+
+#: ../../feature_catalog.rst:125
+msgid "Metadata applies on a portion of the geometry or attribute event."
+msgstr ""
+
+#: ../../feature_catalog.rst:130 ../../feature_catalog.rst:416
+msgid "Creation Date"
+msgstr ""
+
+#: ../../feature_catalog.rst:132 ../../feature_catalog.rst:418
+msgid "The date of data creation."
+msgstr ""
+
+#: ../../feature_catalog.rst:134 ../../feature_catalog.rst:195
+#: ../../feature_catalog.rst:420
+msgid ""
+"A date in the format YYYYMMDD or \"Unknown\". If the month or the day is "
+"unknown, corresponding characters are left blank."
+msgstr ""
+
+#: ../../feature_catalog.rst:137 ../../feature_catalog.rst:198
+#: ../../feature_catalog.rst:423
+msgid "Examples: 20060630, 200606, 2006."
+msgstr ""
+
+#: ../../feature_catalog.rst
+msgid "Data Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:138 ../../feature_catalog.rst:199
+#: ../../feature_catalog.rst:424
+msgid "Character (8)"
+msgstr ""
+
+#: ../../feature_catalog.rst:141 ../../feature_catalog.rst:427
+msgid "Dataset Name"
+msgstr ""
+
+#: ../../feature_catalog.rst:143 ../../feature_catalog.rst:429
+#: ../../feature_catalog.rst:1166
+msgid "Province or Territory covered by the dataset."
+msgstr ""
+
+#: ../../feature_catalog.rst:150 ../../feature_catalog.rst:436
+#: ../../feature_catalog.rst:1173
+msgid "Newfoundland and Labrador"
+msgstr ""
+
+#: ../../feature_catalog.rst:151 ../../feature_catalog.rst:437
+#: ../../feature_catalog.rst:1174
+msgid "Nova Scotia"
+msgstr ""
+
+#: ../../feature_catalog.rst:152 ../../feature_catalog.rst:438
+#: ../../feature_catalog.rst:1175
+msgid "Prince Edward Island"
+msgstr ""
+
+#: ../../feature_catalog.rst:153 ../../feature_catalog.rst:439
+#: ../../feature_catalog.rst:1176
+msgid "New Brunswick"
+msgstr ""
+
+#: ../../feature_catalog.rst:154 ../../feature_catalog.rst:440
+#: ../../feature_catalog.rst:1177
+msgid "Quebec"
+msgstr ""
+
+#: ../../feature_catalog.rst:155 ../../feature_catalog.rst:441
+#: ../../feature_catalog.rst:1178
+msgid "Ontario"
+msgstr ""
+
+#: ../../feature_catalog.rst:156 ../../feature_catalog.rst:442
+#: ../../feature_catalog.rst:1179
+msgid "Manitoba"
+msgstr ""
+
+#: ../../feature_catalog.rst:157 ../../feature_catalog.rst:443
+#: ../../feature_catalog.rst:1180
+msgid "Saskatchewan"
+msgstr ""
+
+#: ../../feature_catalog.rst:158 ../../feature_catalog.rst:444
+#: ../../feature_catalog.rst:1181
+msgid "Alberta"
+msgstr ""
+
+#: ../../feature_catalog.rst:159 ../../feature_catalog.rst:445
+#: ../../feature_catalog.rst:1182
+msgid "British Columbia"
+msgstr ""
+
+#: ../../feature_catalog.rst:160 ../../feature_catalog.rst:446
+#: ../../feature_catalog.rst:1183
+msgid "Yukon Territory"
+msgstr ""
+
+#: ../../feature_catalog.rst:161 ../../feature_catalog.rst:447
+#: ../../feature_catalog.rst:1184
+msgid "Northwest Territories"
+msgstr ""
+
+#: ../../feature_catalog.rst:162 ../../feature_catalog.rst:448
+#: ../../feature_catalog.rst:567 ../../feature_catalog.rst:767
+#: ../../feature_catalog.rst:1025 ../../feature_catalog.rst:1057
+#: ../../feature_catalog.rst:1185
+msgid "13"
+msgstr ""
+
+#: ../../feature_catalog.rst:162 ../../feature_catalog.rst:448
+#: ../../feature_catalog.rst:1185
+msgid "Nunavut"
+msgstr ""
+
+#: ../../feature_catalog.rst:166
+msgid "Planimetric Accuracy"
+msgstr ""
+
+#: ../../feature_catalog.rst:168
+msgid ""
+"The planimetric accuracy expressed in meters as the circular map accuracy"
+" standard (CMAS)."
+msgstr ""
+
+#: ../../feature_catalog.rst:170
+msgid "[-1,1..n]"
+msgstr ""
+
+#: ../../feature_catalog.rst:171
+msgid "Integer « -1 » when the value is unknown"
+msgstr ""
+
+#: ../../feature_catalog.rst:175
+msgid "Provider"
+msgstr ""
+
+#: ../../feature_catalog.rst:177
+msgid ""
+"The affiliation of the organization that generated (created or revised) "
+"the object."
+msgstr ""
+
+#: ../../feature_catalog.rst:184
+msgid "Other value."
+msgstr ""
+
+#: ../../feature_catalog.rst:185
+msgid "Federal"
+msgstr ""
+
+#: ../../feature_catalog.rst:185
+msgid "Federal departments or agencies."
+msgstr ""
+
+#: ../../feature_catalog.rst:186
+msgid "Provincial / Territorial"
+msgstr ""
+
+#: ../../feature_catalog.rst:186
+msgid "Provincial / territorial departments or agencies."
+msgstr ""
+
+#: ../../feature_catalog.rst:187
+msgid "Municipal"
+msgstr ""
+
+#: ../../feature_catalog.rst:187
+msgid "Municipal departments or agencies."
+msgstr ""
+
+#: ../../feature_catalog.rst:191
+msgid "Revision Date"
+msgstr ""
+
+#: ../../feature_catalog.rst:193
+msgid "The date of data revision."
+msgstr ""
+
+#: ../../feature_catalog.rst:202 ../../feature_catalog.rst:452
+msgid "Standard Version"
+msgstr ""
+
+#: ../../feature_catalog.rst:204 ../../feature_catalog.rst:454
+msgid "The version number of the GeoBase Product specifications."
+msgstr ""
+
+#: ../../feature_catalog.rst:206 ../../feature_catalog.rst:456
+msgid "[2.0]"
+msgstr ""
+
+#: ../../feature_catalog.rst:207 ../../feature_catalog.rst:262
+#: ../../feature_catalog.rst:317 ../../feature_catalog.rst:457
+#: ../../feature_catalog.rst:640 ../../feature_catalog.rst:734
+msgid "Character (10)"
+msgstr ""
+
+#: ../../feature_catalog.rst:210
+msgid "Address Range"
+msgstr ""
+
+#: ../../feature_catalog.rst:212
+msgid ""
+"A set of attributes representing the address of the first and last "
+"building located along a side of the entire Road Element or a portion of "
+"it."
+msgstr ""
+
+#: ../../feature_catalog.rst
+msgid "Is Abstract"
+msgstr ""
+
+#: ../../feature_catalog.rst:215 ../../feature_catalog.rst:389
+#: ../../feature_catalog.rst:464 ../../feature_catalog.rst:515
+#: ../../feature_catalog.rst:627 ../../feature_catalog.rst:679
+#: ../../feature_catalog.rst:995 ../../feature_catalog.rst:1414
+msgid "No"
+msgstr ""
+
+#: ../../feature_catalog.rst
+msgid "Geometry"
+msgstr ""
+
+#: ../../feature_catalog.rst:219 ../../feature_catalog.rst:393
+#: ../../feature_catalog.rst:468 ../../feature_catalog.rst:519
+#: ../../feature_catalog.rst:631 ../../feature_catalog.rst:683
+#: ../../feature_catalog.rst:999 ../../feature_catalog.rst:1418
+msgid "Attribute Section"
+msgstr ""
+
+#: ../../feature_catalog.rst:222
+msgid "Alternate Street Name NID (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:224
+msgid ""
+"The identifier used to link an address range to its alternate street "
+"name. A specific value is defined for the left and right sides of the "
+"Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:227
+msgid ""
+"A UUID or \"None\" when no value applies. Example: "
+"69822b23d217494896014e57a2edb8ac"
+msgstr ""
+
+#: ../../feature_catalog.rst:228 ../../feature_catalog.rst:345
+#: ../../feature_catalog.rst:356 ../../feature_catalog.rst:403
+#: ../../feature_catalog.rst:413 ../../feature_catalog.rst:493
+#: ../../feature_catalog.rst:503 ../../feature_catalog.rst:578
+#: ../../feature_catalog.rst:666 ../../feature_catalog.rst:709
+#: ../../feature_catalog.rst:787 ../../feature_catalog.rst:914
+#: ../../feature_catalog.rst:1091 ../../feature_catalog.rst:1428
+#: ../../feature_catalog.rst:1438
+msgid "Character (32)"
+msgstr ""
+
+#: ../../feature_catalog.rst:231
+msgid "Digitizing Direction Flag (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:233 ../../feature_catalog.rst:688
+msgid ""
+"Indicates if the attribute event follows the same direction as the "
+"digitizing of the Road Element. A specific value is defined for the left "
+"and right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:241 ../../feature_catalog.rst:696
+msgid "Same Direction"
+msgstr ""
+
+#: ../../feature_catalog.rst:241 ../../feature_catalog.rst:696
+msgid "Attribute event and Road Element geometry are in the same direction."
+msgstr ""
+
+#: ../../feature_catalog.rst:242 ../../feature_catalog.rst:697
+msgid "Opposite Direction"
+msgstr ""
+
+#: ../../feature_catalog.rst:242 ../../feature_catalog.rst:697
+msgid "Attribute event and Road Element geometry are in opposite directions."
+msgstr ""
+
+#: ../../feature_catalog.rst:243 ../../feature_catalog.rst:698
+msgid "Not Applicable"
+msgstr ""
+
+#: ../../feature_catalog.rst:243 ../../feature_catalog.rst:698
+msgid ""
+"Indication of the digitizing direction of the Road Element not needed for"
+" the attribute event."
+msgstr ""
+
+#: ../../feature_catalog.rst:247 ../../feature_catalog.rst:737
+msgid "First House Number (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:249 ../../feature_catalog.rst:739
+msgid ""
+"The first house number address value along a particular side (left or "
+"right) of a Road Element. A specific value is defined for the left and "
+"right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:252 ../../feature_catalog.rst:307
+#: ../../feature_catalog.rst:742 ../../feature_catalog.rst:776
+msgid ""
+"[-1..n] The value \"0\" is used when no value applies. The value \"-1\" "
+"is used when the value is unknown."
+msgstr ""
+
+#: ../../feature_catalog.rst:253 ../../feature_catalog.rst:308
+#: ../../feature_catalog.rst:543 ../../feature_catalog.rst:743
+#: ../../feature_catalog.rst:777 ../../feature_catalog.rst:795
+#: ../../feature_catalog.rst:862 ../../feature_catalog.rst:903
+msgid "Integer"
+msgstr ""
+
+#: ../../feature_catalog.rst:256
+msgid "First House Number Suffix (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:258 ../../feature_catalog.rst:313
+msgid ""
+"A non-integer value, such as a fraction (e.g. 1⁄4) or a character (e.g. "
+"A) that sometimes follows the house number address value. A specific "
+"value is defined for the left and right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:261 ../../feature_catalog.rst:316
+msgid "A non-integer value or \"None\" when no value applies."
+msgstr ""
+
+#: ../../feature_catalog.rst:265
+msgid "First House Number Type (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:267 ../../feature_catalog.rst:322
+msgid ""
+"Method used to populate the address range. A specific value is defined "
+"for the left and right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:274 ../../feature_catalog.rst:329
+msgid "Due to the source, the house number type is not known."
+msgstr ""
+
+#: ../../feature_catalog.rst:275 ../../feature_catalog.rst:330
+msgid "Absence of a house along the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:276 ../../feature_catalog.rst:331
+msgid "Actual Located"
+msgstr ""
+
+#: ../../feature_catalog.rst:276 ../../feature_catalog.rst:331
+msgid ""
+"Qualifier indicating that the house number is located at its \"real "
+"world\" position along a Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:277 ../../feature_catalog.rst:332
+msgid "Actual Unlocated"
+msgstr ""
+
+#: ../../feature_catalog.rst:277 ../../feature_catalog.rst:332
+msgid ""
+"Qualifier indicating that the house number is located at one end of the "
+"Road Element. This may be or may not be its \"real world\" position."
+msgstr ""
+
+#: ../../feature_catalog.rst:278 ../../feature_catalog.rst:333
+msgid "Projected"
+msgstr ""
+
+#: ../../feature_catalog.rst:278 ../../feature_catalog.rst:333
+msgid ""
+"Qualifier indicating that the house number is planned, figured or "
+"estimated for the future and is located (at one end) at the beginning or "
+"the end of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:279 ../../feature_catalog.rst:334
+msgid "Interpolated"
+msgstr ""
+
+#: ../../feature_catalog.rst:279 ../../feature_catalog.rst:334
+msgid ""
+"Qualifier indicating that the house number is calculated from two known "
+"house numbers which are located on either side. By convention, the house "
+"is positioned at one end of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:283
+msgid "House Number Structure (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:285
+msgid ""
+"The type of house numbering (or address numbering) method applied to one "
+"side of a particular Road Element. A specific value is defined for the "
+"left and right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:294
+msgid ""
+"No house numbers at all. There are no houses (or addressed dwellings) "
+"along a particular side of a Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:295
+msgid "Even"
+msgstr ""
+
+#: ../../feature_catalog.rst:295
+msgid ""
+"The house numbers appear as even numbers in a sequentially sorted order "
+"(ascending or descending) when moving from one end of the Road Element to"
+" the other. Numeric completeness of the series is not a requirement. An "
+"even house number series that has missing numbers but is sequentially "
+"sorted is considered Even. An example is the series (2, 4, 8, 18, 22)."
+msgstr ""
+
+#: ../../feature_catalog.rst:296
+msgid "Odd"
+msgstr ""
+
+#: ../../feature_catalog.rst:296
+msgid ""
+"The house numbers appear as odd numbers in a sequentially sorted order "
+"(ascending or descending) when moving from one end of the Road Element to"
+" the other. Numeric completeness of the series is not a requirement. An "
+"odd house number series that has missing numbers but is sequentially "
+"sorted is considered Odd. Examples are the series (5, 7, 9, 11, 13) and "
+"(35, 39, 43, 69, 71, 73, 85)."
+msgstr ""
+
+#: ../../feature_catalog.rst:297
+msgid "Mixed"
+msgstr ""
+
+#: ../../feature_catalog.rst:297
+msgid ""
+"The house numbers are odd and even on the same side of a Road Element in "
+"a sequentially sorted order (ascending or descending) when moving from "
+"one end of the Road Element to the other. Numeric completeness of the "
+"series is not a requirement. An odd and even house number series that has"
+" missing numbers but is sequentially sorted is considered Mixed. Examples"
+" are the series (5, 6, 7, 9, 10, 13) and (24, 27, 30, 33, 34, 36)."
+msgstr ""
+
+#: ../../feature_catalog.rst:298
+msgid "Irregular"
+msgstr ""
+
+#: ../../feature_catalog.rst:298
+msgid "Means the house numbers do not occur in any sorted order."
+msgstr ""
+
+#: ../../feature_catalog.rst:302 ../../feature_catalog.rst:771
+msgid "Last House Number (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:304 ../../feature_catalog.rst:773
+msgid ""
+"The last house number address value along a particular side (left or "
+"right) of a Road Element. A specific value is defined for the left and "
+"right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:311
+msgid "Last House Number Suffix (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:320
+msgid "Last House Number Type (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:338 ../../feature_catalog.rst:396
+#: ../../feature_catalog.rst:486 ../../feature_catalog.rst:571
+#: ../../feature_catalog.rst:659 ../../feature_catalog.rst:780
+#: ../../feature_catalog.rst:1084 ../../feature_catalog.rst:1421
+msgid "NID"
+msgstr ""
+
+#: ../../feature_catalog.rst:340 ../../feature_catalog.rst:398
+#: ../../feature_catalog.rst:488 ../../feature_catalog.rst:573
+#: ../../feature_catalog.rst:661 ../../feature_catalog.rst:782
+#: ../../feature_catalog.rst:1086 ../../feature_catalog.rst:1423
+msgid "A national unique identifier."
+msgstr ""
+
+#: ../../feature_catalog.rst:342 ../../feature_catalog.rst:400
+#: ../../feature_catalog.rst:410 ../../feature_catalog.rst:490
+#: ../../feature_catalog.rst:500 ../../feature_catalog.rst:575
+#: ../../feature_catalog.rst:663 ../../feature_catalog.rst:706
+#: ../../feature_catalog.rst:784 ../../feature_catalog.rst:1088
+#: ../../feature_catalog.rst:1425 ../../feature_catalog.rst:1435
+msgid "A UUID."
+msgstr ""
+
+#: ../../feature_catalog.rst:344 ../../feature_catalog.rst:355
+#: ../../feature_catalog.rst:402 ../../feature_catalog.rst:412
+#: ../../feature_catalog.rst:492 ../../feature_catalog.rst:502
+#: ../../feature_catalog.rst:577 ../../feature_catalog.rst:665
+#: ../../feature_catalog.rst:708 ../../feature_catalog.rst:786
+#: ../../feature_catalog.rst:913 ../../feature_catalog.rst:1090
+#: ../../feature_catalog.rst:1427 ../../feature_catalog.rst:1437
+msgid "Example: 69822b23d217494896014e57a2edb8ac"
+msgstr ""
+
+#: ../../feature_catalog.rst:348
+msgid "Official Street Name NID (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:350
+msgid ""
+"The identifier used to link an address range to its recognized official "
+"street name. A specific value is defined for the left and right sides of "
+"the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:353 ../../feature_catalog.rst:911
+msgid "A UUID or \"None\" when no value applies."
+msgstr ""
+
+#: ../../feature_catalog.rst:359
+msgid "Reference System Indicator (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:361
+msgid ""
+"An indication of whether the physical address of all or a portion of a "
+"Road Element is based on a particular addressing system. A specific value"
+" is defined for the left and right sides of the Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:370
+msgid "No reference system indicator."
+msgstr ""
+
+#: ../../feature_catalog.rst:371
+msgid "Civic"
+msgstr ""
+
+#: ../../feature_catalog.rst:372
+msgid "Lot and Concession"
+msgstr ""
+
+#: ../../feature_catalog.rst:373
+msgid "911 Measured"
+msgstr ""
+
+#: ../../feature_catalog.rst:374
+msgid "911 Civic"
+msgstr ""
+
+#: ../../feature_catalog.rst:375
+msgid "DLS Townships"
+msgstr ""
+
+#: ../../feature_catalog.rst:375
+msgid "Dominion Land Survey, survey method dominant in the Prairie provinces."
+msgstr ""
+
+#: ../../feature_catalog.rst:381 ../../feature_catalog.rst:508
+#: ../../feature_catalog.rst:616 ../../feature_catalog.rst:671
+#: ../../feature_catalog.rst:987 ../../feature_catalog.rst:1407
+#: ../../feature_catalog.rst:1459
+msgid "Refer to the attributes describe in the section object metadata."
+msgstr ""
+
+#: ../../feature_catalog.rst:384
+msgid "Alternate Name Link"
+msgstr ""
+
+#: ../../feature_catalog.rst:386
+msgid ""
+"A linkup table establishing one or many relations between address ranges "
+"and their non-official street and place names used or known by the "
+"general public."
+msgstr ""
+
+#: ../../feature_catalog.rst:406
+msgid "Street Name NID"
+msgstr ""
+
+#: ../../feature_catalog.rst:408
+msgid "The NID of the non official street and place name."
+msgstr ""
+
+#: ../../feature_catalog.rst:460
+msgid "Blocked Passage"
+msgstr ""
+
+#: ../../feature_catalog.rst:462
+msgid ""
+"Indication of a physical barrier on a Road Element built to prevent or "
+"control further access."
+msgstr ""
+
+#: ../../feature_catalog.rst:465 ../../feature_catalog.rst:628
+#: ../../feature_catalog.rst:1345 ../../feature_catalog.rst:1415
+msgid "Point"
+msgstr ""
+
+#: ../../feature_catalog.rst:471
+msgid "Blocked Passage Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:473
+msgid ""
+"The type of blocked passage as an indication of the fact whether it is "
+"removable."
+msgstr ""
+
+#: ../../feature_catalog.rst:480
+msgid "A blocked passage for which the specific type is unknown."
+msgstr ""
+
+#: ../../feature_catalog.rst:481
+msgid "Permanently Fixed"
+msgstr ""
+
+#: ../../feature_catalog.rst:481
+msgid ""
+"The barrier cannot be removed without destroying it. Heavy equipment "
+"needed in order to allow further access. Examples of permanently fixed "
+"blocked passage are concrete blocks or a mound of earth."
+msgstr ""
+
+#: ../../feature_catalog.rst:482
+msgid "Removable"
+msgstr ""
+
+#: ../../feature_catalog.rst:482
+msgid ""
+"The barrier is designed to free the entrance to the (other side of the) "
+"Road Element that it is blocking. Further access easily allowed when so "
+"desired."
+msgstr ""
+
+#: ../../feature_catalog.rst:496 ../../feature_catalog.rst:1431
+msgid "Road Element NID"
+msgstr ""
+
+#: ../../feature_catalog.rst:498 ../../feature_catalog.rst:1433
+msgid "The NID of the Road Element on which the point geometry is located."
+msgstr ""
+
+#: ../../feature_catalog.rst:511
+msgid "Ferry Connection Segment"
+msgstr ""
+
+#: ../../feature_catalog.rst:513
+msgid ""
+"The average route a ferryboat takes when transporting vehicles between "
+"two fixed locations on the road network."
+msgstr ""
+
+#: ../../feature_catalog.rst:516 ../../feature_catalog.rst:680
+#: ../../feature_catalog.rst:1319
+msgid "Line"
+msgstr ""
+
+#: ../../feature_catalog.rst:522 ../../feature_catalog.rst:712
+msgid "Closing Period"
+msgstr ""
+
+#: ../../feature_catalog.rst:524 ../../feature_catalog.rst:714
+msgid ""
+"The period in which the road or ferry connection is not available to the "
+"public."
+msgstr ""
+
+#: ../../feature_catalog.rst:531 ../../feature_catalog.rst:721
+msgid "It is not possible to determine if there is a closing period."
+msgstr ""
+
+#: ../../feature_catalog.rst:532 ../../feature_catalog.rst:722
+msgid ""
+"There is no closing period. The road or ferry connection is open year "
+"round."
+msgstr ""
+
+#: ../../feature_catalog.rst:533 ../../feature_catalog.rst:723
+#: ../../feature_catalog.rst:828
+msgid "Summer"
+msgstr ""
+
+#: ../../feature_catalog.rst:533 ../../feature_catalog.rst:723
+msgid ""
+"Period of the year for which the absence of ice and snow prevent the "
+"access to the road or ferry connection."
+msgstr ""
+
+#: ../../feature_catalog.rst:534 ../../feature_catalog.rst:567
+#: ../../feature_catalog.rst:724 ../../feature_catalog.rst:767
+#: ../../feature_catalog.rst:829
+msgid "Winter"
+msgstr ""
+
+#: ../../feature_catalog.rst:534 ../../feature_catalog.rst:724
+msgid ""
+"Period of the year for which ice and snow prevent the access to the road "
+"or ferry connection."
+msgstr ""
+
+#: ../../feature_catalog.rst:538
+msgid "Ferry Segment ID"
+msgstr ""
+
+#: ../../feature_catalog.rst:540
+msgid ""
+"A unique identifier within a dataset assigned to each Ferry Connection "
+"Segment."
+msgstr ""
+
+#: ../../feature_catalog.rst:542 ../../feature_catalog.rst:861
+msgid "[1..n]"
+msgstr ""
+
+#: ../../feature_catalog.rst:546 ../../feature_catalog.rst:746
+msgid "Functional Road Class"
+msgstr ""
+
+#: ../../feature_catalog.rst:548 ../../feature_catalog.rst:748
+msgid ""
+"A classification based on the importance of the role that the Road "
+"Element or Ferry Connection performs in the connectivity of the total "
+"road network. :Domain:"
+msgstr ""
+
+#: ../../feature_catalog.rst:555 ../../feature_catalog.rst:755
+msgid "Freeway"
+msgstr ""
+
+#: ../../feature_catalog.rst:555 ../../feature_catalog.rst:755
+msgid ""
+"An unimpeded, high-speed controlled access thoroughfare for through "
+"traffic with typically no at- grade intersections, usually with no "
+"property access or direct access, and which is accessed by a ramp. "
+"Pedestrians are prohibited."
+msgstr ""
+
+#: ../../feature_catalog.rst:556 ../../feature_catalog.rst:756
+msgid "Expressway / Highway"
+msgstr ""
+
+#: ../../feature_catalog.rst:556 ../../feature_catalog.rst:756
+msgid ""
+"A high-speed thoroughfare with a combination of controlled access "
+"intersections at any grade."
+msgstr ""
+
+#: ../../feature_catalog.rst:557 ../../feature_catalog.rst:757
+msgid "Arterial"
+msgstr ""
+
+#: ../../feature_catalog.rst:557 ../../feature_catalog.rst:757
+msgid "A major thoroughfare with medium to large traffic capacity."
+msgstr ""
+
+#: ../../feature_catalog.rst:558 ../../feature_catalog.rst:758
+msgid "Collector"
+msgstr ""
+
+#: ../../feature_catalog.rst:558 ../../feature_catalog.rst:758
+msgid ""
+"A minor thoroughfare mainly used to access properties and to feed traffic"
+" with right of way."
+msgstr ""
+
+#: ../../feature_catalog.rst:559 ../../feature_catalog.rst:759
+msgid "Local / Street"
+msgstr ""
+
+#: ../../feature_catalog.rst:559 ../../feature_catalog.rst:759
+msgid ""
+"A low-speed thoroughfare dedicated to provide full access to the front of"
+" properties."
+msgstr ""
+
+#: ../../feature_catalog.rst:560 ../../feature_catalog.rst:760
+msgid "Local / Strata"
+msgstr ""
+
+#: ../../feature_catalog.rst:560 ../../feature_catalog.rst:760
+msgid ""
+"A low-speed thoroughfare dedicated to provide access to properties with "
+"potential public restriction such as: trailer parks, First Nations, "
+"strata, private estates, seasonal residences."
+msgstr ""
+
+#: ../../feature_catalog.rst:561 ../../feature_catalog.rst:761
+msgid "Local / Unknown"
+msgstr ""
+
+#: ../../feature_catalog.rst:561 ../../feature_catalog.rst:761
+msgid ""
+"A low-speed thoroughfare dedicated to provide access to the front of "
+"properties but for which the access regulations are unknown."
+msgstr ""
+
+#: ../../feature_catalog.rst:562 ../../feature_catalog.rst:762
+msgid "Alleyway / Lane"
+msgstr ""
+
+#: ../../feature_catalog.rst:562 ../../feature_catalog.rst:762
+msgid ""
+"A low-speed thoroughfare dedicated to provide access to the rear of "
+"properties."
+msgstr ""
+
+#: ../../feature_catalog.rst:563 ../../feature_catalog.rst:763
+msgid "Ramp"
+msgstr ""
+
+#: ../../feature_catalog.rst:563 ../../feature_catalog.rst:763
+msgid ""
+"A system of interconnecting roadways providing for the controlled "
+"movement between two or more roadways."
+msgstr ""
+
+#: ../../feature_catalog.rst:564 ../../feature_catalog.rst:764
+msgid "Resource / Recreation"
+msgstr ""
+
+#: ../../feature_catalog.rst:564 ../../feature_catalog.rst:764
+msgid ""
+"A narrow passage whose primary function is to provide access for resource"
+" extraction and may also have serve in providing public access to the "
+"backcountry."
+msgstr ""
+
+#: ../../feature_catalog.rst:565 ../../feature_catalog.rst:765
+msgid "Rapid Transit"
+msgstr ""
+
+#: ../../feature_catalog.rst:565 ../../feature_catalog.rst:765
+msgid "A thoroughfare restricted to public transit buses."
+msgstr ""
+
+#: ../../feature_catalog.rst:566 ../../feature_catalog.rst:766
+msgid "Service Lane"
+msgstr ""
+
+#: ../../feature_catalog.rst:566 ../../feature_catalog.rst:766
+msgid ""
+"A stretch of road permitting vehicles to come to a stop along a freeway "
+"or highway. Scale, service lane, emergency lane, lookout, and rest area."
+msgstr ""
+
+#: ../../feature_catalog.rst:567 ../../feature_catalog.rst:767
+msgid ""
+"A road that is only useable during the winter when conditions allow for "
+"passage over lakes, rivers, and wetlands."
+msgstr ""
+
+#: ../../feature_catalog.rst:581 ../../feature_catalog.rst:865
+msgid "Route Name English (1, 2, 3, 4)"
+msgstr ""
+
+#: ../../feature_catalog.rst:583 ../../feature_catalog.rst:867
+msgid ""
+"The English version of a name of a particular route in a given road "
+"network as attributed by a national or sub national agency. A particular "
+"Road Segment or Ferry Connection Segment can belong to more than one "
+"named route. In such cases, it has multiple route name attributes."
+msgstr ""
+
+#: ../../feature_catalog.rst:587 ../../feature_catalog.rst:871
+msgid ""
+"A complete English route name value such as \"Trans-Canada Highway\" or "
+"\"None\" when no value applies or \"Unknown\" when the value is not "
+"known."
+msgstr ""
+
+#: ../../feature_catalog.rst:589 ../../feature_catalog.rst:600
+#: ../../feature_catalog.rst:611 ../../feature_catalog.rst:804
+#: ../../feature_catalog.rst:814 ../../feature_catalog.rst:854
+#: ../../feature_catalog.rst:873 ../../feature_catalog.rst:884
+#: ../../feature_catalog.rst:895 ../../feature_catalog.rst:922
+#: ../../feature_catalog.rst:930 ../../feature_catalog.rst:1100
+#: ../../feature_catalog.rst:1220
+msgid "Character (100)"
+msgstr ""
+
+#: ../../feature_catalog.rst:592 ../../feature_catalog.rst:876
+msgid "Route Name French (1, 2, 3, 4)"
+msgstr ""
+
+#: ../../feature_catalog.rst:594 ../../feature_catalog.rst:878
+msgid ""
+"The French version of a name of a particular route in a given road "
+"network as attributed by a national or sub national agency. A particular "
+"Road Segment or Ferry Connection Segment can belong to more than one "
+"named route. In such cases, it has multiple route name attributes."
+msgstr ""
+
+#: ../../feature_catalog.rst:598 ../../feature_catalog.rst:882
+msgid ""
+"A complete French route name value such as \"Autoroute transcanadienne\" "
+"or \"None\" when no value applies or \"Unknown\" when the value is not "
+"known."
+msgstr ""
+
+#: ../../feature_catalog.rst:603 ../../feature_catalog.rst:887
+msgid "Route Number (1, 2, 3, 4, 5)"
+msgstr ""
+
+#: ../../feature_catalog.rst:605 ../../feature_catalog.rst:889
+msgid ""
+"The ID number of a particular route in a given road network as attributed"
+" by a national or sub-national agency. A particular Road Segment or Ferry"
+" Connection Segment can belong to more than one numbered route. In such "
+"cases, it has multiple route number attributes."
+msgstr ""
+
+#: ../../feature_catalog.rst:609 ../../feature_catalog.rst:893
+msgid ""
+"A route number including possible associated non-integer characters such "
+"as \"A\" or \"None\" when no value applies. Examples: 1, 1A, 230-A, "
+"430-28."
+msgstr ""
+
+#: ../../feature_catalog.rst:619
+msgid "Junction"
+msgstr ""
+
+#: ../../feature_catalog.rst:621
+msgid ""
+"A feature that bounds a Road Element or a Ferry Connection. A Road "
+"Element or Ferry Connection always forms a connection between two "
+"Junctions and, a Road Element or Ferry Connection is always bounded by "
+"exactly two Junctions. A Junction Feature represents the physical "
+"connection between its adjoining Road Elements or Ferry Connections. A "
+"Junction is defined at the intersection of three or more roads, at the "
+"junction of a road and a ferry, at the end of a dead end road and at the "
+"junction of a road or ferry with a National, Provincial or Territorial "
+"Boundary."
+msgstr ""
+
+#: ../../feature_catalog.rst:634 ../../feature_catalog.rst:728
+msgid "Exit Number"
+msgstr ""
+
+#: ../../feature_catalog.rst:636 ../../feature_catalog.rst:730
+msgid ""
+"The ID number of an exit on a controlled access thoroughfare that has "
+"been assigned by an administrating body."
+msgstr ""
+
+#: ../../feature_catalog.rst:638 ../../feature_catalog.rst:732
+msgid ""
+"An ID number including possible associated non-integer characters such as"
+" \"A\" or \"None\" when no value applies. Examples: 11, 11A, 11-A, "
+"80-EST, 80-E, 80E."
+msgstr ""
+
+#: ../../feature_catalog.rst:643
+msgid "Junction Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:645
+msgid "The classification of a Junction."
+msgstr ""
+
+#: ../../feature_catalog.rst:652
+msgid "Intersection"
+msgstr ""
+
+#: ../../feature_catalog.rst:652
+msgid ""
+"An intersection between three or more Road Elements intersecting at same "
+"grade level."
+msgstr ""
+
+#: ../../feature_catalog.rst:653
+msgid "DeadEnd"
+msgstr ""
+
+#: ../../feature_catalog.rst:653
+msgid ""
+"A specific Junction that indicates that a Road Element ends and is not "
+"connected to any other Road Element or Ferry Connection."
+msgstr ""
+
+#: ../../feature_catalog.rst:654
+msgid "Ferry"
+msgstr ""
+
+#: ../../feature_catalog.rst:654
+msgid ""
+"A specific Junction that indicates that a Road Element connects to a "
+"Ferry Connection."
+msgstr ""
+
+#: ../../feature_catalog.rst:655
+msgid "NatProvTer"
+msgstr ""
+
+#: ../../feature_catalog.rst:655
+msgid ""
+"A specific Junction at the limit of a dataset indicating that a Road "
+"element or Ferry connection continues into the adjacent province, "
+"territory or country."
+msgstr ""
+
+#: ../../feature_catalog.rst:674
+msgid "Road Segment"
+msgstr ""
+
+#: ../../feature_catalog.rst:676
+msgid ""
+"A road is a linear section of the earth designed for or the result of "
+"vehicular movement. A Road Segment is the specific representation of a "
+"portion of a road with uniform characteristics."
+msgstr ""
+
+#: ../../feature_catalog.rst:686
+msgid "Address Range Digitizing Direction Flag (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:702
+msgid "Address Range NID"
+msgstr ""
+
+#: ../../feature_catalog.rst:704
+msgid "A UUID assigned to each particular block face address ranges."
+msgstr ""
+
+#: ../../feature_catalog.rst:790
+msgid "Number of Lanes"
+msgstr ""
+
+#: ../../feature_catalog.rst:792
+msgid "The number of lanes existing on a Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:794
+msgid "[1..8]"
+msgstr ""
+
+#: ../../feature_catalog.rst:798
+msgid "Official Place Name (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:800
+msgid ""
+"Official name of an administrative area, district or other named area "
+"which is required for uniqueness of the street name."
+msgstr ""
+
+#: ../../feature_catalog.rst:802 ../../feature_catalog.rst:812
+msgid ""
+"Derived from the Street and place names table. A specific value is "
+"defined for the left and right sides of the Road Element. \"None\" when "
+"no value applies or \"Unknown\" when the value is not known."
+msgstr ""
+
+#: ../../feature_catalog.rst:807
+msgid "Official Street Name Concatenated (left, right)"
+msgstr ""
+
+#: ../../feature_catalog.rst:809
+msgid ""
+"A concatenation of the officially recognized Directional prefix, Street "
+"type prefix, Street name article, Street name body, Street type suffix, "
+"Directional suffix and Muni quadrant values."
+msgstr ""
+
+#: ../../feature_catalog.rst:817
+msgid "Paved Road Surface Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:819
+msgid "The type of surface a paved Road Element has."
+msgstr ""
+
+#: ../../feature_catalog.rst:826
+msgid "A paved road with an unknown surface type."
+msgstr ""
+
+#: ../../feature_catalog.rst:828
+msgid "A paved road with a rigid surface such as concrete or steel decks."
+msgstr ""
+
+#: ../../feature_catalog.rst:829
+msgid "A paved road with a flexible surface such as asphalt or tar gravel."
+msgstr ""
+
+#: ../../feature_catalog.rst:830
+msgid "Blocks"
+msgstr ""
+
+#: ../../feature_catalog.rst:830
+msgid "A paved road with a surface made of blocks such as cobblestones."
+msgstr ""
+
+#: ../../feature_catalog.rst:834
+msgid "Pavement Status"
+msgstr ""
+
+#: ../../feature_catalog.rst:836
+msgid "An indication of improvement applied to a Road surface."
+msgstr ""
+
+#: ../../feature_catalog.rst:843
+msgid "Paved"
+msgstr ""
+
+#: ../../feature_catalog.rst:843
+msgid ""
+"A road with a surface made of hardened material such as concrete, "
+"asphalt, tar gravel, or steel decks."
+msgstr ""
+
+#: ../../feature_catalog.rst:844
+msgid "Unpaved"
+msgstr ""
+
+#: ../../feature_catalog.rst:844
+msgid "A road with a surface made of loose material such as gravel or dirt."
+msgstr ""
+
+#: ../../feature_catalog.rst:848
+msgid "Road Jurisdiction"
+msgstr ""
+
+#: ../../feature_catalog.rst:850
+msgid ""
+"The agency with the responsibility/authority to ensure maintenance occurs"
+" but is not necessarily the one who undertakes the maintenance directly."
+msgstr ""
+
+#: ../../feature_catalog.rst:853
+msgid ""
+"The Agency name or \"None\" when no value applies or \"Unknown\" when the"
+" value is not known."
+msgstr ""
+
+#: ../../feature_catalog.rst:857
+msgid "Road Segment ID"
+msgstr ""
+
+#: ../../feature_catalog.rst:859
+msgid "A unique identifier within a dataset assigned to each Road Segment."
+msgstr ""
+
+#: ../../feature_catalog.rst:898
+msgid "Speed Restriction"
+msgstr ""
+
+#: ../../feature_catalog.rst:900
+msgid ""
+"The maximum speed allowed on the road. The value is expressed in "
+"kilometers per hour"
+msgstr ""
+
+#: ../../feature_catalog.rst:902
+msgid "-1 when unknown or a multiple of 5 lower than or equal to 120"
+msgstr ""
+
+#: ../../feature_catalog.rst:906
+msgid "Structure ID"
+msgstr ""
+
+#: ../../feature_catalog.rst:908
+msgid ""
+"A national unique identifier assigned to the Road Segment or the set of "
+"adjoining Road Segments forming a structure. This identifier allows for "
+"the reconstitution of a structure that is fragmented by Junctions."
+msgstr ""
+
+#: ../../feature_catalog.rst:917
+msgid "Structure Name English"
+msgstr ""
+
+#: ../../feature_catalog.rst:919
+msgid ""
+"The English version of the name of a road structure as assigned by a "
+"national or subnational agency."
+msgstr ""
+
+#: ../../feature_catalog.rst:921 ../../feature_catalog.rst:929
+msgid ""
+"A complete structure name or \"None\" when no value applies or "
+"\"Unknown\" when the structure name is not known."
+msgstr ""
+
+#: ../../feature_catalog.rst:925
+msgid "Structure Name French"
+msgstr ""
+
+#: ../../feature_catalog.rst:927
+msgid ""
+"The French version of the name of a road structure as assigned by a "
+"national or subnational agency."
+msgstr ""
+
+#: ../../feature_catalog.rst:933
+msgid "Structure Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:935
+msgid "The classification of a structure."
+msgstr ""
+
+#: ../../feature_catalog.rst:943
+msgid "Bridge"
+msgstr ""
+
+#: ../../feature_catalog.rst:943
+msgid ""
+"A manmade construction that supports a road on a raised structure and "
+"spans an obstacle, river, another road, or railway."
+msgstr ""
+
+#: ../../feature_catalog.rst:944
+msgid "Bridge covered"
+msgstr ""
+
+#: ../../feature_catalog.rst:944
+msgid ""
+"A manmade construction that supports a road on a covered raised structure"
+" and spans an obstacle, river, another road, or railway."
+msgstr ""
+
+#: ../../feature_catalog.rst:945
+msgid "Bridge moveable"
+msgstr ""
+
+#: ../../feature_catalog.rst:945
+msgid ""
+"A manmade construction that supports a road on a moveable raised "
+"structure and spans an obstacle, river, another road, or railway."
+msgstr ""
+
+#: ../../feature_catalog.rst:946
+msgid "Bridge unknown"
+msgstr ""
+
+#: ../../feature_catalog.rst:946
+msgid ""
+"A bridge for which it is currently impossible to determine whether its "
+"structure is covered, moveable or other."
+msgstr ""
+
+#: ../../feature_catalog.rst:947
+msgid "Tunnel"
+msgstr ""
+
+#: ../../feature_catalog.rst:947
+msgid ""
+"An enclosed manmade construction built to carry a road through or below a"
+" natural feature or other obstructions."
+msgstr ""
+
+#: ../../feature_catalog.rst:948
+msgid "Snowshed"
+msgstr ""
+
+#: ../../feature_catalog.rst:948
+msgid ""
+"A manmade roofed structure built over a road in mountainous areas to "
+"prevent snow slides from blocking the road."
+msgstr ""
+
+#: ../../feature_catalog.rst:949
+msgid "Dam"
+msgstr ""
+
+#: ../../feature_catalog.rst:949
+msgid ""
+"A manmade linear structure built across a waterway or floodway to control"
+" the flow of water and supporting a road for motor vehicles."
+msgstr ""
+
+#: ../../feature_catalog.rst:953
+msgid "Traffic Direction"
+msgstr ""
+
+#: ../../feature_catalog.rst:955
+msgid "The direction(s) of traffic flow allowed on the road."
+msgstr ""
+
+#: ../../feature_catalog.rst:962
+msgid "Information not acquired."
+msgstr ""
+
+#: ../../feature_catalog.rst:963
+msgid "Both directions"
+msgstr ""
+
+#: ../../feature_catalog.rst:963
+msgid "Traffic flow is allowed in both directions."
+msgstr ""
+
+#: ../../feature_catalog.rst:964
+msgid "Same direction"
+msgstr ""
+
+#: ../../feature_catalog.rst:964
+msgid ""
+"The direction of one way traffic flow is the same as the digitizing "
+"direction of the Road Segment."
+msgstr ""
+
+#: ../../feature_catalog.rst:965
+msgid "Opposite direction"
+msgstr ""
+
+#: ../../feature_catalog.rst:965
+msgid ""
+"The direction of one way traffic flow is opposite to the digitizing "
+"direction of the Road Segment."
+msgstr ""
+
+#: ../../feature_catalog.rst:969
+msgid "Unpaved Road Surface Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:971
+msgid "The type of surface an unpaved Road Element has."
+msgstr ""
+
+#: ../../feature_catalog.rst:978
+msgid ""
+"An unpaved road for which the characteristics of the material used is not"
+" known."
+msgstr ""
+
+#: ../../feature_catalog.rst:980
+msgid "Gravel"
+msgstr ""
+
+#: ../../feature_catalog.rst:980
+msgid "A dirt road whose surface has been improved by grading with gravel."
+msgstr ""
+
+#: ../../feature_catalog.rst:981
+msgid "Dirt"
+msgstr ""
+
+#: ../../feature_catalog.rst:981
+msgid ""
+"Roads whose surface is formed by the removal of vegetation and/or by the "
+"transportation movements over that road which inhibit further growth of "
+"any vegetation."
+msgstr ""
+
+#: ../../feature_catalog.rst:990
+msgid "Street and Place Names"
+msgstr ""
+
+#: ../../feature_catalog.rst:992
+msgid ""
+"A street name recognized by the municipality or naming authority and a "
+"name of an administrative area, district or other named area which is "
+"required for uniqueness of the street name."
+msgstr ""
+
+#: ../../feature_catalog.rst:1002
+msgid "Directional Prefix"
+msgstr ""
+
+#: ../../feature_catalog.rst:1004
+msgid ""
+"A geographic direction that is part of the street name and precedes the "
+"street name body or, if appropriate, the street type prefix."
+msgstr ""
+
+#: ../../feature_catalog.rst:1013 ../../feature_catalog.rst:1045
+msgid "North"
+msgstr ""
+
+#: ../../feature_catalog.rst:1014 ../../feature_catalog.rst:1046
+msgid "Nord"
+msgstr ""
+
+#: ../../feature_catalog.rst:1015 ../../feature_catalog.rst:1047
+msgid "South"
+msgstr ""
+
+#: ../../feature_catalog.rst:1016 ../../feature_catalog.rst:1048
+msgid "Sud"
+msgstr ""
+
+#: ../../feature_catalog.rst:1017 ../../feature_catalog.rst:1049
+msgid "East"
+msgstr ""
+
+#: ../../feature_catalog.rst:1018 ../../feature_catalog.rst:1050
+msgid "Est"
+msgstr ""
+
+#: ../../feature_catalog.rst:1019 ../../feature_catalog.rst:1051
+msgid "West"
+msgstr ""
+
+#: ../../feature_catalog.rst:1020 ../../feature_catalog.rst:1052
+msgid "Ouest"
+msgstr ""
+
+#: ../../feature_catalog.rst:1021 ../../feature_catalog.rst:1053
+msgid "Northwest"
+msgstr ""
+
+#: ../../feature_catalog.rst:1022 ../../feature_catalog.rst:1054
+msgid "Nord-ouest"
+msgstr ""
+
+#: ../../feature_catalog.rst:1023 ../../feature_catalog.rst:1055
+msgid "Northeast"
+msgstr ""
+
+#: ../../feature_catalog.rst:1024 ../../feature_catalog.rst:1056
+msgid "Nord-est"
+msgstr ""
+
+#: ../../feature_catalog.rst:1025 ../../feature_catalog.rst:1057
+msgid "Southwest"
+msgstr ""
+
+#: ../../feature_catalog.rst:1026 ../../feature_catalog.rst:1058
+msgid "14"
+msgstr ""
+
+#: ../../feature_catalog.rst:1026 ../../feature_catalog.rst:1058
+msgid "Sud-ouest"
+msgstr ""
+
+#: ../../feature_catalog.rst:1027 ../../feature_catalog.rst:1059
+msgid "15"
+msgstr ""
+
+#: ../../feature_catalog.rst:1027 ../../feature_catalog.rst:1059
+msgid "Southeast"
+msgstr ""
+
+#: ../../feature_catalog.rst:1028 ../../feature_catalog.rst:1060
+msgid "16"
+msgstr ""
+
+#: ../../feature_catalog.rst:1028 ../../feature_catalog.rst:1060
+msgid "Sud-est"
+msgstr ""
+
+#: ../../feature_catalog.rst:1029 ../../feature_catalog.rst:1061
+msgid "17"
+msgstr ""
+
+#: ../../feature_catalog.rst:1029 ../../feature_catalog.rst:1061
+msgid "Central"
+msgstr ""
+
+#: ../../feature_catalog.rst:1030 ../../feature_catalog.rst:1062
+msgid "18"
+msgstr ""
+
+#: ../../feature_catalog.rst:1030 ../../feature_catalog.rst:1062
+#: ../../feature_catalog.rst:1258
+msgid "Centre"
+msgstr ""
+
+#: ../../feature_catalog.rst:1034
+msgid "Directional Suffix"
+msgstr ""
+
+#: ../../feature_catalog.rst:1036
+msgid ""
+"A geographic direction that is part of the street name and succeeds the "
+"street name body or, if appropriate, the street type suffix."
+msgstr ""
+
+#: ../../feature_catalog.rst:1066
+msgid "Muni Quadrant"
+msgstr ""
+
+#: ../../feature_catalog.rst:1068
+msgid ""
+"The attribute Muni quadrant is used in some addresses much like the "
+"directional attributes where the town is divided into sections based on "
+"major east-west and north- south divisions. The effect is as if multiple "
+"directional were used."
+msgstr ""
+
+#: ../../feature_catalog.rst:1077
+msgid "South-West"
+msgstr ""
+
+#: ../../feature_catalog.rst:1078
+msgid "South-East"
+msgstr ""
+
+#: ../../feature_catalog.rst:1079
+msgid "North-East"
+msgstr ""
+
+#: ../../feature_catalog.rst:1080
+msgid "North-West"
+msgstr ""
+
+#: ../../feature_catalog.rst:1094
+msgid "Place Name"
+msgstr ""
+
+#: ../../feature_catalog.rst:1096
+msgid ""
+"Name of an administrative area, district or other named area which is "
+"required for uniqueness of the street name."
+msgstr ""
+
+#: ../../feature_catalog.rst:1098
+msgid ""
+"The complete name of the place. Examples: Arnold's Cove, Saint-Jean-"
+"Baptiste-de-l'Îsle-Verte, Sault Ste. Marie, Grand- Sault, Grand Falls."
+msgstr ""
+
+#: ../../feature_catalog.rst:1103
+msgid "Place Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:1105
+msgid "Expression specifying the type of place."
+msgstr ""
+
+#: ../../feature_catalog.rst:1113
+msgid "Borough / Borough"
+msgstr ""
+
+#: ../../feature_catalog.rst:1114
+msgid "Chartered Community"
+msgstr ""
+
+#: ../../feature_catalog.rst:1115
+msgid "City / Cité"
+msgstr ""
+
+#: ../../feature_catalog.rst:1116
+msgid "City / Ville"
+msgstr ""
+
+#: ../../feature_catalog.rst:1117
+msgid "Community / Communauté"
+msgstr ""
+
+#: ../../feature_catalog.rst:1118
+msgid "County (Municipality) / Comté (Municipalité)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1119
+msgid "Cree Village / Village Cri"
+msgstr ""
+
+#: ../../feature_catalog.rst:1120
+msgid "Crown Colony / Colonie de la couronne"
+msgstr ""
+
+#: ../../feature_catalog.rst:1121
+msgid "District (Municipality) / District (Municipalité)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1122
+msgid "Hamlet / Hameau Improvement District"
+msgstr ""
+
+#: ../../feature_catalog.rst:1123
+msgid "Indian Government District"
+msgstr ""
+
+#: ../../feature_catalog.rst:1124
+msgid "Indian Reserve / Réserve indienne"
+msgstr ""
+
+#: ../../feature_catalog.rst:1125
+msgid "Indian Settlement / Établissement indien"
+msgstr ""
+
+#: ../../feature_catalog.rst:1126
+msgid "Island Municipality"
+msgstr ""
+
+#: ../../feature_catalog.rst:1127
+msgid "Local Government District"
+msgstr ""
+
+#: ../../feature_catalog.rst:1128
+msgid "Lot / Lot"
+msgstr ""
+
+#: ../../feature_catalog.rst:1129
+msgid "Municipal District / District municipal"
+msgstr ""
+
+#: ../../feature_catalog.rst:1130
+msgid "Municipality / Municipalité"
+msgstr ""
+
+#: ../../feature_catalog.rst:1131
+msgid "Naskapi Village / Village Naskapi"
+msgstr ""
+
+#: ../../feature_catalog.rst:1132
+msgid "Nisga'a land / Terre Nisga'a"
+msgstr ""
+
+#: ../../feature_catalog.rst:1133
+msgid "Nisga'a Village / Village Nisga'a"
+msgstr ""
+
+#: ../../feature_catalog.rst:1134
+msgid "Northern Hamlet / Hameau nordique"
+msgstr ""
+
+#: ../../feature_catalog.rst:1135
+msgid "Northern Town / Ville nordique"
+msgstr ""
+
+#: ../../feature_catalog.rst:1136
+msgid "Northern Village / Village nordique"
+msgstr ""
+
+#: ../../feature_catalog.rst:1137
+msgid "Parish (Municipality) / Paroisse (Municipalité)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1138
+msgid "Parish / Paroisse Region / Région"
+msgstr ""
+
+#: ../../feature_catalog.rst:1139
+msgid "Regional District Electoral Area"
+msgstr ""
+
+#: ../../feature_catalog.rst:1140
+msgid "Regional Municipality / Municipalité régionale"
+msgstr ""
+
+#: ../../feature_catalog.rst:1141
+msgid "Resort Village / Centre de villégiature"
+msgstr ""
+
+#: ../../feature_catalog.rst:1142
+msgid "Rural Community"
+msgstr ""
+
+#: ../../feature_catalog.rst:1143
+msgid "Rural Municipality / Municipalité rurale"
+msgstr ""
+
+#: ../../feature_catalog.rst:1144
+msgid "Settlement / Établissement"
+msgstr ""
+
+#: ../../feature_catalog.rst:1145
+msgid "Special Area"
+msgstr ""
+
+#: ../../feature_catalog.rst:1146
+msgid "Specialized Municipality / Municipalité spécialisée"
+msgstr ""
+
+#: ../../feature_catalog.rst:1147
+msgid "Subdivision of County Municipality"
+msgstr ""
+
+#: ../../feature_catalog.rst:1148
+msgid "Subdivision of Regional District"
+msgstr ""
+
+#: ../../feature_catalog.rst:1149
+msgid "Subdivision of Unorganized"
+msgstr ""
+
+#: ../../feature_catalog.rst:1150
+msgid "Summer Village / Village estival"
+msgstr ""
+
+#: ../../feature_catalog.rst:1151
+msgid "Terre inuite"
+msgstr ""
+
+#: ../../feature_catalog.rst:1152
+msgid "Terres réservées"
+msgstr ""
+
+#: ../../feature_catalog.rst:1153
+msgid "Teslin land / Terre Teslin"
+msgstr ""
+
+#: ../../feature_catalog.rst:1154
+msgid "Town / Ville"
+msgstr ""
+
+#: ../../feature_catalog.rst:1155
+msgid "Township (Municipality) / Canton (Municipalité)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1156
+msgid "Township / Canton"
+msgstr ""
+
+#: ../../feature_catalog.rst:1157
+msgid "United Township (Municipality) / Cantons- unis (Municipalité)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1158
+msgid "Unorganized / Non- organisé"
+msgstr ""
+
+#: ../../feature_catalog.rst:1159
+msgid "Village / Village"
+msgstr ""
+
+#: ../../feature_catalog.rst:1160
+msgid "Without Designation (Municipality) / Sans désignation (Municipalité)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1164
+msgid "Province"
+msgstr ""
+
+#: ../../feature_catalog.rst:1189
+msgid "Street Name Article"
+msgstr ""
+
+#: ../../feature_catalog.rst:1191
+msgid ""
+"Article(s) that is (are) part of the street name and located at the "
+"beginning."
+msgstr ""
+
+#: ../../feature_catalog.rst:1199
+msgid "à"
+msgstr ""
+
+#: ../../feature_catalog.rst:1200
+msgid "à l'"
+msgstr ""
+
+#: ../../feature_catalog.rst:1201
+msgid "à la"
+msgstr ""
+
+#: ../../feature_catalog.rst:1202
+msgid "au aux by the chez d'"
+msgstr ""
+
+#: ../../feature_catalog.rst:1203
+msgid "de"
+msgstr ""
+
+#: ../../feature_catalog.rst:1204
+msgid "de l' de la des du"
+msgstr ""
+
+#: ../../feature_catalog.rst:1205
+msgid "l' la"
+msgstr ""
+
+#: ../../feature_catalog.rst:1206
+msgid "le"
+msgstr ""
+
+#: ../../feature_catalog.rst:1207
+msgid "les"
+msgstr ""
+
+#: ../../feature_catalog.rst:1208
+msgid "of the the"
+msgstr ""
+
+#: ../../feature_catalog.rst:1212
+msgid "Street Name Body"
+msgstr ""
+
+#: ../../feature_catalog.rst:1214
+msgid ""
+"The portion of the street name (either official or alternate) that has "
+"the most identifying power excluding street type and directional prefixes"
+" or suffixes and street name articles."
+msgstr ""
+
+#: ../../feature_catalog.rst:1217
+msgid "The complete street name body or \"None\" when no value applies."
+msgstr ""
+
+#: ../../feature_catalog.rst:1219
+msgid ""
+"Examples: Capitale, Trésor, Golf, Abbott, Abbott's, Main, Church, Park, "
+"Bread and Cheese."
+msgstr ""
+
+#: ../../feature_catalog.rst:1223
+msgid "Street Type Prefix"
+msgstr ""
+
+#: ../../feature_catalog.rst:1225
+msgid ""
+"A part of the street name of a Road Element identifying the street type. "
+"A prefix precedes the street name body of a Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:1228
+msgid ""
+"Listed values are incomplete. \"None\" when no value applies or "
+"\"Unknown\" when the value is not known."
+msgstr ""
+
+#: ../../feature_catalog.rst:1229 ../../feature_catalog.rst:1402
+msgid "Character (30)"
+msgstr ""
+
+#: ../../feature_catalog.rst:1235
+msgid "Abbey"
+msgstr ""
+
+#: ../../feature_catalog.rst:1236
+msgid "Access"
+msgstr ""
+
+#: ../../feature_catalog.rst:1237
+msgid "Acres"
+msgstr ""
+
+#: ../../feature_catalog.rst:1238
+msgid "Aire"
+msgstr ""
+
+#: ../../feature_catalog.rst:1239
+msgid "Allée"
+msgstr ""
+
+#: ../../feature_catalog.rst:1240
+msgid "Alley"
+msgstr ""
+
+#: ../../feature_catalog.rst:1241
+msgid "Autoroute"
+msgstr ""
+
+#: ../../feature_catalog.rst:1242
+msgid "Avenue"
+msgstr ""
+
+#: ../../feature_catalog.rst:1243
+msgid "Barrage"
+msgstr ""
+
+#: ../../feature_catalog.rst:1244
+msgid "Bay"
+msgstr ""
+
+#: ../../feature_catalog.rst:1245
+msgid "Beach"
+msgstr ""
+
+#: ../../feature_catalog.rst:1246
+msgid "Bend"
+msgstr ""
+
+#: ../../feature_catalog.rst:1247
+msgid "Bloc"
+msgstr ""
+
+#: ../../feature_catalog.rst:1248
+msgid "Block"
+msgstr ""
+
+#: ../../feature_catalog.rst:1249
+msgid "Boulevard"
+msgstr ""
+
+#: ../../feature_catalog.rst:1250
+msgid "Bourg"
+msgstr ""
+
+#: ../../feature_catalog.rst:1251
+msgid "Brook"
+msgstr ""
+
+#: ../../feature_catalog.rst:1252
+msgid "By-pass"
+msgstr ""
+
+#: ../../feature_catalog.rst:1253
+msgid "Byway"
+msgstr ""
+
+#: ../../feature_catalog.rst:1254
+msgid "Campus"
+msgstr ""
+
+#: ../../feature_catalog.rst:1255
+msgid "Cape"
+msgstr ""
+
+#: ../../feature_catalog.rst:1256
+msgid "Carre"
+msgstr ""
+
+#: ../../feature_catalog.rst:1257
+msgid "Carrefour"
+msgstr ""
+
+#: ../../feature_catalog.rst:1259
+msgid "Cercle"
+msgstr ""
+
+#: ../../feature_catalog.rst:1260
+msgid "Chase"
+msgstr ""
+
+#: ../../feature_catalog.rst:1261
+msgid "Chemin"
+msgstr ""
+
+#: ../../feature_catalog.rst:1262
+msgid "Circle"
+msgstr ""
+
+#: ../../feature_catalog.rst:1263
+msgid "Circuit"
+msgstr ""
+
+#: ../../feature_catalog.rst:1264
+msgid "Close"
+msgstr ""
+
+#: ../../feature_catalog.rst:1265
+msgid "Common"
+msgstr ""
+
+#: ../../feature_catalog.rst:1266
+msgid "Concession"
+msgstr ""
+
+#: ../../feature_catalog.rst:1267
+msgid "Corners"
+msgstr ""
+
+#: ../../feature_catalog.rst:1268
+msgid "Côte"
+msgstr ""
+
+#: ../../feature_catalog.rst:1269
+msgid "Cour"
+msgstr ""
+
+#: ../../feature_catalog.rst:1270
+msgid "Court"
+msgstr ""
+
+#: ../../feature_catalog.rst:1271
+msgid "Cove"
+msgstr ""
+
+#: ../../feature_catalog.rst:1272
+msgid "Crescent"
+msgstr ""
+
+#: ../../feature_catalog.rst:1273
+msgid "Croft"
+msgstr ""
+
+#: ../../feature_catalog.rst:1274
+msgid "Croissant"
+msgstr ""
+
+#: ../../feature_catalog.rst:1275
+msgid "Crossing"
+msgstr ""
+
+#: ../../feature_catalog.rst:1276
+msgid "Crossroads"
+msgstr ""
+
+#: ../../feature_catalog.rst:1277
+msgid "Cul-de-sac"
+msgstr ""
+
+#: ../../feature_catalog.rst:1278
+msgid "Dale"
+msgstr ""
+
+#: ../../feature_catalog.rst:1279
+msgid "Dell"
+msgstr ""
+
+#: ../../feature_catalog.rst:1280
+msgid "Desserte"
+msgstr ""
+
+#: ../../feature_catalog.rst:1281
+msgid "Diversion"
+msgstr ""
+
+#: ../../feature_catalog.rst:1282
+msgid "Downs"
+msgstr ""
+
+#: ../../feature_catalog.rst:1283
+msgid "Drive"
+msgstr ""
+
+#: ../../feature_catalog.rst:1284
+msgid "Droit de passage"
+msgstr ""
+
+#: ../../feature_catalog.rst:1285
+msgid "Échangeur"
+msgstr ""
+
+#: ../../feature_catalog.rst:1286
+msgid "End"
+msgstr ""
+
+#: ../../feature_catalog.rst:1287
+msgid "Esplanade"
+msgstr ""
+
+#: ../../feature_catalog.rst:1288
+msgid "Estates"
+msgstr ""
+
+#: ../../feature_catalog.rst:1289
+msgid "Expressway"
+msgstr ""
+
+#: ../../feature_catalog.rst:1290
+msgid "Extension"
+msgstr ""
+
+#: ../../feature_catalog.rst:1291
+msgid "Farm"
+msgstr ""
+
+#: ../../feature_catalog.rst:1292
+msgid "Field"
+msgstr ""
+
+#: ../../feature_catalog.rst:1293
+msgid "Forest"
+msgstr ""
+
+#: ../../feature_catalog.rst:1294
+msgid "Front"
+msgstr ""
+
+#: ../../feature_catalog.rst:1295
+msgid "Gardens"
+msgstr ""
+
+#: ../../feature_catalog.rst:1296
+msgid "Gate"
+msgstr ""
+
+#: ../../feature_catalog.rst:1297
+msgid "Glade"
+msgstr ""
+
+#: ../../feature_catalog.rst:1298
+msgid "Glen"
+msgstr ""
+
+#: ../../feature_catalog.rst:1299
+msgid "Green"
+msgstr ""
+
+#: ../../feature_catalog.rst:1300
+msgid "Grounds"
+msgstr ""
+
+#: ../../feature_catalog.rst:1301
+msgid "Grove"
+msgstr ""
+
+#: ../../feature_catalog.rst:1302
+msgid "Harbour"
+msgstr ""
+
+#: ../../feature_catalog.rst:1303
+msgid "Haven"
+msgstr ""
+
+#: ../../feature_catalog.rst:1304
+msgid "Heath"
+msgstr ""
+
+#: ../../feature_catalog.rst:1305
+msgid "Heights"
+msgstr ""
+
+#: ../../feature_catalog.rst:1306
+msgid "Highlands"
+msgstr ""
+
+#: ../../feature_catalog.rst:1307
+msgid "Highway"
+msgstr ""
+
+#: ../../feature_catalog.rst:1308
+msgid "Hill"
+msgstr ""
+
+#: ../../feature_catalog.rst:1309
+msgid "Hollow"
+msgstr ""
+
+#: ../../feature_catalog.rst:1310
+msgid "Île"
+msgstr ""
+
+#: ../../feature_catalog.rst:1311
+msgid "Impasse"
+msgstr ""
+
+#: ../../feature_catalog.rst:1312
+msgid "Island"
+msgstr ""
+
+#: ../../feature_catalog.rst:1313
+msgid "Key"
+msgstr ""
+
+#: ../../feature_catalog.rst:1314
+msgid "Knoll"
+msgstr ""
+
+#: ../../feature_catalog.rst:1315
+msgid "Landing"
+msgstr ""
+
+#: ../../feature_catalog.rst:1316
+msgid "Lane"
+msgstr ""
+
+#: ../../feature_catalog.rst:1317
+msgid "Laneway"
+msgstr ""
+
+#: ../../feature_catalog.rst:1318
+msgid "Limits"
+msgstr ""
+
+#: ../../feature_catalog.rst:1320
+msgid "Link"
+msgstr ""
+
+#: ../../feature_catalog.rst:1321
+msgid "Lookout"
+msgstr ""
+
+#: ../../feature_catalog.rst:1322
+msgid "Loop"
+msgstr ""
+
+#: ../../feature_catalog.rst:1323
+msgid "Mall"
+msgstr ""
+
+#: ../../feature_catalog.rst:1324
+msgid "Manor"
+msgstr ""
+
+#: ../../feature_catalog.rst:1325
+msgid "Maze"
+msgstr ""
+
+#: ../../feature_catalog.rst:1326
+msgid "Meadow"
+msgstr ""
+
+#: ../../feature_catalog.rst:1327
+msgid "Mews"
+msgstr ""
+
+#: ../../feature_catalog.rst:1328
+msgid "Montée"
+msgstr ""
+
+#: ../../feature_catalog.rst:1329
+msgid "Moor"
+msgstr ""
+
+#: ../../feature_catalog.rst:1330
+msgid "Mount"
+msgstr ""
+
+#: ../../feature_catalog.rst:1331
+msgid "Mountain"
+msgstr ""
+
+#: ../../feature_catalog.rst:1332
+msgid "Orchard"
+msgstr ""
+
+#: ../../feature_catalog.rst:1333
+msgid "Parade"
+msgstr ""
+
+#: ../../feature_catalog.rst:1334
+msgid "Parc"
+msgstr ""
+
+#: ../../feature_catalog.rst:1335
+msgid "Park"
+msgstr ""
+
+#: ../../feature_catalog.rst:1336
+msgid "Parkway"
+msgstr ""
+
+#: ../../feature_catalog.rst:1337
+msgid "Passage"
+msgstr ""
+
+#: ../../feature_catalog.rst:1338
+msgid "Path"
+msgstr ""
+
+#: ../../feature_catalog.rst:1339
+msgid "Pathway"
+msgstr ""
+
+#: ../../feature_catalog.rst:1340
+msgid "Peak"
+msgstr ""
+
+#: ../../feature_catalog.rst:1341
+msgid "Pines"
+msgstr ""
+
+#: ../../feature_catalog.rst:1342
+msgid "Place"
+msgstr ""
+
+#: ../../feature_catalog.rst:1343
+msgid "Plateau"
+msgstr ""
+
+#: ../../feature_catalog.rst:1344
+msgid "Plaza"
+msgstr ""
+
+#: ../../feature_catalog.rst:1346
+msgid "Port"
+msgstr ""
+
+#: ../../feature_catalog.rst:1347
+msgid "Private"
+msgstr ""
+
+#: ../../feature_catalog.rst:1348
+msgid "Promenade"
+msgstr ""
+
+#: ../../feature_catalog.rst:1349
+msgid "Quay"
+msgstr ""
+
+#: ../../feature_catalog.rst:1350
+msgid "Rang"
+msgstr ""
+
+#: ../../feature_catalog.rst:1351
+msgid "Range"
+msgstr ""
+
+#: ../../feature_catalog.rst:1352
+msgid "Reach"
+msgstr ""
+
+#: ../../feature_catalog.rst:1353
+msgid "Ridge"
+msgstr ""
+
+#: ../../feature_catalog.rst:1354
+msgid "Right of Way"
+msgstr ""
+
+#: ../../feature_catalog.rst:1355
+msgid "Rise"
+msgstr ""
+
+#: ../../feature_catalog.rst:1356
+msgid "Road"
+msgstr ""
+
+#: ../../feature_catalog.rst:1357
+msgid "Rond Point"
+msgstr ""
+
+#: ../../feature_catalog.rst:1358
+msgid "Route"
+msgstr ""
+
+#: ../../feature_catalog.rst:1359
+msgid "Row"
+msgstr ""
+
+#: ../../feature_catalog.rst:1360
+msgid "Rue"
+msgstr ""
+
+#: ../../feature_catalog.rst:1361
+msgid "Ruelle"
+msgstr ""
+
+#: ../../feature_catalog.rst:1362
+msgid "Ruisseau"
+msgstr ""
+
+#: ../../feature_catalog.rst:1363
+msgid "Run"
+msgstr ""
+
+#: ../../feature_catalog.rst:1364
+msgid "Section"
+msgstr ""
+
+#: ../../feature_catalog.rst:1365
+msgid "Sentier"
+msgstr ""
+
+#: ../../feature_catalog.rst:1366
+msgid "Sideroad"
+msgstr ""
+
+#: ../../feature_catalog.rst:1367
+msgid "Square"
+msgstr ""
+
+#: ../../feature_catalog.rst:1368
+msgid "Street"
+msgstr ""
+
+#: ../../feature_catalog.rst:1369
+msgid "Stroll"
+msgstr ""
+
+#: ../../feature_catalog.rst:1370
+msgid "Subdivision"
+msgstr ""
+
+#: ../../feature_catalog.rst:1371
+msgid "Terrace"
+msgstr ""
+
+#: ../../feature_catalog.rst:1372
+msgid "Terrasse"
+msgstr ""
+
+#: ../../feature_catalog.rst:1373
+msgid "Thicket"
+msgstr ""
+
+#: ../../feature_catalog.rst:1374
+msgid "Towers"
+msgstr ""
+
+#: ../../feature_catalog.rst:1375
+msgid "Townline"
+msgstr ""
+
+#: ../../feature_catalog.rst:1376
+msgid "Trace"
+msgstr ""
+
+#: ../../feature_catalog.rst:1377
+msgid "Trail"
+msgstr ""
+
+#: ../../feature_catalog.rst:1378
+msgid "Trunk"
+msgstr ""
+
+#: ../../feature_catalog.rst:1379
+msgid "Turnabout"
+msgstr ""
+
+#: ../../feature_catalog.rst:1380
+msgid "Vale"
+msgstr ""
+
+#: ../../feature_catalog.rst:1381
+msgid "Via"
+msgstr ""
+
+#: ../../feature_catalog.rst:1382
+msgid "View"
+msgstr ""
+
+#: ../../feature_catalog.rst:1383
+msgid "Village"
+msgstr ""
+
+#: ../../feature_catalog.rst:1384
+msgid "Vista"
+msgstr ""
+
+#: ../../feature_catalog.rst:1385
+msgid "Voie"
+msgstr ""
+
+#: ../../feature_catalog.rst:1386
+msgid "Walk"
+msgstr ""
+
+#: ../../feature_catalog.rst:1387
+msgid "Way"
+msgstr ""
+
+#: ../../feature_catalog.rst:1388
+msgid "Wharf"
+msgstr ""
+
+#: ../../feature_catalog.rst:1389
+msgid "Wood"
+msgstr ""
+
+#: ../../feature_catalog.rst:1390
+msgid "Woods"
+msgstr ""
+
+#: ../../feature_catalog.rst:1391
+msgid "Wynd"
+msgstr ""
+
+#: ../../feature_catalog.rst:1395
+msgid "Street Type Suffix"
+msgstr ""
+
+#: ../../feature_catalog.rst:1397
+msgid ""
+"A part of the street name of a Road Element identifying the street type. "
+"A suffix follows the street name body of a Road Element."
+msgstr ""
+
+#: ../../feature_catalog.rst:1400
+msgid ""
+"Same domain as the attribute street type prefix. \"None\" when no value "
+"applies or \"Unknown\" when the value is not known."
+msgstr ""
+
+#: ../../feature_catalog.rst:1410
+msgid "Toll Point"
+msgstr ""
+
+#: ../../feature_catalog.rst:1412
+msgid ""
+"Place where a right-of-way is charged to gain access to a motorway, a "
+"bridge, etc."
+msgstr ""
+
+#: ../../feature_catalog.rst:1441
+msgid "Toll Point Type"
+msgstr ""
+
+#: ../../feature_catalog.rst:1443
+msgid "The type of toll point."
+msgstr ""
+
+#: ../../feature_catalog.rst:1450
+msgid ""
+"A toll point for which it is currently impossible to determine the "
+"specific type."
+msgstr ""
+
+#: ../../feature_catalog.rst:1451
+msgid "Physical Toll Booth"
+msgstr ""
+
+#: ../../feature_catalog.rst:1451
+msgid ""
+"A toll booth is a construction along or across the road where toll can be"
+" paid to employees of the organization in charge of collecting the toll, "
+"to machines capable of automatically recognizing coins or bills or to "
+"machines involving electronic methods of payment like credit cards or "
+"bank cards."
+msgstr ""
+
+#: ../../feature_catalog.rst:1452
+msgid "Virtual Toll Booth"
+msgstr ""
+
+#: ../../feature_catalog.rst:1452
+msgid ""
+"At a virtual point of toll payment, toll will be charged via automatic "
+"registration of the passing vehicle by subscription or invoice."
+msgstr ""
+
+#: ../../feature_catalog.rst:1453
+msgid "Hybrid"
+msgstr ""
+
+#: ../../feature_catalog.rst:1453
+msgid "Hybrid signifies a toll booth which is both physical and virtual."
+msgstr ""
+
