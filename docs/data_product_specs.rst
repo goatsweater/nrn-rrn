@@ -75,7 +75,10 @@ Abbreviations and acronyms
 
 .. glossary::
     CRSID
-        Coordinate Reference System Identifier CCOG Canadian Council on Geomatics
+        Coordinate Reference System Identifier
+    
+    CCOG
+        Canadian Council on Geomatics
     
     GDF
         Geographic Data File
