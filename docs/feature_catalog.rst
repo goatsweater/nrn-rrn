@@ -20,7 +20,10 @@ Acronyms and Abbreviations
 
 .. glossary::
     CMAS
-        Circular Map Accuracy Standard DEM: Digital Elevation Model
+        Circular Map Accuracy Standard
+    
+    DEM
+        Digital Elevation Model
     
     GPS
         Global Positioning System
