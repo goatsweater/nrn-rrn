@@ -880,7 +880,7 @@ msgid ""
 "A UUID or \"None\" when no value applies. Example: "
 "69822b23d217494896014e57a2edb8ac"
 msgstr ""
-"Un IDUU ou « Aucun » quand aucune valeur ne s’applique. Exemple : "
+"Un IDUU ou « Aucun » quand aucune valeur ne s’applique. Exemple: "
 "69822b23d217494896014e57a2edb8ac"
 
 #: ../../feature_catalog.rst:236 ../../feature_catalog.rst:353
@@ -1008,7 +1008,7 @@ msgstr "La source utilisée ne permet pas d'identifier le type de numérotatio
 
 #: ../../feature_catalog.rst:283 ../../feature_catalog.rst:338
 msgid "Absence of a house along the Road Element."
-msgstr ""
+msgstr "Aucune structure de numérotation. Il n'y a pas de bâtiment, avec adresse, le long d'un côté particulier d'un Élément routier."
 
 #: ../../feature_catalog.rst:284 ../../feature_catalog.rst:339
 msgid "Actual Located"
