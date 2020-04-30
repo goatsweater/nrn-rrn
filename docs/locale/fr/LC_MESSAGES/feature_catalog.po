@@ -20,7 +20,7 @@ msgstr ""
 
 #: ../../feature_catalog.rst:3
 msgid "Feature Catalog - Segmented View"
-msgstr ""
+msgstr "Catalogue d’entités - Vue segmentée"
 
 #: ../../feature_catalog.rst:8
 msgid ""
@@ -29,6 +29,10 @@ msgid ""
 "— Geographic Data Files (GDF) — Overall data specification* resulting "
 "from technical committee ISO / TC 204."
 msgstr ""
+"La description des entités et attributs de ce catalogue est en grande "
+"partie extraite de la norme internationale ISO 14825 — Systèmes de transport "
+"intelligents — Fichiers de données géographiques — Spécification des données "
+"globales du comité technique ISO/TC 204."
 
 #: ../../feature_catalog.rst:12
 msgid ""
@@ -36,14 +40,17 @@ msgid ""
 "Geographic information — Methodology for feature cataloguing* prepared by"
 " technical committee ISO/TC 211."
 msgstr ""
+"Ce catalogue a été adapté à partir de la norme internationale ISO 19110 — "
+"Information géographique — Méthodologie de catalogage des entités préparée "
+"par le comité technique ISO/TC 211."
 
 #: ../../feature_catalog.rst:16
 msgid "Contents"
-msgstr ""
+msgstr "Contenu"
 
 #: ../../feature_catalog.rst:19
 msgid "Acronyms and Abbreviations"
-msgstr ""
+msgstr "Sigles et abbréviations"
 
 #: ../../feature_catalog.rst:21
 msgid "CMAS:"
@@ -55,23 +62,23 @@ msgstr ""
 
 #: ../../feature_catalog.rst:24
 msgid "GPS:"
-msgstr ""
+msgstr "GPS:"
 
 #: ../../feature_catalog.rst:26
 msgid "Global Positioning System"
-msgstr ""
+msgstr "Système mondial de localisation"
 
 #: ../../feature_catalog.rst:27
 msgid "ID:"
-msgstr ""
+msgstr "ID :"
 
 #: ../../feature_catalog.rst:29
 msgid "Identifier"
-msgstr ""
+msgstr "Identifiant"
 
 #: ../../feature_catalog.rst:30
 msgid "ISO/TC:"
-msgstr ""
+msgstr "ISO/TC:"
 
 #: ../../feature_catalog.rst:32
 msgid ""
@@ -80,24 +87,24 @@ msgid ""
 msgstr ""
 
 #: ../../feature_catalog.rst:34
-msgid "NID:"
-msgstr ""
+msgid "NID"
+msgstr "IDN"
 
 #: ../../feature_catalog.rst:36
 msgid "National Identifier"
-msgstr ""
+msgstr "Identifiant national"
 
 #: ../../feature_catalog.rst:37
-msgid "NRCan:"
-msgstr ""
+msgid "NRCan"
+msgstr "RNCan"
 
 #: ../../feature_catalog.rst:39
 msgid "Natural Resources Canada"
-msgstr ""
+msgstr "Ressources naturelles Canada"
 
 #: ../../feature_catalog.rst:40
-msgid "NRN:"
-msgstr ""
+msgid "NRN"
+msgstr "RRN"
 
 #: ../../feature_catalog.rst:42
 msgid "National Road Network UUID: Universal Unique Identifier"
@@ -105,21 +112,22 @@ msgstr ""
 
 #: ../../feature_catalog.rst:45
 msgid "Terms and Definitions"
-msgstr ""
+msgstr "Termes et Définitions"
 
 #: ../../feature_catalog.rst:48
 msgid "Attribute"
-msgstr ""
+msgstr "Attribut"
 
 #: ../../feature_catalog.rst:48
 msgid ""
 "Characteristic of a feature. For example, number of lanes or pavement "
 "status."
 msgstr ""
+"Caractéristique d'entité. Par exemple, nombre de voies ou type de chaussée."
 
 #: ../../feature_catalog.rst:52
 msgid "Class"
-msgstr ""
+msgstr "Classe"
 
 #: ../../feature_catalog.rst:51
 msgid ""
@@ -127,18 +135,19 @@ msgid ""
 "operations, methods, relationships, and semantics. A class does not "
 "always have an associated geometry (e.g., address range class)."
 msgstr ""
+"Description d’un ensemble d’objets partageant les mêmes attributs, opérations, méthodes, relations et sémantique. Une classe n’a pas toujours une géométrie associée (ex. la classe Intervalles d’adresse)."
 
 #: ../../feature_catalog.rst:55
 msgid "Feature"
-msgstr ""
+msgstr "Entité"
 
 #: ../../feature_catalog.rst:55
 msgid "Digital representation of a real world phenomenon."
-msgstr ""
+msgstr "Représentation numérique d’un phénomène réel."
 
 #: ../../feature_catalog.rst:59
 msgid "Ferry Connection"
-msgstr ""
+msgstr "Liaison par transbordeur"
 
 #: ../../feature_catalog.rst:58
 msgid ""
@@ -146,26 +155,27 @@ msgid ""
 "two fixed locations on the Road Network. Two Junctions always bound a "
 "Ferry Connection."
 msgstr ""
+"La route approximative suivie par un navire transbordeur qui transporte des véhicules entre deux emplacements sur le réseau routier. Deux jonctions limitent toujours une liaison par transbordeur."
 
 #: ../../feature_catalog.rst:62
 msgid "Network Linear Element"
-msgstr ""
+msgstr "Élément linéaire du réseau"
 
 #: ../../feature_catalog.rst:62
 msgid "Abstract class of a Road Element and Ferry Connection."
-msgstr ""
+msgstr "Classe abstraite qui englobe les entités Élément routier et Liaison par transbordeur."
 
 #: ../../feature_catalog.rst:65
 msgid "Object"
-msgstr ""
+msgstr "Objet"
 
 #: ../../feature_catalog.rst:65
 msgid "An object is an instance of a class."
-msgstr ""
+msgstr "Un objet est une instance d'une classe."
 
 #: ../../feature_catalog.rst:70
 msgid "Road Element"
-msgstr ""
+msgstr "Élément routier"
 
 #: ../../feature_catalog.rst:68
 msgid ""
@@ -175,20 +185,22 @@ msgid ""
 "Road Element is composed of one or more than one contiguous Road "
 "Segments."
 msgstr ""
+"Une route est une section linéaire à la surface de la Terre qui a été conçue pour la circulation de véhicules ou qui en est le résultat. Un Élément routier est la représentation d'une route entre deux Jonctions. Un Élément routier est toujours limité par deux Jonctions. Un Élément routier est composé d'un ou plusieurs Segments routiers."
 
 #: ../../feature_catalog.rst:73
 msgid "Segment"
-msgstr ""
+msgstr "Segment"
 
 #: ../../feature_catalog.rst:73
 msgid ""
 "Portion of a Network Linear Element that has a common set of defined "
 "characteristics (attributes)."
 msgstr ""
+"Portion d'un Élément linéaire du réseau présentant un ensemble commun de caractéristiques (attributs) définies"
 
 #: ../../feature_catalog.rst:78
 msgid "Universal Unique Identifier (UUID)"
-msgstr ""
+msgstr "Identifiant unique universel (IDUU)"
 
 #: ../../feature_catalog.rst:76
 msgid ""
@@ -197,33 +209,37 @@ msgid ""
 "Identification Rules available on the GeoBase portal (www.geobase.ca), "
 "under the National Road Network Data section."
 msgstr ""
+"La définition et la méthode utilisée pour la génération d’un Identifiant universel unique (IDUU) est décrite dans le document Données vectorielles nationales – Règles d’identification disponible sur le portail GéoBase (www.geobase.ca), sous la section Données du Réseau routier national."
 
 #: ../../feature_catalog.rst:81 ../../feature_catalog.rst:379
 #: ../../feature_catalog.rst:506 ../../feature_catalog.rst:614
 #: ../../feature_catalog.rst:669 ../../feature_catalog.rst:985
 #: ../../feature_catalog.rst:1405 ../../feature_catalog.rst:1457
 msgid "Object Metadata"
-msgstr ""
+msgstr "Métadonnées d'objet"
 
 #: ../../feature_catalog.rst:83
 msgid ""
 "The attributes described in the section object metadata apply to all "
 "feature classes (except for Alternate Name Link)."
 msgstr ""
+"Les attributs décrits dans la section métadonnées d'objet s'appliquent à toutes les entités (sauf pour Lien
+nom non officiel)."
 
 #: ../../feature_catalog.rst:87
 msgid "Acquisition Technique"
-msgstr ""
+msgstr "Technique acquisition"
 
 #: ../../feature_catalog.rst:89
 msgid ""
 "The type of data source or technique used to populate (create or revise) "
 "the dataset."
 msgstr ""
+"Le type de source ou la technique utilisé pour acquérir (création ou révision) les données."
 
 #: ../../feature_catalog.rst
 msgid "Domain"
-msgstr ""
+msgstr "Domaine"
 
 #: ../../feature_catalog.rst:94 ../../feature_catalog.rst:121
 #: ../../feature_catalog.rst:148 ../../feature_catalog.rst:182
@@ -240,7 +256,7 @@ msgstr ""
 #: ../../feature_catalog.rst:1074 ../../feature_catalog.rst:1171
 #: ../../feature_catalog.rst:1448
 msgid "Code"
-msgstr ""
+msgstr "Code"
 
 #: ../../feature_catalog.rst:94 ../../feature_catalog.rst:121
 #: ../../feature_catalog.rst:148 ../../feature_catalog.rst:182
@@ -258,7 +274,7 @@ msgstr ""
 #: ../../feature_catalog.rst:1171 ../../feature_catalog.rst:1196
 #: ../../feature_catalog.rst:1232 ../../feature_catalog.rst:1448
 msgid "Label"
-msgstr ""
+msgstr "Étiquette"
 
 #: ../../feature_catalog.rst:94 ../../feature_catalog.rst:121
 #: ../../feature_catalog.rst:182 ../../feature_catalog.rst:239
@@ -275,7 +291,7 @@ msgstr ""
 #: ../../feature_catalog.rst:1196 ../../feature_catalog.rst:1232
 #: ../../feature_catalog.rst:1448
 msgid "Definition"
-msgstr ""
+msgstr "Définition"
 
 #: ../../feature_catalog.rst:96 ../../feature_catalog.rst:123
 #: ../../feature_catalog.rst:274 ../../feature_catalog.rst:293
@@ -295,12 +311,12 @@ msgstr ""
 #: ../../feature_catalog.rst:962 ../../feature_catalog.rst:978
 #: ../../feature_catalog.rst:1450
 msgid "Unknown"
-msgstr ""
+msgstr "Inconnu"
 
 #: ../../feature_catalog.rst:96 ../../feature_catalog.rst:123
 #: ../../feature_catalog.rst:293 ../../feature_catalog.rst:369
 msgid "Impossible to determine."
-msgstr ""
+msgstr "Impossible de déterminer le type."
 
 #: ../../feature_catalog.rst:97 ../../feature_catalog.rst:275
 #: ../../feature_catalog.rst:294 ../../feature_catalog.rst:330
@@ -321,7 +337,7 @@ msgstr ""
 #: ../../feature_catalog.rst:1076 ../../feature_catalog.rst:1112
 #: ../../feature_catalog.rst:1198 ../../feature_catalog.rst:1234
 msgid "None"
-msgstr ""
+msgstr "Aucun"
 
 #: ../../feature_catalog.rst:97 ../../feature_catalog.rst:827
 #: ../../feature_catalog.rst:942 ../../feature_catalog.rst:979
@@ -329,7 +345,7 @@ msgstr ""
 #: ../../feature_catalog.rst:1076 ../../feature_catalog.rst:1112
 #: ../../feature_catalog.rst:1198 ../../feature_catalog.rst:1234
 msgid "No value applies."
-msgstr ""
+msgstr "Aucune valeur disponible à l'égard de la source."
 
 #: ../../feature_catalog.rst:98 ../../feature_catalog.rst:124
 #: ../../feature_catalog.rst:150 ../../feature_catalog.rst:184
@@ -350,11 +366,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:98 ../../feature_catalog.rst:184
 msgid "Other"
-msgstr ""
+msgstr "Autre"
 
 #: ../../feature_catalog.rst:98
 msgid "All possible values not explicitly mentioned in the domain."
-msgstr ""
+msgstr "Toutes valeurs possibles non mentionnées explicitement dans le domaine."
 
 #: ../../feature_catalog.rst:99 ../../feature_catalog.rst:125
 #: ../../feature_catalog.rst:151 ../../feature_catalog.rst:185
@@ -375,11 +391,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:99
 msgid "GPS"
-msgstr ""
+msgstr "GPS"
 
 #: ../../feature_catalog.rst:99
 msgid "Data collected using a GPS device."
-msgstr ""
+msgstr "Données captée en utilisant le GPS."
 
 #: ../../feature_catalog.rst:100 ../../feature_catalog.rst:152
 #: ../../feature_catalog.rst:186 ../../feature_catalog.rst:243
@@ -397,11 +413,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:100
 msgid "Orthoimage"
-msgstr ""
+msgstr "Ortho-image"
 
 #: ../../feature_catalog.rst:100
 msgid "Satellite imagery orthorectified."
-msgstr ""
+msgstr "Image satellite orthorectifiée."
 
 #: ../../feature_catalog.rst:101 ../../feature_catalog.rst:153
 #: ../../feature_catalog.rst:187 ../../feature_catalog.rst:279
@@ -416,11 +432,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:101
 msgid "Orthophoto"
-msgstr ""
+msgstr "Ortho-photo"
 
 #: ../../feature_catalog.rst:101
 msgid "Aerial photo orthorectified."
-msgstr ""
+msgstr "Photographie aérienne orthorectifiée."
 
 #: ../../feature_catalog.rst:102 ../../feature_catalog.rst:154
 #: ../../feature_catalog.rst:375 ../../feature_catalog.rst:440
@@ -432,11 +448,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:102
 msgid "Vector Data"
-msgstr ""
+msgstr "Données vectorielles"
 
 #: ../../feature_catalog.rst:102
 msgid "Vector digital data."
-msgstr ""
+msgstr "Données vectorielles numériques."
 
 #: ../../feature_catalog.rst:103 ../../feature_catalog.rst:155
 #: ../../feature_catalog.rst:441 ../../feature_catalog.rst:560
@@ -448,11 +464,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:103
 msgid "Paper Map"
-msgstr ""
+msgstr "Carte papier"
 
 #: ../../feature_catalog.rst:103
 msgid "Conventional sources of information like maps or plans."
-msgstr ""
+msgstr "Sources d'information conventionnelles comme des cartes ou des plans."
 
 #: ../../feature_catalog.rst:104 ../../feature_catalog.rst:156
 #: ../../feature_catalog.rst:442 ../../feature_catalog.rst:561
@@ -464,11 +480,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:104
 msgid "Field Completion"
-msgstr ""
+msgstr "Complètement terrain"
 
 #: ../../feature_catalog.rst:104
 msgid "Information gathered from people directly on the field."
-msgstr ""
+msgstr "Information obtenue de gens directement sur le terrain."
 
 #: ../../feature_catalog.rst:105 ../../feature_catalog.rst:157
 #: ../../feature_catalog.rst:443 ../../feature_catalog.rst:562
@@ -479,11 +495,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:105
 msgid "Raster Data"
-msgstr ""
+msgstr "Données matricielles"
 
 #: ../../feature_catalog.rst:105
 msgid "Data resulting from a scanning process."
-msgstr ""
+msgstr "Données provenant d'un processus de balayage."
 
 #: ../../feature_catalog.rst:106 ../../feature_catalog.rst:158
 #: ../../feature_catalog.rst:444 ../../feature_catalog.rst:563
@@ -494,11 +510,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:106
 msgid "Digital Elevation Model"
-msgstr ""
+msgstr "Modèle numérique d'élévation"
 
 #: ../../feature_catalog.rst:106
 msgid "Data coming from a Digital Elevation Model (DEM)."
-msgstr ""
+msgstr "Données provenant d'un modèle numérique d'élévation (MNE)."
 
 #: ../../feature_catalog.rst:107 ../../feature_catalog.rst:159
 #: ../../feature_catalog.rst:445 ../../feature_catalog.rst:564
@@ -509,11 +525,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:107
 msgid "Aerial Photo"
-msgstr ""
+msgstr "Photographie aérienne"
 
 #: ../../feature_catalog.rst:107
 msgid "Aerial photography not orthorectified."
-msgstr ""
+msgstr "Photographie aérienne non orthorectifiée."
 
 #: ../../feature_catalog.rst:108 ../../feature_catalog.rst:160
 #: ../../feature_catalog.rst:446 ../../feature_catalog.rst:565
@@ -524,11 +540,11 @@ msgstr ""
 
 #: ../../feature_catalog.rst:108
 msgid "Raw Imagery Data"
-msgstr ""
+msgstr "Image satellite brute"
 
 #: ../../feature_catalog.rst:108
 msgid "Satellite imagery not orthorectified."
-msgstr ""
+msgstr "Image satellite non orthorectifiée."
 
 #: ../../feature_catalog.rst:109 ../../feature_catalog.rst:161
 #: ../../feature_catalog.rst:447 ../../feature_catalog.rst:566
@@ -539,45 +555,46 @@ msgstr ""
 
 #: ../../feature_catalog.rst:109
 msgid "Computed"
-msgstr ""
+msgstr "Calculé"
 
 #: ../../feature_catalog.rst:109
 msgid "Geometric information that has been computed (not captured)."
-msgstr ""
+msgstr "Informations géométriques calculées (non captées)."
 
 #: ../../feature_catalog.rst:113
 msgid "Coverage"
-msgstr ""
+msgstr "Couverture"
 
 #: ../../feature_catalog.rst:115
 msgid ""
 "This value indicates if this set of metadata covers the full length of "
 "the Network Linear Element or only a portion of it."
 msgstr ""
+"Cette valeur indique si les métadonnées s'appliquent à tout l'Élément linéaire du réseau ou à une portion de celui-ci."
 
 #: ../../feature_catalog.rst:124
 msgid "Complete"
-msgstr ""
+msgstr "Complet"
 
 #: ../../feature_catalog.rst:124
 msgid "Metadata applies on the entire geometry or attribute event."
-msgstr ""
+msgstr "Les métadonnées s'appliquent à la totalité de la géométrie ou de l'événement."
 
 #: ../../feature_catalog.rst:125
 msgid "Partial"
-msgstr ""
+msgstr "Partiel"
 
 #: ../../feature_catalog.rst:125
 msgid "Metadata applies on a portion of the geometry or attribute event."
-msgstr ""
+msgstr "Les métadonnées s'appliquent à une portion de la géométrie ou de l'événement."
 
 #: ../../feature_catalog.rst:130 ../../feature_catalog.rst:416
 msgid "Creation Date"
-msgstr ""
+msgstr "Date création"
 
 #: ../../feature_catalog.rst:132 ../../feature_catalog.rst:418
 msgid "The date of data creation."
-msgstr ""
+msgstr "La date de création des données."
 
 #: ../../feature_catalog.rst:134 ../../feature_catalog.rst:195
 #: ../../feature_catalog.rst:420
@@ -585,89 +602,90 @@ msgid ""
 "A date in the format YYYYMMDD or \"Unknown\". If the month or the day is "
 "unknown, corresponding characters are left blank."
 msgstr ""
+"Une date selon le format AAAAMMJJ ou « Inconnu ». Si le mois ou le jour est inconnu, les caractères correspondants sont laissés vides."
 
 #: ../../feature_catalog.rst:137 ../../feature_catalog.rst:198
 #: ../../feature_catalog.rst:423
 msgid "Examples: 20060630, 200606, 2006."
-msgstr ""
+msgstr "Exemples: 20060630, 200606, 2006."
 
 #: ../../feature_catalog.rst
 msgid "Data Type"
-msgstr ""
+msgstr "Type de données"
 
 #: ../../feature_catalog.rst:138 ../../feature_catalog.rst:199
 #: ../../feature_catalog.rst:424
 msgid "Character (8)"
-msgstr ""
+msgstr "Caractère (8)"
 
 #: ../../feature_catalog.rst:141 ../../feature_catalog.rst:427
 msgid "Dataset Name"
-msgstr ""
+msgstr "Nom jeu de données"
 
 #: ../../feature_catalog.rst:143 ../../feature_catalog.rst:429
 #: ../../feature_catalog.rst:1166
 msgid "Province or Territory covered by the dataset."
-msgstr ""
+msgstr "Province ou territoire couvert par le jeu de données."
 
 #: ../../feature_catalog.rst:150 ../../feature_catalog.rst:436
 #: ../../feature_catalog.rst:1173
 msgid "Newfoundland and Labrador"
-msgstr ""
+msgstr "Terre-Neuve et Labrador"
 
 #: ../../feature_catalog.rst:151 ../../feature_catalog.rst:437
 #: ../../feature_catalog.rst:1174
 msgid "Nova Scotia"
-msgstr ""
+msgstr "Nouvelle-Écosse"
 
 #: ../../feature_catalog.rst:152 ../../feature_catalog.rst:438
 #: ../../feature_catalog.rst:1175
 msgid "Prince Edward Island"
-msgstr ""
+msgstr "Île-du-Prince-Édouard"
 
 #: ../../feature_catalog.rst:153 ../../feature_catalog.rst:439
 #: ../../feature_catalog.rst:1176
 msgid "New Brunswick"
-msgstr ""
+msgstr "Nouveau-Brunswick"
 
 #: ../../feature_catalog.rst:154 ../../feature_catalog.rst:440
 #: ../../feature_catalog.rst:1177
 msgid "Quebec"
-msgstr ""
+msgstr "Québec"
 
 #: ../../feature_catalog.rst:155 ../../feature_catalog.rst:441
 #: ../../feature_catalog.rst:1178
 msgid "Ontario"
-msgstr ""
+msgstr "Ontario"
 
 #: ../../feature_catalog.rst:156 ../../feature_catalog.rst:442
 #: ../../feature_catalog.rst:1179
 msgid "Manitoba"
-msgstr ""
+msgstr "Manitoba"
 
 #: ../../feature_catalog.rst:157 ../../feature_catalog.rst:443
 #: ../../feature_catalog.rst:1180
 msgid "Saskatchewan"
-msgstr ""
+msgstr "Saskatchewan"
 
 #: ../../feature_catalog.rst:158 ../../feature_catalog.rst:444
 #: ../../feature_catalog.rst:1181
 msgid "Alberta"
-msgstr ""
+msgstr "Alberta"
 
 #: ../../feature_catalog.rst:159 ../../feature_catalog.rst:445
 #: ../../feature_catalog.rst:1182
 msgid "British Columbia"
-msgstr ""
+msgstr "Colombie-Britannique"
 
 #: ../../feature_catalog.rst:160 ../../feature_catalog.rst:446
 #: ../../feature_catalog.rst:1183
 msgid "Yukon Territory"
-msgstr ""
+msgstr "Territoire du Yukon"
 
 #: ../../feature_catalog.rst:161 ../../feature_catalog.rst:447
 #: ../../feature_catalog.rst:1184
 msgid "Northwest Territories"
-msgstr ""
+msgstr "Territoires du Nord-Ouest"
 
 #: ../../feature_catalog.rst:162 ../../feature_catalog.rst:448
 #: ../../feature_catalog.rst:567 ../../feature_catalog.rst:767
@@ -679,17 +697,17 @@ msgstr ""
 #: ../../feature_catalog.rst:162 ../../feature_catalog.rst:448
 #: ../../feature_catalog.rst:1185
 msgid "Nunavut"
-msgstr ""
+msgstr "Nunavut"
 
 #: ../../feature_catalog.rst:166
 msgid "Planimetric Accuracy"
-msgstr ""
+msgstr "Précision planimétrique"
 
 #: ../../feature_catalog.rst:168
 msgid ""
 "The planimetric accuracy expressed in meters as the circular map accuracy"
 " standard (CMAS)."
-msgstr ""
+msgstr "Précision planimétrique exprimée en mètres selon la précision cartographique circulaire normalisée (PCCN)."
 
 #: ../../feature_catalog.rst:170
 msgid "[-1,1..n]"
@@ -697,61 +715,62 @@ msgstr ""
 
 #: ../../feature_catalog.rst:171
 msgid "Integer « -1 » when the value is unknown"
-msgstr ""
+msgstr "Entier « -1 » lorsque la valeur est inconnue"
 
 #: ../../feature_catalog.rst:175
 msgid "Provider"
-msgstr ""
+msgstr "Fournisseur"
 
 #: ../../feature_catalog.rst:177
 msgid ""
 "The affiliation of the organization that generated (created or revised) "
 "the object."
 msgstr ""
+"L'affiliation de l'organisme qui a généré (acquis ou révisé) l'objet."
 
 #: ../../feature_catalog.rst:184
 msgid "Other value."
-msgstr ""
+msgstr "Valeur autre."
 
 #: ../../feature_catalog.rst:185
 msgid "Federal"
-msgstr ""
+msgstr "Fédéral"
 
 #: ../../feature_catalog.rst:185
 msgid "Federal departments or agencies."
-msgstr ""
+msgstr "Département ou agence fédéral."
 
 #: ../../feature_catalog.rst:186
 msgid "Provincial / Territorial"
-msgstr ""
+msgstr "Provincial / Territorial"
 
 #: ../../feature_catalog.rst:186
 msgid "Provincial / territorial departments or agencies."
-msgstr ""
+msgstr "Département ou agence provincial / territorial."
 
 #: ../../feature_catalog.rst:187
 msgid "Municipal"
-msgstr ""
+msgstr "Municipal"
 
 #: ../../feature_catalog.rst:187
 msgid "Municipal departments or agencies."
-msgstr ""
+msgstr "Département ou agence municipal."
 
 #: ../../feature_catalog.rst:191
 msgid "Revision Date"
-msgstr ""
+msgstr "Date révision"
 
 #: ../../feature_catalog.rst:193
 msgid "The date of data revision."
-msgstr ""
+msgstr "La date de révision des données."
 
 #: ../../feature_catalog.rst:202 ../../feature_catalog.rst:452
 msgid "Standard Version"
-msgstr ""
+msgstr "Version normes"
 
 #: ../../feature_catalog.rst:204 ../../feature_catalog.rst:454
 msgid "The version number of the GeoBase Product specifications."
-msgstr ""
+msgstr "Le numéro de version des spécifications du produit GéoBase."
 
 #: ../../feature_catalog.rst:206 ../../feature_catalog.rst:456
 msgid "[2.0]"
@@ -761,11 +780,11 @@ msgstr ""
 #: ../../feature_catalog.rst:317 ../../feature_catalog.rst:457
 #: ../../feature_catalog.rst:640 ../../feature_catalog.rst:734
 msgid "Character (10)"
-msgstr ""
+msgstr "Caractère (10)"
 
 #: ../../feature_catalog.rst:210
 msgid "Address Range"
-msgstr ""
+msgstr "Intervalles d'adresse"
 
 #: ../../feature_catalog.rst:212
 msgid ""
@@ -773,28 +792,29 @@ msgid ""
 "building located along a side of the entire Road Element or a portion of "
 "it."
 msgstr ""
+"Ensemble d'attributs qui représente l'adresse du premier et du dernier édifice situés de chaque côté d'un Élément routier."
 
 #: ../../feature_catalog.rst
 msgid "Is Abstract"
-msgstr ""
+msgstr "Est abstrait"
 
 #: ../../feature_catalog.rst:215 ../../feature_catalog.rst:389
 #: ../../feature_catalog.rst:464 ../../feature_catalog.rst:515
 #: ../../feature_catalog.rst:627 ../../feature_catalog.rst:679
 #: ../../feature_catalog.rst:995 ../../feature_catalog.rst:1414
 msgid "No"
-msgstr ""
+msgstr "Non"
 
 #: ../../feature_catalog.rst
 msgid "Geometry"
-msgstr ""
+msgstr "Géométrie"
 
 #: ../../feature_catalog.rst:219 ../../feature_catalog.rst:393
 #: ../../feature_catalog.rst:468 ../../feature_catalog.rst:519
 #: ../../feature_catalog.rst:631 ../../feature_catalog.rst:683
 #: ../../feature_catalog.rst:999 ../../feature_catalog.rst:1418
 msgid "Attribute Section"
-msgstr ""
+msgstr "Section Attribut"
 
 #: ../../feature_catalog.rst:222
 msgid "Alternate Street Name NID (left, right)"
@@ -884,7 +904,7 @@ msgstr ""
 #: ../../feature_catalog.rst:777 ../../feature_catalog.rst:795
 #: ../../feature_catalog.rst:862 ../../feature_catalog.rst:903
 msgid "Integer"
-msgstr ""
+msgstr "Entier"
 
 #: ../../feature_catalog.rst:256
 msgid "First House Number Suffix (left, right)"
@@ -1051,14 +1071,14 @@ msgstr ""
 #: ../../feature_catalog.rst:659 ../../feature_catalog.rst:780
 #: ../../feature_catalog.rst:1084 ../../feature_catalog.rst:1421
 msgid "NID"
-msgstr ""
+msgstr "IDN"
 
 #: ../../feature_catalog.rst:340 ../../feature_catalog.rst:398
 #: ../../feature_catalog.rst:488 ../../feature_catalog.rst:573
 #: ../../feature_catalog.rst:661 ../../feature_catalog.rst:782
 #: ../../feature_catalog.rst:1086 ../../feature_catalog.rst:1423
 msgid "A national unique identifier."
-msgstr ""
+msgstr "Un identifiant national unique."
 
 #: ../../feature_catalog.rst:342 ../../feature_catalog.rst:400
 #: ../../feature_catalog.rst:410 ../../feature_catalog.rst:490
@@ -1067,7 +1087,7 @@ msgstr ""
 #: ../../feature_catalog.rst:784 ../../feature_catalog.rst:1088
 #: ../../feature_catalog.rst:1425 ../../feature_catalog.rst:1435
 msgid "A UUID."
-msgstr ""
+msgstr "Un IDUU."
 
 #: ../../feature_catalog.rst:344 ../../feature_catalog.rst:355
 #: ../../feature_catalog.rst:402 ../../feature_catalog.rst:412
@@ -1077,7 +1097,7 @@ msgstr ""
 #: ../../feature_catalog.rst:913 ../../feature_catalog.rst:1090
 #: ../../feature_catalog.rst:1427 ../../feature_catalog.rst:1437
 msgid "Example: 69822b23d217494896014e57a2edb8ac"
-msgstr ""
+msgstr "Exemple : 69822b23d217494896014e57a2edb8ac"
 
 #: ../../feature_catalog.rst:348
 msgid "Official Street Name NID (left, right)"
@@ -1496,7 +1516,7 @@ msgstr ""
 
 #: ../../feature_catalog.rst:619
 msgid "Junction"
-msgstr ""
+msgstr "Jonction"
 
 #: ../../feature_catalog.rst:621
 msgid ""
@@ -1510,16 +1530,18 @@ msgid ""
 "junction of a road or ferry with a National, Provincial or Territorial "
 "Boundary."
 msgstr ""
+"Une entité positionnée à chaque extrémité d’un Élément routier ou d’une Liaison par transbordeur (fournir la définition ou indiquer Segment de liaison par transbordeur). Un Élément routier ou une Liaison par transbordeur forme toujours une liaison entre deux Jonctions et, un Élément routier ou une Liaison par transbordeur est toujours délimitée par exactement deux Jonctions. Une entité Jonction représente la connexion physique existant entre les Éléments routiers et Liaisons par transbordeur attenants. Une Jonction se situe à l'intersection de trois Éléments routiers ou plus, à l'intersection d'un Élément routier et d'une Liaison par transbordeur, à la fin d'un cul-de-sac ou à l'intersection d'un Élément routier ou d'une Liaison par transbordeur avec une frontière internationale, provinciale ou territoriale."
 
 #: ../../feature_catalog.rst:634 ../../feature_catalog.rst:728
 msgid "Exit Number"
-msgstr ""
+msgstr "Numéro de sortie"
 
 #: ../../feature_catalog.rst:636 ../../feature_catalog.rst:730
 msgid ""
 "The ID number of an exit on a controlled access thoroughfare that has "
 "been assigned by an administrating body."
 msgstr ""
+"Le numéro d'identifiant d'une sortie sur une voie de circulation à accès contrôlé qui a été attribué par une autorité administrative."
 
 #: ../../feature_catalog.rst:638 ../../feature_catalog.rst:732
 msgid ""
@@ -1527,48 +1549,52 @@ msgid ""
 " \"A\" or \"None\" when no value applies. Examples: 11, 11A, 11-A, "
 "80-EST, 80-E, 80E."
 msgstr ""
+"Un numéro d'identifiant y compris les caractères non entiers tels que « A » qui y sont parfois associés ou « Aucun » quand aucune valeur ne s'applique. Exemples : 11, 11A, 11-A, 80-EST, 80-E, 80E"
 
 #: ../../feature_catalog.rst:643
 msgid "Junction Type"
-msgstr ""
+msgstr "Type jonction"
 
 #: ../../feature_catalog.rst:645
 msgid "The classification of a Junction."
-msgstr ""
+msgstr "La classification du type de jonction."
 
 #: ../../feature_catalog.rst:652
 msgid "Intersection"
-msgstr ""
+msgstr "Intersection"
 
 #: ../../feature_catalog.rst:652
 msgid ""
 "An intersection between three or more Road Elements intersecting at same "
 "grade level."
 msgstr ""
+"Intersection entre trois Éléments routiers ou plus se rencontrant au même niveau du sol."
 
 #: ../../feature_catalog.rst:653
 msgid "DeadEnd"
-msgstr ""
+msgstr "Cul-de-sac"
 
 #: ../../feature_catalog.rst:653
 msgid ""
 "A specific Junction that indicates that a Road Element ends and is not "
 "connected to any other Road Element or Ferry Connection."
 msgstr ""
+"Jonction spécifique qui indique qu'un Élément routier prend fin et n'est pas relié à aucun autre Élément routier ou Liaison par transbordeur."
 
 #: ../../feature_catalog.rst:654
 msgid "Ferry"
-msgstr ""
+msgstr "Transbordement"
 
 #: ../../feature_catalog.rst:654
 msgid ""
 "A specific Junction that indicates that a Road Element connects to a "
 "Ferry Connection."
 msgstr ""
+"Jonction spécifique qui indique qu'un Élément routier se poursuit comme Liaison par transbordeur."
 
 #: ../../feature_catalog.rst:655
 msgid "NatProvTer"
-msgstr ""
+msgstr "NatProvTer"
 
 #: ../../feature_catalog.rst:655
 msgid ""
@@ -1576,6 +1602,7 @@ msgid ""
 "element or Ferry connection continues into the adjacent province, "
 "territory or country."
 msgstr ""
+"Jonction spécifique à la limite d'un jeu de données qui indique qu'un Élément routier ou une Liaison par transbordeur se poursuit dans la province, territoire ou pays voisin."
 
 #: ../../feature_catalog.rst:674
 msgid "Road Segment"
