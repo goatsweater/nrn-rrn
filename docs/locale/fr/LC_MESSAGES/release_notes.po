@@ -28,7 +28,7 @@ msgstr "Date de la dernière publication: 1 novembre 2019"
 
 #: ../../release_notes.rst:10
 msgid "Current release notes"
-msgstr ""
+msgstr "Notes de publication"
 
 #: ../../release_notes.rst:12
 msgid "Information on dataset updates."
