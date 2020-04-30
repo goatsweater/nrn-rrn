@@ -20,7 +20,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:3
 msgid "Product Distribution Formats - Segmented View"
-msgstr ""
+msgstr "Formats de distribution du produit - Vue segmentée"
 
 #: ../../distribution_formats.rst:8
 msgid "Contents"
@@ -28,7 +28,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:11
 msgid "Overview"
-msgstr ""
+msgstr "Aperçu"
 
 #: ../../distribution_formats.rst:13
 msgid ""
@@ -37,6 +37,10 @@ msgid ""
 "Passage*, *Ferry Connection Segment*, *Junction*, *Crossing*, *Road "
 "Segment*, *Street and Place Names*, and *Toll Point*."
 msgstr ""
+"Les entités du Réseau routier national (RRN) vue segmentée sont les suivantes: "
+"Intervalle d’adresse, Jonction, Lien nom non officiel, Noms de rue et de lieu, "
+"Passage obstrué, Poste de péage, Croisement, Segment de liaison par transbordeur "
+"et Segment routier."
 
 #: ../../distribution_formats.rst:17
 msgid ""
@@ -44,28 +48,32 @@ msgid ""
 "(Geography Markup Language), KML (Keyhole Markup Language) SHAPE (ESRI "
 "|trade|)."
 msgstr ""
+"Les formats de fichiers de sortie disponibles pour le produit sont: GML "
+"(Geography Markup Language), KML (Keyhole Markup Language) et SHAPE (ESRI |trade|)."
 
 #: ../../distribution_formats.rst:21
 msgid ""
 "Data files distributed in KML format only contain the entity *Road "
 "Segment* and a subset of attributes."
 msgstr ""
+"Les fichiers de données dans le format KML contiennent uniquement l’entité "
+"Segment routier et un sous-ensemble de ses attributs."
 
 #: ../../distribution_formats.rst:25
 msgid "Product Identification"
-msgstr ""
+msgstr "Identification du produit"
 
 #: ../../distribution_formats.rst
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: ../../distribution_formats.rst:27
 msgid "National Road Network"
-msgstr ""
+msgstr "Réseau routier national"
 
 #: ../../distribution_formats.rst
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 #: ../../distribution_formats.rst:28
 msgid "2.1"
@@ -73,7 +81,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #: ../../distribution_formats.rst:29
 msgid "2012-03-31"
@@ -81,25 +89,26 @@ msgstr ""
 
 #: ../../distribution_formats.rst
 msgid "Standard"
-msgstr ""
+msgstr "Normes"
 
 #: ../../distribution_formats.rst:30
 msgid ""
 "National Road Network: Data Product Specifications, Edition 2.1, "
 "2012-03-31"
 msgstr ""
+"Réseau routier national : Spécifications de produit, édition 2.1, 2012-03-31"
 
 #: ../../distribution_formats.rst
 msgid "Feature catalogue"
-msgstr ""
+msgstr "Catalogue d’entités"
 
 #: ../../distribution_formats.rst:31
 msgid "National Road Network: Feature Catalogue, Edition 2.1, 2012-03-31"
-msgstr ""
+msgstr "Réseau routier national : Catalogue d’entités, édition 2.1, 2012-03-31"
 
 #: ../../distribution_formats.rst:34
 msgid "Distribution Formats Identification"
-msgstr ""
+msgstr "Identification des formats de distribution"
 
 #: ../../distribution_formats.rst:37 ../../distribution_formats.rst:39
 msgid "GML – Geography Markup Language"
@@ -115,7 +124,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst
 msgid "Specifications"
-msgstr ""
+msgstr "Spécifications"
 
 #: ../../distribution_formats.rst:42
 msgid ""
@@ -123,6 +132,8 @@ msgid ""
 "Specifications, OGC Document Number 02-069 "
 "(http://portal.opengeospatial.org/files/?artifact_id=11339)"
 msgstr ""
+"Geography Markup Language – GML – 2.1.2, OpenGIS®Implementation Specifications, "
+"OGC Document Number 02-069 (http://portal.opengeospatial.org/files/?artifact_id=11339)"
 
 #: ../../distribution_formats.rst:46 ../../distribution_formats.rst:48
 msgid "KML – Keyhole Markup Language"
@@ -142,6 +153,9 @@ msgid ""
 "Reference number of this OGC® project document: OGC 07-147r2 "
 "(http://portal.opengeospatial.org/files/?artifact_id=27810)"
 msgstr ""
+"Open Geospatial Consortium Inc., OGC® KML, Version 2.2.0, 2008-04-14, Reference "
+"number of this OGC® project document: OGC 07-147r2 "
+"(http://portal.opengeospatial.org/files/?artifact_id=27810)"
 
 #: ../../distribution_formats.rst:56
 msgid "Shape – ESRI |trade|"
@@ -187,11 +201,11 @@ msgstr ""
 
 #: ../../distribution_formats.rst:73
 msgid "Distribution Files Identification"
-msgstr ""
+msgstr "Identification des fichiers de distribution"
 
 #: ../../distribution_formats.rst:76
 msgid "GML File Names"
-msgstr ""
+msgstr "Nomenclature des fichiers GML"
 
 #: ../../distribution_formats.rst:78
 msgid ""
@@ -201,10 +215,16 @@ msgid ""
 "finally up to four change management files (one for each type of content)"
 " are available. The name of a GML file is structured accordingly::"
 msgstr ""
+"Les entités du produit distribuées dans le format GML sont regroupées par jeu "
+"de données à l’intérieur de différents fichiers. Un fichier contenant les "
+"entités géométriques et leurs attributs de base (GEOM), un fichier regroupant "
+"les tables d’attributs d’adressage (ADDR), et jusqu’à quatre fichiers de "
+"gestion des modifications pour chaque type de contenu du jeu de données (GEOM "
+"et ADDR). Le nom des fichiers GML prend la forme suivante::"
 
 #: ../../distribution_formats.rst:85
 msgid "NRN = Abbreviated title of the product."
-msgstr ""
+msgstr "RRN = Titre abrégé du produit."
 
 #: ../../distribution_formats.rst:86 ../../distribution_formats.rst:142
 #: ../../distribution_formats.rst:177
@@ -213,6 +233,9 @@ msgid ""
 "dataset location. Possible codes are: AB, BC, MB, ON, NB, NL, NS, NT, NU,"
 " PE, QC, SK, YT."
 msgstr ""
+"<IDENTIFIANT> = Code de province ou de territoire anglais correspondant à la "
+"localisation du jeu de données. Les codes possibles sont : AB, BC, MB, ON, NB, "
+"NL, NS, NT, NU, PE, QC, SK, YT."
 
 #: ../../distribution_formats.rst:88 ../../distribution_formats.rst:144
 #: ../../distribution_formats.rst:179 ../../distribution_formats.rst:202
@@ -222,7 +245,7 @@ msgstr ""
 #: ../../distribution_formats.rst:89 ../../distribution_formats.rst:145
 #: ../../distribution_formats.rst:180 ../../distribution_formats.rst:203
 msgid "<version> = Dataset version number."
-msgstr ""
+msgstr "<édition> = Édition du jeu de données."
 
 #: ../../distribution_formats.rst:90
 msgid ""
@@ -230,6 +253,8 @@ msgid ""
 "(Geometrical entities and basic attributes), ADDR (Address attributes "
 "tables)."
 msgstr ""
+"<CONTENU> = Indicateur du contenu du jeu de données. Les valeurs possibles "
+"sont : GEOM (entités géométriques et attributs de base), ADDR (tables d’attributs d’adressage)."
 
 #: ../../distribution_formats.rst:92 ../../distribution_formats.rst:147
 #: ../../distribution_formats.rst:182
@@ -238,15 +263,18 @@ msgid ""
 "dataset entities and attributes in comparison to previous edition. "
 "Possible values are identified in section 4.5.2."
 msgstr ""
+"[<MODIFICATION>] = [] = Optionnel. Type de modification apportée aux entités "
+"et attributs du jeu de données par rapport à l’édition précédente. Les valeurs "
+"possibles sont identifiées à la section 4.5.2."
 
 #: ../../distribution_formats.rst:94
 msgid ".gml = File name extension."
-msgstr ""
+msgstr ".gml = Extension du nom de fichier."
 
 #: ../../distribution_formats.rst:96 ../../distribution_formats.rst:161
 #: ../../distribution_formats.rst:186 ../../distribution_formats.rst:209
 msgid "Examples:"
-msgstr ""
+msgstr "Exemples:"
 
 #: ../../distribution_formats.rst:98
 msgid ""
@@ -274,7 +302,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:108
 msgid "GeoBase"
-msgstr ""
+msgstr "GéoBase"
 
 #: ../../distribution_formats.rst:110
 msgid ""
@@ -284,10 +312,15 @@ msgid ""
 "``NRN_<IDENTIFIER>_<edition>_<version>_<CONTENT>[_<MODIFICATION>].xsd`` "
 "and a reference is recorded within the GML file."
 msgstr ""
+"Un schéma XML (fichier XSD) est également livré pour chaque fichier GML. Ce "
+"fichier définit de façon structurée le type de contenu, la syntaxe et la "
+"sémantique des documents GML. Le nom de ce fichier est "
+"RRN_<IDENTIFIANT>_<édition>_<version>_<CONTENU>[_<MODIFICATION>].xsd et est "
+"cité en référence dans le fichier GML."
 
 #: ../../distribution_formats.rst:116
 msgid "KML file name"
-msgstr ""
+msgstr "Nomenclature du fichier KML"
 
 #: ../../distribution_formats.rst:118
 msgid ""
@@ -295,10 +328,12 @@ msgid ""
 "part of the product that is distributed in KML format. The name of the "
 "KML file is structured accordingly::"
 msgstr ""
+"Uniquement l’entité Segment routier (et un sous-ensemble d’attributs) du "
+"produit est distribuée dans le format KML. Le nom du fichier KML prend la forme suivante::"
 
 #: ../../distribution_formats.rst:123 ../../distribution_formats.rst:199
 msgid "nrn_rrn = Abbreviated English and French product title."
-msgstr ""
+msgstr "nrn_rrn = Titre abrégé anglais et français du produit."
 
 #: ../../distribution_formats.rst:124 ../../distribution_formats.rst:200
 msgid ""
@@ -306,22 +341,25 @@ msgid ""
 "dataset location. Possible codes are: ab, bc, mb, on, nb, nl, ns, nt, nu,"
 " pe, qc, sk, yt."
 msgstr ""
+"<identifiant> = Code de province ou de territoire anglais correspondant à "
+"la localisation du jeu de données. Les codes possibles sont : ab, bc, mb, "
+"on, nb, nl, ns, nt, nu, pe, qc, sk, yt."
 
 #: ../../distribution_formats.rst:125
 msgid "kml Dataset distribution format."
-msgstr ""
+msgstr "kml Format de distribution du jeu de données."
 
 #: ../../distribution_formats.rst:126
 msgid "en ISO code of the dataset distribution language."
-msgstr ""
+msgstr "fr Code ISO de la langue de distribution du jeu de données."
 
 #: ../../distribution_formats.rst:127
 msgid ".kmz = File name extension."
-msgstr ""
+msgstr ".kmz = Extension du nom de fichier."
 
 #: ../../distribution_formats.rst:129
 msgid "Example:"
-msgstr ""
+msgstr "Exemple:"
 
 #: ../../distribution_formats.rst:131
 msgid "``nrn_rrn_ab_kml_en.kmz`` (Road Segment for dataset of Alberta)."
@@ -329,7 +367,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:134
 msgid "Shape file names"
-msgstr ""
+msgstr "Nomenclature des fichiers Shape"
 
 #: ../../distribution_formats.rst:136
 msgid ""
@@ -337,18 +375,20 @@ msgid ""
 "according to their geometrical representation. The name of the Shape "
 "files is structured accordingly::"
 msgstr ""
+"Les entités du produit dans le format Shape sont divisées selon leur "
+"représentation géométrique. Le nom des fichiers Shape suit la structure suivante::"
 
 #: ../../distribution_formats.rst:141 ../../distribution_formats.rst:176
 msgid "NRN = Abbreviated product title."
-msgstr ""
+msgstr "RRN = Titre abrégé français du produit."
 
 #: ../../distribution_formats.rst:146 ../../distribution_formats.rst:181
 msgid "<ENTITY> = Abbreviated entity name as defined in section 4.5.1."
-msgstr ""
+msgstr "<ENTITÉ> = Nom abrégé de l’entité tel que défini à la section 4.5.1."
 
 #: ../../distribution_formats.rst:149 ../../distribution_formats.rst:184
 msgid ".shp = Extension of the main geometry file name."
-msgstr ""
+msgstr ".shp = Extension du nom de fichier principal de géométrie."
 
 #: ../../distribution_formats.rst:151
 msgid ""
@@ -391,7 +431,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:168
 msgid "GeoPackage File Names"
-msgstr ""
+msgstr "Nomenclature des fichiers GPKG"
 
 #: ../../distribution_formats.rst:170
 msgid ""
@@ -400,16 +440,20 @@ msgid ""
 "according to their geometrical representation. The name of the GeoPackage"
 " file is structured accordingly::"
 msgstr ""
+"Les entités du produit dans le format GPKG sont divisées selon leur "
+"représentation géométrique. Le nom des fichiers GPKG suit la structure suivante::"
 
 #: ../../distribution_formats.rst:188
 msgid ""
 "``NRN_AB_4_0_ROADSEG.gpkg`` (All entities for dataset of Alberta, edition"
 " 4, version 0);"
 msgstr ""
+"``RRN_AB_4_0_SEGMROUT.gpkg`` (Entité Segment routier du jeu de données de "
+"l’Alberta, édition 4, version 0);"
 
 #: ../../distribution_formats.rst:191
 msgid "Metadata File"
-msgstr ""
+msgstr "Fichier de métadonnées"
 
 #: ../../distribution_formats.rst:193
 msgid ""
@@ -418,6 +462,10 @@ msgid ""
 "in English) and two others according to FGDC/HTML format. The name of the"
 " metadata file is structured accordingly::"
 msgstr ""
+"Quatre fichiers de métadonnées sont distribués avec chaque jeu de données "
+"du produit RRN. Deux fichiers sont livrés dans le format FGDC/XML (en français "
+"et en anglais) et deux autres selon le format FGDC/HTML. La nomenclature du "
+"fichier de métadonnées est::"
 
 #: ../../distribution_formats.rst:204
 msgid ""
@@ -449,7 +497,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:217
 msgid "List of distribution file names"
-msgstr ""
+msgstr "Liste des noms de fichiers de distribution"
 
 #: ../../distribution_formats.rst:219
 msgid ""
@@ -458,10 +506,14 @@ msgid ""
 "file containing the modifications (differences) applied to the previous "
 "edition of the dataset."
 msgstr ""
+"Le produit RRN comporte deux types de jeux de données : des fichiers "
+"contenant les données actualisées (i.e. qui ont été mises à jour) et des "
+"fichiers contenant les modifications (différences) appliquées à l’édition "
+"précédente du jeu de données."
 
 #: ../../distribution_formats.rst:224
 msgid "Dataset"
-msgstr ""
+msgstr "Jeu de données"
 
 #: ../../distribution_formats.rst:226
 msgid ""
@@ -470,6 +522,10 @@ msgid ""
 "Shape format is NRN_<IDENTIFER>_<edition>_<version>_<ENTITY>. The "
 "extension of the file name corresponds to the distribution format."
 msgstr ""
+"Le nom du fichier dans le format GML est "
+"RRN_<IDENTIFIANT>_<édition>_<version>_<CONTENU>. Le nom du fichier dans "
+"le format Shape est RRN_<IDENTIFIANT>_<édition>_<version>_<ENTITÉ>. "
+"L’extension du nom de fichier dépend directement du format de distribution."
 
 #: ../../distribution_formats.rst:231
 msgid "Feature catalogue Entity name"
@@ -477,135 +533,136 @@ msgstr ""
 
 #: ../../distribution_formats.rst:231
 msgid "GML/KML* Entity name"
-msgstr ""
+msgstr "GML/KML Nom d’entité"
 
 #: ../../distribution_formats.rst:231
 msgid "Shape File name (``<entity>``)"
-msgstr ""
+msgstr "Shape Nom du fichier (``<entity>``)"
 
 #: ../../distribution_formats.rst:231
 msgid "Type"
-msgstr ""
+msgstr "Type de géométrie"
 
 #: ../../distribution_formats.rst:234 ../../distribution_formats.rst:319
 msgid "Address Range"
-msgstr ""
+msgstr "Intervalle d’adresse"
 
 #: ../../distribution_formats.rst:234
 msgid "AddressRange"
-msgstr ""
+msgstr "IntervalleAdresse"
 
 #: ../../distribution_formats.rst:234
 msgid "ADDRANGE"
-msgstr ""
+msgstr "INTERVADR"
 
 #: ../../distribution_formats.rst:234 ../../distribution_formats.rst:236
 #: ../../distribution_formats.rst:246
 msgid "Table **"
-msgstr ""
+msgstr "Table **"
 
 #: ../../distribution_formats.rst:236 ../../distribution_formats.rst:373
 msgid "Alternate Name Link"
-msgstr ""
+msgstr "Lien nom non officiel"
 
 #: ../../distribution_formats.rst:236
 msgid "AlternateNameLink"
-msgstr ""
+msgstr "LienNomNonOfficiel"
 
 #: ../../distribution_formats.rst:236
 msgid "ALTNAMLINK"
-msgstr ""
+msgstr "LIENNOFF"
 
 #: ../../distribution_formats.rst:238 ../../distribution_formats.rst:393
 msgid "Blocked Passage"
-msgstr ""
+msgstr "Passage obstrué"
 
 #: ../../distribution_formats.rst:238
 msgid "BlockedPassage"
-msgstr ""
+msgstr "PassageObstrue"
 
 #: ../../distribution_formats.rst:238
 msgid "BLKPASSAGE"
-msgstr ""
+msgstr "PASSAGEOBS"
 
 #: ../../distribution_formats.rst:238 ../../distribution_formats.rst:242
 #: ../../distribution_formats.rst:248
 msgid "Point"
-msgstr ""
+msgstr "Point"
 
 #: ../../distribution_formats.rst:240 ../../distribution_formats.rst:407
 msgid "Ferry Connection Segment"
-msgstr ""
+msgstr "Segment de liaison par transbordeur"
 
 #: ../../distribution_formats.rst:240
 msgid "FerryConnectionSegment"
-msgstr ""
+msgstr "SegmentLiaisonTransbordeur"
 
 #: ../../distribution_formats.rst:240
 msgid "FERRYSEG"
-msgstr ""
+msgstr "SLIAISONTR"
 
 #: ../../distribution_formats.rst:240 ../../distribution_formats.rst:244
 msgid "Line"
-msgstr ""
+msgstr "Ligne"
 
 #: ../../distribution_formats.rst:242 ../../distribution_formats.rst:447
 msgid "Junction"
-msgstr ""
+msgstr "Jonction"
 
 #: ../../distribution_formats.rst:242
 msgid "JUNCTION"
-msgstr ""
+msgstr "JONCTION"
 
 #: ../../distribution_formats.rst:244 ../../distribution_formats.rst:461
 msgid "Road Segment"
-msgstr ""
+msgstr "Segment routier"
 
 #: ../../distribution_formats.rst:244
 msgid "RoadSegment *"
-msgstr ""
+msgstr "SegmentRoutier *"
 
 #: ../../distribution_formats.rst:244
 msgid "ROADSEG"
-msgstr ""
+msgstr "SEGMROUT"
 
 #: ../../distribution_formats.rst:246 ../../distribution_formats.rst:550
 msgid "Street and Place Names"
-msgstr ""
+msgstr "Noms de rue et de lieu"
 
 #: ../../distribution_formats.rst:246
 msgid "StreetPlaceNames"
-msgstr ""
+msgstr "NomRueLieu"
 
 #: ../../distribution_formats.rst:246
 msgid "STRPLANAME"
-msgstr ""
+msgstr "NOMRUELIEU"
 
 #: ../../distribution_formats.rst:248 ../../distribution_formats.rst:580
 msgid "Toll Point"
-msgstr ""
+msgstr "Poste de péage"
 
 #: ../../distribution_formats.rst:248
 msgid "TollPoint"
-msgstr ""
+msgstr "PostePeage"
 
 #: ../../distribution_formats.rst:248
 msgid "TOLLPOINT"
-msgstr ""
+msgstr "POSTEPEAGE"
 
 #: ../../distribution_formats.rst:251 ../../distribution_formats.rst:546
 msgid "\\* KML content (simplified version of the dataset)"
-msgstr ""
+msgstr "\\* Contenu KML (version simplifiée du jeu de données)"
 
 #: ../../distribution_formats.rst:253
 msgid ""
 "\\** Attributes file (.dbf) in Shape format and entities without geometry"
 " in GML format."
 msgstr ""
+"\\** Fichier d’attributs (.dbf) dans le format Shape et entités sans géométrie dans le format GML."
 
 #: ../../distribution_formats.rst:256
 msgid "Change Management Files"
-msgstr ""
+msgstr "Fichiers de gestion des modifications"
 
 #: ../../distribution_formats.rst:258
 msgid ""
@@ -618,66 +675,74 @@ msgid ""
 "``NRN_<IDENTIFIER>_<edition>_<version>_<ENTITY>_<MODIFICATION>``. The "
 "extension of the file name corresponds to the distribution format."
 msgstr ""
+"La gestion des modifications consiste principalement à identifier l’ajout, "
+"la confirmation, l’élimination ou la modification des objets (géométrie "
+"et/ou attribut) entre deux éditions successives d’un jeu de données. Un "
+"fichier de données est généré pour chaque type d’effet. Le nom du fichier "
+"dans le format GML est ``RRN_<IDENTIFIANT>_<édition>_<version>_<CONTENU>_<MODIFICATION>``. "
+"Le nom du fichier selon le format Shape est "
+"``RN_<IDENTIFIANT>_<édition>_<version>_<ENTITÉ>_MODIFICATION>``. L’extension du "
+"nom de fichier dépend directement du format de distribution."
 
 #: ../../distribution_formats.rst:266
 msgid "Change management Effect name"
-msgstr ""
+msgstr "Gestion des modifications Nom de l’effet"
 
 #: ../../distribution_formats.rst:266
 msgid "GML File name (<MODIFICATION>)"
-msgstr ""
+msgstr "GML Nom du fichier (<MODIFICATION>)"
 
 #: ../../distribution_formats.rst:266
 msgid "Shape File name (<MODIFICATION>)"
-msgstr ""
+msgstr "Shape Nom du fichier (<MODIFICATION>)"
 
 #: ../../distribution_formats.rst:269
 msgid "Added"
-msgstr ""
+msgstr "Ajout"
 
 #: ../../distribution_formats.rst:269
 msgid "<GML File Name>_ADDED"
-msgstr ""
+msgstr "<Nom du fichier GML>_AJOUT"
 
 #: ../../distribution_formats.rst:269
 msgid "<Shape File Name>_ADDED"
-msgstr ""
+msgstr "<Nom du fichier Shape>_AJOUT"
 
 #: ../../distribution_formats.rst:271
 msgid "Confirmed"
-msgstr ""
+msgstr "Confirmation"
 
 #: ../../distribution_formats.rst:271
 msgid "<GML File Name>_CONFIRMED"
-msgstr ""
+msgstr "<Nom du fichier GML>_CONFIRME"
 
 #: ../../distribution_formats.rst:271
 msgid "<Shape File Name>_CONFIRMED"
-msgstr ""
+msgstr "<Nom du fichier Shape>_CONFIRME"
 
 #: ../../distribution_formats.rst:273
 msgid "Modified"
-msgstr ""
+msgstr "Modification"
 
 #: ../../distribution_formats.rst:273
 msgid "<GML File Name>_MODIFIED"
-msgstr ""
+msgstr "<Nom du fichier GML>_MODIFIE"
 
 #: ../../distribution_formats.rst:273
 msgid "<Shape File Name>_MODIFIED"
-msgstr ""
+msgstr "<Nom du fichier Shape>_MODIFIE"
 
 #: ../../distribution_formats.rst:275
 msgid "Retired"
-msgstr ""
+msgstr "Élimination"
 
 #: ../../distribution_formats.rst:275
 msgid "<GML File Name>_RETIRED"
-msgstr ""
+msgstr "<Nom du fichier GML>_ELIMINE"
 
 #: ../../distribution_formats.rst:275
 msgid "<Shape File Name>_RETIRED"
-msgstr ""
+msgstr "<Nom du fichier Shape>_ELIMINE"
 
 #: ../../distribution_formats.rst:278
 msgid ""
@@ -685,10 +750,13 @@ msgid ""
 " method used for the *follow-up of the geometrical modifications* is "
 "provided with the dataset."
 msgstr ""
+"La méthode utilisée pour le suivi des modifications géométriques est "
+"indiquée dans un fichier texte nommé : ``LISEZMOI_<IDENTIFIANT>.txt`` qui "
+"est joint au jeu de données."
 
 #: ../../distribution_formats.rst:282
 msgid "Attributes Identification"
-msgstr ""
+msgstr "Identification des attributs"
 
 #: ../../distribution_formats.rst:284
 msgid ""
@@ -696,6 +764,9 @@ msgid ""
 "the first table. The attributes specific to each entity are presented in "
 "the following subsection."
 msgstr ""
+"Les attributs communs à l’ensemble des entités du produit RRN sont identifiés "
+"dans le premier tableau. Les attributs spécifiques à chaque entité sont "
+"présentés dans la sous-section suivante."
 
 #: ../../distribution_formats.rst:287
 msgid ""
@@ -703,10 +774,13 @@ msgid ""
 "or N(n,d) for number (c = number of characters, n = total number of "
 "digits, d = number of digits in decimal)."
 msgstr ""
+"Le type de données de tous les formats de distribution est soit : C(c) pour "
+"caractères ou N(n,d) pour nombre (c = nombre de caractères, n = nombre total "
+"de chiffres, d = nombre de chiffres en décimales)."
 
 #: ../../distribution_formats.rst:292
 msgid "Attributes Common to All Entities Except Alternate Name Link"
-msgstr ""
+msgstr "Attributs communs pour toutes les entités (sauf Lien nom non officiel)"
 
 #: ../../distribution_formats.rst:295 ../../distribution_formats.rst:322
 #: ../../distribution_formats.rst:376 ../../distribution_formats.rst:396
@@ -714,7 +788,7 @@ msgstr ""
 #: ../../distribution_formats.rst:464 ../../distribution_formats.rst:553
 #: ../../distribution_formats.rst:583
 msgid "Feature Catalogue Attribute Name"
-msgstr ""
+msgstr "Catalogue d’entités Nom d’attribut"
 
 #: ../../distribution_formats.rst:295 ../../distribution_formats.rst:322
 #: ../../distribution_formats.rst:376 ../../distribution_formats.rst:396
@@ -722,7 +796,7 @@ msgstr ""
 #: ../../distribution_formats.rst:464 ../../distribution_formats.rst:553
 #: ../../distribution_formats.rst:583
 msgid "GML Attribute Name"
-msgstr ""
+msgstr "GML Nom d’attribut"
 
 #: ../../distribution_formats.rst:295 ../../distribution_formats.rst:322
 #: ../../distribution_formats.rst:376 ../../distribution_formats.rst:396
@@ -730,7 +804,7 @@ msgstr ""
 #: ../../distribution_formats.rst:464 ../../distribution_formats.rst:553
 #: ../../distribution_formats.rst:583
 msgid "Shape Attribute Name"
-msgstr ""
+msgstr "Shape Nom d’attribut"
 
 #: ../../distribution_formats.rst:295 ../../distribution_formats.rst:322
 #: ../../distribution_formats.rst:376 ../../distribution_formats.rst:396
@@ -738,19 +812,19 @@ msgstr ""
 #: ../../distribution_formats.rst:464 ../../distribution_formats.rst:553
 #: ../../distribution_formats.rst:583
 msgid "Shape Data Type"
-msgstr ""
+msgstr "Type de données"
 
 #: ../../distribution_formats.rst:298
 msgid "Acquisition Technique"
-msgstr ""
+msgstr "Technique acquisition"
 
 #: ../../distribution_formats.rst:298
 msgid "acquisitionTechnique"
-msgstr ""
+msgstr "techniqueAcquisition"
 
 #: ../../distribution_formats.rst:298
 msgid "ACQTECH"
-msgstr ""
+msgstr "TECHACQ"
 
 #: ../../distribution_formats.rst:298
 msgid "C(23)"
@@ -758,15 +832,15 @@ msgstr ""
 
 #: ../../distribution_formats.rst:300
 msgid "Coverage"
-msgstr ""
+msgstr "Couverture"
 
 #: ../../distribution_formats.rst:300
 msgid "metadataCoverage"
-msgstr ""
+msgstr "couvertureMetadonnees"
 
 #: ../../distribution_formats.rst:300
 msgid "METACOVER"
-msgstr ""
+msgstr "COUVERMETA"
 
 #: ../../distribution_formats.rst:300 ../../distribution_formats.rst:302
 #: ../../distribution_formats.rst:310 ../../distribution_formats.rst:379
@@ -776,27 +850,27 @@ msgstr ""
 
 #: ../../distribution_formats.rst:302 ../../distribution_formats.rst:379
 msgid "Creation Date"
-msgstr ""
+msgstr "Date création"
 
 #: ../../distribution_formats.rst:302 ../../distribution_formats.rst:379
 msgid "creationDate"
-msgstr ""
+msgstr "dateCreation"
 
 #: ../../distribution_formats.rst:302 ../../distribution_formats.rst:379
 msgid "CREDATE"
-msgstr ""
+msgstr "DATECRE"
 
 #: ../../distribution_formats.rst:304 ../../distribution_formats.rst:381
 msgid "Dataset Name"
-msgstr ""
+msgstr "Nom jeu de données"
 
 #: ../../distribution_formats.rst:304 ../../distribution_formats.rst:381
 msgid "datasetName"
-msgstr ""
+msgstr "nomJeuDonnees"
 
 #: ../../distribution_formats.rst:304
 msgid "DATASETNAME"
-msgstr ""
+msgstr "NOMJEUDONN"
 
 #: ../../distribution_formats.rst:304 ../../distribution_formats.rst:568
 msgid "C(25)"
@@ -804,15 +878,15 @@ msgstr ""
 
 #: ../../distribution_formats.rst:306
 msgid "Planimetric Accuracy"
-msgstr ""
+msgstr "Précision planimétrique"
 
 #: ../../distribution_formats.rst:306
 msgid "planimetricAccuracy"
-msgstr ""
+msgstr "precisionPlanimetrique"
 
 #: ../../distribution_formats.rst:306
 msgid "ACCURACY"
-msgstr ""
+msgstr "PRECISION"
 
 #: ../../distribution_formats.rst:306 ../../distribution_formats.rst:489
 #: ../../distribution_formats.rst:531
@@ -821,15 +895,15 @@ msgstr ""
 
 #: ../../distribution_formats.rst:308
 msgid "Provider"
-msgstr ""
+msgstr "Fournisseur"
 
 #: ../../distribution_formats.rst:308
 msgid "provider"
-msgstr ""
+msgstr "fournisseur"
 
 #: ../../distribution_formats.rst:308
 msgid "PROVIDER"
-msgstr ""
+msgstr "FOURNISSR"
 
 #: ../../distribution_formats.rst:308
 msgid "C(24)"
@@ -837,27 +911,27 @@ msgstr ""
 
 #: ../../distribution_formats.rst:310 ../../distribution_formats.rst:385
 msgid "Revision Date"
-msgstr ""
+msgstr "Date révision"
 
 #: ../../distribution_formats.rst:310 ../../distribution_formats.rst:385
 msgid "revisionDate"
-msgstr ""
+msgstr "dateRevision"
 
 #: ../../distribution_formats.rst:310 ../../distribution_formats.rst:385
 msgid "REVDATE"
-msgstr ""
+msgstr "DATEREV"
 
 #: ../../distribution_formats.rst:312 ../../distribution_formats.rst:387
 msgid "Standard Version"
-msgstr ""
+msgstr "Version normes"
 
 #: ../../distribution_formats.rst:312 ../../distribution_formats.rst:387
 msgid "standardVersion"
-msgstr ""
+msgstr "versionNormes"
 
 #: ../../distribution_formats.rst:312 ../../distribution_formats.rst:387
 msgid "SPECVERS"
-msgstr ""
+msgstr "VERSNORMES"
 
 #: ../../distribution_formats.rst:312 ../../distribution_formats.rst:337
 #: ../../distribution_formats.rst:339 ../../distribution_formats.rst:353
@@ -873,7 +947,7 @@ msgstr ""
 
 #: ../../distribution_formats.rst:316
 msgid "Attributes Specific to Entities"
-msgstr ""
+msgstr "Attributs spécifiques aux entités"
 
 #: ../../distribution_formats.rst:325 ../../distribution_formats.rst:475
 msgid "Alternate Street Name NID (left, right)"
