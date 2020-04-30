@@ -28,25 +28,17 @@ Creation date of the data product specifications: 2007-05-31
 Responsible party
 -----------------
 
-GeoBase
+| GeoBase
+| Statistics Canada
+| Statistical Geomatics Centre 
+| 170, Tunney’s Pasture Driveway, 
+| Ottawa (Ontario), Canada
+| K1A 0T6
 
-Statistics Canada
-
-Statistical Geomatics Centre 
-
-170, Tunney’s Pasture Driveway, 
-
-Ottawa (Ontario), Canada
-
-K1A 0T6
-
-Telephone: 1-800-263-1136
-
-Fax: 1-514-283-9350
-
-E-mail: STATCAN.infostats-infostats.STATCAN@canada.ca
-
-Website: http://www.geobase.ca 
+| Telephone: 1-800-263-1136
+| Fax: 1-514-283-9350
+| E-mail: STATCAN.infostats-infostats.STATCAN@canada.ca
+| Website: http://www.geobase.ca 
 
 Language
 --------
