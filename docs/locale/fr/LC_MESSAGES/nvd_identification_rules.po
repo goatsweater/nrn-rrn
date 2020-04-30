@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: National Road Network \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-29 16:02-0400\n"
+"POT-Creation-Date: 2020-04-30 15:08-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,102 +20,121 @@ msgstr ""
 
 #: ../../nvd_identification_rules.rst:3
 msgid "National Vector Data - Identification Rules"
-msgstr ""
+msgstr "Données vectorielles nationales - Règles d’identification"
 
 #: ../../nvd_identification_rules.rst:6
 msgid "Contents"
-msgstr ""
+msgstr "Contenu"
 
 #: ../../nvd_identification_rules.rst:9
 msgid "Abbreviations"
-msgstr ""
+msgstr "Sigles et abréviation"
 
 #: ../../nvd_identification_rules.rst:11
 msgid "GUID"
-msgstr ""
+msgstr "GUID"
 
 #: ../../nvd_identification_rules.rst:13
 msgid "Globally Unique Identifiers"
-msgstr ""
+msgstr "Globally Unique Identifiers"
 
 #: ../../nvd_identification_rules.rst:14
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: ../../nvd_identification_rules.rst:16
 msgid "Identifier"
-msgstr ""
+msgstr "Identifiant"
 
 #: ../../nvd_identification_rules.rst:17
 msgid "IEEE"
-msgstr ""
+msgstr "IEEE"
 
 #: ../../nvd_identification_rules.rst:19
-msgid ""
-"Institute of Electrical and Electronics Engineers NHN National "
-"Hydrographic Network"
-msgstr ""
+msgid "Institute of Electrical and Electronics Engineers"
+msgstr "Institute of Electrical and Electronics Engineers"
 
 #: ../../nvd_identification_rules.rst:20
-msgid "NID"
-msgstr ""
+msgid "NHN"
+msgstr "RHN"
 
 #: ../../nvd_identification_rules.rst:22
-msgid "National Identifier"
-msgstr ""
+#, fuzzy
+msgid "National Hydrographic Network"
+msgstr "Réseau routier national"
 
 #: ../../nvd_identification_rules.rst:23
-msgid "NRCan"
-msgstr ""
+msgid "NID"
+msgstr "IDN"
 
 #: ../../nvd_identification_rules.rst:25
-msgid "Natural Resources Canada"
-msgstr ""
+msgid "National Identifier"
+msgstr "Identifiant national"
 
 #: ../../nvd_identification_rules.rst:26
-msgid "NRN"
-msgstr ""
+msgid "NRCan"
+msgstr "RNCan"
 
 #: ../../nvd_identification_rules.rst:28
-msgid "National Road Network"
-msgstr ""
+msgid "Natural Resources Canada"
+msgstr "Ressources naturelles Canada"
 
 #: ../../nvd_identification_rules.rst:29
-msgid "NSDI"
-msgstr ""
+msgid "NRN"
+msgstr "RRN"
 
 #: ../../nvd_identification_rules.rst:31
-msgid "National Spatial Data Infrastructure – USA NVD National Vector Data"
-msgstr ""
+msgid "National Road Network"
+msgstr "Réseau routier national"
 
 #: ../../nvd_identification_rules.rst:32
-msgid "UUID"
-msgstr ""
+msgid "NSDI"
+msgstr "NSDI"
 
 #: ../../nvd_identification_rules.rst:34
-msgid "Universal Unique Identifiers"
-msgstr ""
+msgid "National Spatial Data Infrastructure – USA"
+msgstr "National Spatial Data Infrastructure – USA"
+
+#: ../../nvd_identification_rules.rst:35
+msgid "NVD"
+msgstr "DVN"
 
 #: ../../nvd_identification_rules.rst:37
-msgid "Terms and Definitons"
-msgstr ""
+msgid "National Vector Data"
+msgstr "Données vectorielles nationales"
 
-#: ../../nvd_identification_rules.rst:42
-msgid "Network Linear Element"
-msgstr ""
+#: ../../nvd_identification_rules.rst:38
+msgid "UUID"
+msgstr "IDUU"
 
 #: ../../nvd_identification_rules.rst:40
+msgid "Universal Unique Identifiers"
+msgstr "Identifiant universel unique"
+
+#: ../../nvd_identification_rules.rst:43
+msgid "Terms and Definitons"
+msgstr "Termes et Définitions"
+
+#: ../../nvd_identification_rules.rst:48
+msgid "Network Linear Element"
+msgstr "Données vectorielles nationales"
+
+#: ../../nvd_identification_rules.rst:46
 msgid ""
 "Several layers of vector data, referred to as National Vector Data (NVD),"
 " will share the same specification. The National Road Network (NRN) and "
 "National Hydrographic Network (NHN) are examples of NVD."
 msgstr ""
+"Plusieurs couches de données vectorielles partageront les mêmes "
+"spécifications. Ces couches sont appelées Données vectorielles "
+"nationales (DVN). Le réseau routier national (RRN) et le réseau "
+"hydrographique national (RHN) sont des exemples de DVN."
 
-#: ../../nvd_identification_rules.rst:45
+#: ../../nvd_identification_rules.rst:51
 msgid "Overview"
-msgstr ""
+msgstr "Aperçu"
 
-#: ../../nvd_identification_rules.rst:47
+#: ../../nvd_identification_rules.rst:53
 msgid ""
 "The objective is to update the NVD product on a regular basis as soon as "
 "mechanisms have been established between NRN partners. One of the update "
@@ -123,8 +142,13 @@ msgid ""
 "establishment of change management principles is founded on two basic "
 "concepts: identification rules and definition / classification of change."
 msgstr ""
+"L’objectif est d’actualiser les produits DVN sur une base régulière "
+"dès que des mécanismes auront été implantés parmi les partenaires de"
+" DVN. Un de ces mécanismes est la mise en œuvre de principes de gestion "
+"des modifications. Deux concepts de base sont nécessaires : règles "
+"d’identification et définition des classifications des modifications."
 
-#: ../../nvd_identification_rules.rst:52
+#: ../../nvd_identification_rules.rst:58
 msgid ""
 "The concept of Identification is based on objects that depict real-world "
 "phenomena that vary over time, either by their description, by their "
@@ -139,30 +163,49 @@ msgid ""
 "permanent identification of a phenomenon and its application must achieve"
 " two primary objectives:"
 msgstr ""
+"Quant à l’identification, les objets qui illustrent les phénomènes du "
+"monde réel varient avec le temps, soit par leur description, soit par la"
+" précision des instruments et méthodes utilisées pour leur acquisition"
+" initiale. Il est donc possible que plus d’une représentation des mêmes"
+" phénomènes existent. À titre d’exemple, dans le cadre de cette "
+"initiative, nous voulons élaborer et maintenir une seule représentation"
+" du réseau routier national. Les rôles des identifiants sont "
+"fondamentaux en vue d’assurer le bon échange et la bonne circulation des"
+" objets qui ont été modifiés à la source et qui ont déjà été "
+"livrés aux utilisateurs. L’implantation d’une norme pour "
+"l’identification permanente d’un phénomène et de son application vise "
+"deux objectifs primaires:"
 
-#: ../../nvd_identification_rules.rst:62
+#: ../../nvd_identification_rules.rst:68
 msgid ""
 "Facilitate the management and distribution of object changes in an "
 "incremental manner;"
 msgstr ""
+"faciliter la gestion et la distribution des modifications d'objets d'une "
+"manière progressive;"
 
-#: ../../nvd_identification_rules.rst:63
+#: ../../nvd_identification_rules.rst:69
 msgid "Facilitate the conflation process, if necessary."
-msgstr ""
+msgstr "faciliter le processus de fusion, si nécessaire."
 
-#: ../../nvd_identification_rules.rst:65
+#: ../../nvd_identification_rules.rst:71
 msgid ""
 "Every occurrence of NVD basic features must be uniquely identified: As an"
 " example, each geometric object in the NRN: *Road Element*, *Ferry "
 "Connection*, and *Junction* that describe specific characteristics of the"
 " linear network must also be uniquely identified."
 msgstr ""
+"Chaque occurrence des entités fondamentales des DVN doit être "
+"identifiée de façon unique. Par exemple dans le RRN, chaque objet "
+"géométrique : élément routier, liaison par transbordeur et jonction, "
+"décrivant des caractéristiques spécifiques du réseau linéaire "
+"doivent également être identifiés de façon unique."
 
-#: ../../nvd_identification_rules.rst:70
+#: ../../nvd_identification_rules.rst:76
 msgid "Identification Standard"
-msgstr ""
+msgstr "Norme d’identification"
 
-#: ../../nvd_identification_rules.rst:72
+#: ../../nvd_identification_rules.rst:78
 msgid ""
 "The Identifiers must be permanently assigned or persistent. To ensure "
 "their stability, the assigned IDs must be insignificant (inconsequential)"
@@ -171,8 +214,15 @@ msgid ""
 "encapsulating information within the ID can cause ID modification without"
 " any real change ever having occurred in the data."
 msgstr ""
+"Les identifiants doivent être attribués d’une manière permanente. Pour"
+" assurer leur stabilité, les ID attribués doivent être insignifiants "
+"(sans conséquence) dans leur expression [#f1]_. En d’autres mots, les ID"
+" ne doivent pas contenir d’information relative aux données. Des "
+"expériences antérieures ont démontré qu’encapsuler de l’information "
+"dans les ID peut provoquer une modification des ID sans qu’aucun "
+"changement réel ne se produise dans les données."
 
-#: ../../nvd_identification_rules.rst:78
+#: ../../nvd_identification_rules.rst:84
 msgid ""
 "Several standards have dealt with the Road Network. Most of them point to"
 " the importance of using Identifiers without ever specifying the manner, "
@@ -185,8 +235,19 @@ msgid ""
 "Information Standard - Encoding [#f6]_ the UUID definition did comply to "
 "the fundamental requirements sought after:"
 msgstr ""
+"Plusieurs normes ont traité la problématique du réseau routier. La "
+"plupart de celles-ci invoquent l’importance d’utiliser des identifiants "
+"sans ne jamais préciser d’aucune manière le format ou la méthode "
+"d’application. Les documents suivants, GDF [#f2]_, GIS-T (SIG en normes "
+"de données des transports) [#f3]_ et CEN TC 278 [#f4]_ ne comportent "
+"aucune spécification reliée aux identifiants. La norme National Spatial"
+" Data Infrastructure – USA (NSDI) Framework Transportation Identification"
+" Standard a été le seul document qui a clairement défini et expliqué "
+"un code d’identifiant [#f5]_. Dans la norme ISO TC 211/SC: Geographic "
+"Information Standard - Encoding [#f6]_, il y a une définition des IDUU "
+"qui correspond exactement aux exigences fondamentales recherchées:"
 
-#: ../../nvd_identification_rules.rst:87
+#: ../../nvd_identification_rules.rst:93
 msgid ""
 "“An application domain defines a universe and an identification scheme "
 "called universal unique identifiers (UUIDs). A UUID is assigned to an "
@@ -198,41 +259,62 @@ msgid ""
 "identifiers. The identifiers are unique within a well-defined limited "
 "universe defined by an application domain.”"
 msgstr ""
+"Un domaine d’application définit un univers et un schéma "
+"d’identification appelés identifiants universels uniques (IDUU). Un IDUU"
+" est attribué à un objet quand il est créé et demeure stable pendant "
+"toute la durée de vie de l’objet. L’IDUU d’un objet supprimé ne peut "
+"pas être réutilisé. Les IDUU servent à faire la gestion à long terme"
+" de données distribuées et à réaliser des mécanismes "
+"d’actualisation. Ces identifiants sont également appelés identifiants "
+"persistants. Un serveur de noms spéciaux peut être utilisé pour "
+"résoudre les identifiants persistants. Les identifiants sont uniques à "
+"l’intérieur d’un univers limité bien défini caractérisé par un "
+"domaine d’application."
 
-#: ../../nvd_identification_rules.rst:96
+#: ../../nvd_identification_rules.rst:102
 msgid ""
 "This ISO definition is thus adopted for the “Identifier”. A UUID "
 "generation mechanism is presented in the following section."
 msgstr ""
+"Cette définition de l’ISO pour les identifiants a été adoptée. Le "
+"mécanisme de génération est présenté à la section suivante."
 
-#: ../../nvd_identification_rules.rst:100
+#: ../../nvd_identification_rules.rst:106
 msgid "NVD Identification Standard"
-msgstr ""
+msgstr "Norme d’identification des DVN"
 
-#: ../../nvd_identification_rules.rst:102
+#: ../../nvd_identification_rules.rst:108
 msgid ""
 "ID uniqueness is one of the fundamental characteristics that must be "
 "maintained. Two techniques for making IDs unique were studied."
 msgstr ""
+"Le caractère unique des ID est l’une des caractéristiques fondamentales"
+" qu’il faut maintenir. Deux techniques pour rendre les ID uniques ont "
+"été étudiées."
 
-#: ../../nvd_identification_rules.rst:105
+#: ../../nvd_identification_rules.rst:111
 msgid ""
 "The first consists of mandating a firm to generate and manage ID ranges "
 "depending on data producers."
 msgstr ""
+"La première consiste à mandater une entreprise de générer et de "
+"gérer les étendues des ID selon les producteurs de données."
 
-#: ../../nvd_identification_rules.rst:107
+#: ../../nvd_identification_rules.rst:113
 msgid ""
 "The second consists of using a unique ID generation algorithm [#f7]_ that"
 " could be used by data producers with no particular management of range "
 "and domain."
 msgstr ""
+"La seconde consiste à utiliser un algorithme [#f7]_ de génération d’ID"
+" unique dont pourraient se servir les producteurs de données sans "
+"gestion particulière de l’étendue ou du domaine."
 
-#: ../../nvd_identification_rules.rst:110
+#: ../../nvd_identification_rules.rst:116
 msgid "The *second* method is best suited and was the one retained."
-msgstr ""
+msgstr "C’est la *seconde* méthode qui a été retenue."
 
-#: ../../nvd_identification_rules.rst:112
+#: ../../nvd_identification_rules.rst:118
 msgid ""
 "A UUID is an identifier that is unique across both space and time, with "
 "respect to the space of all UUIDs. UUID generation does not require a "
@@ -244,8 +326,18 @@ msgid ""
 "authority. This UUID specification assumes the availability of an IEEE "
 "802 address."
 msgstr ""
+"Un IDUU est un identifiant qui est unique dans le temps et l’espace, "
+"relativement à l’espace de tous les IDUU. La génération des IDUU ne "
+"demande pas une autorité d’enregistrement pour chacun des identifiants. "
+"Plutôt, l’identifiant demande une valeur unique pour l’espace pour "
+"chacun des générateurs d’IDUU. Cette valeur spatialement unique est "
+"spécifiée en tant qu’adresse IEEE 802, qui est normalement déjà "
+"appliquée aux systèmes reliés en réseau. Cette adresse de 48 bits "
+"peut être attribuée à partir d’un bloc d’adresses obtenu par "
+"l’entremise de l’autorité d’enregistrement IEEE. Cette spécification "
+"IDUU présume de la disponibilité d’une adresse IEEE 802."
 
-#: ../../nvd_identification_rules.rst:120
+#: ../../nvd_identification_rules.rst:126
 msgid ""
 "The UUID consists of a 16-byte record and must void of padding between "
 "fields. The hexadecimal values “a” to “f” must be lower case. The total "
@@ -253,28 +345,38 @@ msgid ""
 "representation (32 characters) is specified as a sequence of fields. The "
 "following string is a UUID example:"
 msgstr ""
+"L’IDUU consiste en un enregistrement de 16 octets et ne doit pas contenir"
+" de remplissage entre les champs. Les valeurs hexadécimales « a » à « f"
+" » doivent être en minuscule. La taille totale est de 128 bits. Pour fin"
+" de lecture par des humains, une représentation de chaîne IDUU (32 "
+"caractères) est spécifiée comme une séquence de champs. La chaîne "
+"suivante est un exemple d’IDUU :"
 
-#: ../../nvd_identification_rules.rst:125
+#: ../../nvd_identification_rules.rst:131
 msgid "378a3917e824422cb25f268b8295da51"
 msgstr ""
 
-#: ../../nvd_identification_rules.rst:127
+#: ../../nvd_identification_rules.rst:133
 msgid ""
 "For more information: "
 "http://www.opengroup.org/onlinepubs/9629399/apdxa.htm#tagcjh_20"
 msgstr ""
+"Pour plus de renseignements : "
+"http://www.opengroup.org/onlinepubs/9629399/apdxa.htm#tagcjh_20"
 
-#: ../../nvd_identification_rules.rst:129
+#: ../../nvd_identification_rules.rst:135
 msgid ""
 "The assignation and persistence rules of the UUID are further explained "
 "in the :doc:`nvd_change_management` document."
 msgstr ""
+"Les règles d’attribution et de persistance relativement aux IDUU sont "
+"expliquées dans le document :doc:`nvd_change_management`."
 
-#: ../../nvd_identification_rules.rst:133
+#: ../../nvd_identification_rules.rst:139
 msgid "NID Values"
-msgstr ""
+msgstr "Valeurs IDN"
 
-#: ../../nvd_identification_rules.rst:135
+#: ../../nvd_identification_rules.rst:141
 msgid ""
 "The algorithm described in the previous section provides producers the "
 "needed flexibility while working within a network of partners. The "
@@ -287,50 +389,74 @@ msgid ""
 " synchronization. Modifications to NID’s would render them useless for "
 "data synchronization."
 msgstr ""
+"L’algorithme abordé au paragraphe précédent permet de la souplesse "
+"pour travailler avec plusieurs partenaires. Cet algorithme bien connu "
+"pourrait être utilisé par n’importe quel utilisateur de données pour "
+"modifier les données et y ajouter un nouvel IDN. Les IDN doivent être "
+"générés seulement par des organismes autorisés. Un soin particulier "
+"doit être accordé aux IDN. Ces IDN permettront éventuellement la "
+"synchronisation des données parmi des organismes. Les utilisateurs de "
+"données doivent s’assurer de ne pas modifier d’aucune manière ces "
+"valeurs IDN. Sinon, l’utilisation des IDN pour fin de synchronisation "
+"sera inutile."
 
-#: ../../nvd_identification_rules.rst:145
+#: ../../nvd_identification_rules.rst:151
 msgid "Footnotes"
-msgstr ""
+msgstr "Références"
 
-#: ../../nvd_identification_rules.rst:147
+#: ../../nvd_identification_rules.rst:153
 msgid ""
 "Bédard Y, Larrivé S et Proulx M-J. “Travaux de modélisation pour la "
 "mise en place de la base de données géospatiale“ ISIS, Laval "
 "University, March 2000"
 msgstr ""
+"Bédard, Y., Larrivé, S. et Proulx, M.-J. Travaux de modélisation pour "
+"la mise en place de la base de données géospatiale ISIS, Université "
+"Laval, mars 2000."
 
-#: ../../nvd_identification_rules.rst:149
+#: ../../nvd_identification_rules.rst:155
 msgid ""
 "ISO Technical Committee 204, Working group 3, “ISO/TR 14825 GDF – "
 "Geographic Data Files – Version 4.0,” ISO/TC 204 N629, October 12, 2000"
 msgstr ""
+"ISO Technical Committee 204, Working Group 3. ISO/TR 14825 GDF – "
+"Geographic Data Files – Version 4.0, ISO/TC 204 N629, 12 octobre 2000."
 
-#: ../../nvd_identification_rules.rst:151
+#: ../../nvd_identification_rules.rst:157
 msgid ""
 "Dueker, Kenneth J. and Butler, J. Allison, “GIS-T Enterprise Data Model "
 "with Suggested Implementation Choices“,Center for Urban Studies School of"
 " Urban and Public Affairs Portland State University, October 1, 1997"
 msgstr ""
+"Dueker, Kenneth J. et Butler, J. Allison. GIS-T Enterprise Data Model "
+"with Suggested Implementation Choices, Center for Urban Studies, School "
+"of Urban and Public Affairs, Portland State University, 1er octobre 1997."
 
-#: ../../nvd_identification_rules.rst:154
+#: ../../nvd_identification_rules.rst:160
 msgid "http://www.nen.nl/cen278"
-msgstr ""
+msgstr "http://www.nen.nl/cen278"
 
-#: ../../nvd_identification_rules.rst:155
+#: ../../nvd_identification_rules.rst:161
 msgid ""
 "National Spatial Data Infrastructure, “NSDI FRAMEWORK TRANSPORTATION "
 "IDENTIFICATION STANDARD -- Public Review Draft,” FGDC-STD-999.1-2000, "
 "Ground Transportation Subcommittee Federal Geographic Data Committee, "
 "December, 2000"
 msgstr ""
+"National Spatial Data Infrastructure. NSDI FRAMEWORK TRANSPORTATION "
+"IDENTIFICATION STANDARD -- Public Review Draft, FGDC-STD-999.1-2000, "
+"Ground Transportation Subcommittee, Federal Geographic Data Committee, "
+"décembre 2000."
 
-#: ../../nvd_identification_rules.rst:158
+#: ../../nvd_identification_rules.rst:164
 msgid ""
 "ISO Technical Committee 211, Working Group 4, “Geographic Information – "
 "Encoding,” ISO/CD 19118.3, June 15, 2001"
 msgstr ""
+"ISO Technical Committee 211, Working Group 4. Geographic Information – "
+"Encoding, ISO/CD 19118.3, 15 juin 2001."
 
-#: ../../nvd_identification_rules.rst:160
+#: ../../nvd_identification_rules.rst:166
 msgid ""
 "Readers wishing to use a standards-body definition of UUIDs/GUIDs should "
 "refer to: ISO/IEC 11578:1996 Information technology -- Open Systems "
@@ -341,4 +467,13 @@ msgid ""
 "Procedure Call 8/94, which was the basis for the ISO specification) "
 "http://www.opengroup.org/publications/catalog/c706.htm"
 msgstr ""
-
+"Si vous désirez consulter une définition officielle de IDUU/GUID, nous "
+"vous encourageons à aller à : ISO/IEC 11578:1996 Technologies de "
+"l'information -- Interconnexion de systèmes ouverts (OSI) -- Appel de "
+"procédures à distance (RPC) : "
+"http://www.iso.org/iso/fr/CatalogueDetailPage.CatalogueDetail?CSNUMBER=2229&ICS1=35&ICS2="
+" 100&ICS3=70; ou à : DCE 1.1: Remote Procedure Call Open Group Technical"
+" Standard Document Number C706, août 1997, 737 pages. (Ce document "
+"remplace C309 DCE: Remote Procedure Call 8/94 qui a servi de base pour la"
+" spécification ISO) : "
+"http://www.opengroup.org/publications/catalog/c706.htm"
