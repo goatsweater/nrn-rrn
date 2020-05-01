@@ -195,7 +195,7 @@ has changed from unpaved to paved.
 .. figure:: /_static/figures/example_of_an_update.png
     :alt: Example of an update
 
-    Figure 1: Example of an update.
+    Figure 2: Example of an update.
 
 Table 1: Updating effects shows the geometric effects observed after the update.
 
