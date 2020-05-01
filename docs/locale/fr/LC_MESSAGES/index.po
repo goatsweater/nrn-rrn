@@ -84,7 +84,7 @@ msgstr ""
 
 #: ../../index.rst:41
 msgid "Indices and tables"
-msgstr ""
+msgstr "Indices et tableaux"
 
 #: ../../index.rst:43
 msgid ":ref:`genindex`"
