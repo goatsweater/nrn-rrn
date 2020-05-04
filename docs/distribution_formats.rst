@@ -104,9 +104,6 @@ Examples:
 * ``NRN_AB_4_0_ADDR_ADDED.gml`` (Tables of the addressing attributes added in the dataset of 
   Alberta, edition 4, version 0).
 
-GeoBase
-^^^^^^^
-
 An XML schema (XSD file) is also provided along with a GML data file. This file defines, 
 in a structured manner, the type of content, the syntax and the semantic of GML documents. 
 The name of this file is ``NRN_<IDENTIFIER>_<edition>_<version>_<CONTENT>[_<MODIFICATION>].xsd`` 
@@ -210,7 +207,7 @@ Examples:
 
 * ``nrn_rrn_ab_4_0_fgdc_en.xml`` (English metadata file for dataset of Alberta, edition 4, 
   version 0 in FGDC/XML format)
-* ``nrn_rrn_ab_4_0_fgdc_fr.xml`` (French metadata file for dataset of Alberta, edition 4, 
+* ``nrn_rrn_ab_4_0_fgdc_fr.html`` (French metadata file for dataset of Alberta, edition 4, 
   version 0 in FGDC/HTML format)
 
 List of distribution file names
@@ -493,7 +490,7 @@ Road Segment
 |                                         | right_OfficialPlaceName *        | R_PLACENAM      | C(100)    |
 +-----------------------------------------+----------------------------------+-----------------+-----------+
 | Last House Number (left, right)         | left_OfficialStreetNameConcat *  | L_STNAME_C      | C(100)    |
-|                                         +-------------------------------+--------------------+-----------+
+|                                         +----------------------------------+-----------------+-----------+
 |                                         | right_OfficialStreetNameConcat * | R_STNAME_C      | C(100)    |
 +-----------------------------------------+----------------------------------+-----------------+-----------+
 | Paved Road Surface Type                 | pavedRoadSurfaceType             | PAVSURF         | C(8)      |
