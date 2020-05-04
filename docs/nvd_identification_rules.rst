@@ -16,7 +16,10 @@ Abbreviations
         Identifier
 
     IEEE
-        Institute of Electrical and Electronics Engineers NHN National Hydrographic Network
+        Institute of Electrical and Electronics Engineers
+    
+    NHN
+        National Hydrographic Network
 
     NID
         National Identifier
@@ -28,7 +31,10 @@ Abbreviations
         National Road Network
     
     NSDI
-        National Spatial Data Infrastructure – USA NVD National Vector Data
+        National Spatial Data Infrastructure – USA
+    
+    NVD
+        National Vector Data
 
     UUID
         Universal Unique Identifiers

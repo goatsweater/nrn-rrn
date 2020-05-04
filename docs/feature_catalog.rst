@@ -19,27 +19,35 @@ Acronyms and Abbreviations
 ==========================
 
 .. glossary::
-    CMAS: 
-        Circular Map Accuracy Standard DEM: Digital Elevation Model
+    CMAS
+        Circular Map Accuracy Standard
     
-    GPS: 
+    DEM
+        Digital Elevation Model
+    
+    GPS
         Global Positioning System
     
-    ID: 
+    ID
         Identifier
     
-    ISO/TC: 
-        International Organisation for Standardisation, Technical Committee NatProvTer: National, 
-        Provincial, or Territorial
+    ISO/TC
+        International Organisation for Standardisation, Technical Committee
     
-    NID: 
+    NatProvTer
+        National, Provincial, or Territorial
+    
+    NID
         National Identifier
     
-    NRCan: 
+    NRCan
         Natural Resources Canada
     
-    NRN: 
-        National Road Network UUID: Universal Unique Identifier
+    NRN
+        National Road Network
+    
+    UUID
+        Universal Unique Identifier
 
 Terms and Definitions
 =====================

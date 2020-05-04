@@ -23,30 +23,24 @@ National Road Network
 Reference date
 --------------
 
-Creation date of the data product specifications: 2007-05-31
+Creation date of the data product specifications:
+
+2007-05-31
 
 Responsible party
 -----------------
 
-GeoBase
+| GeoBase
+| Statistics Canada
+| Statistical Geomatics Centre 
+| 170, Tunney’s Pasture Driveway, 
+| Ottawa (Ontario), Canada
+| K1A 0T6
 
-Statistics Canada
-
-Statistical Geomatics Centre 
-
-170, Tunney’s Pasture Driveway, 
-
-Ottawa (Ontario), Canada
-
-K1A 0T6
-
-Telephone: 1-800-263-1136
-
-Fax: 1-514-283-9350
-
-E-mail: STATCAN.infostats-infostats.STATCAN@canada.ca
-
-Website: http://www.geobase.ca 
+| Telephone: 1-800-263-1136
+| Fax: 1-514-283-9350
+| E-mail: STATCAN.infostats-infostats.STATCAN@canada.ca
+| Website: http://www.geobase.ca 
 
 Language
 --------
@@ -75,7 +69,10 @@ Abbreviations and acronyms
 
 .. glossary::
     CRSID
-        Coordinate Reference System Identifier CCOG Canadian Council on Geomatics
+        Coordinate Reference System Identifier
+    
+    CCOG
+        Canadian Council on Geomatics
     
     GDF
         Geographic Data File
@@ -156,6 +153,7 @@ Level
 -----
 
 This scope refers to the following level according to the ISO 19115 standard and CAN/CGSB - 171.100- 2009 standards:
+
 006 - series
 
 Level name
@@ -321,7 +319,9 @@ ISO 3166-1:1997 Codes for the representation of names of countries and their sub
 Date
 """"
 
-Reference date of the ISO 3166-1 standard: 1997-10-01
+Reference date of the ISO 3166-1 standard: 
+
+1997-10-01
 
 Date type code
 """"""""""""""
@@ -331,7 +331,9 @@ Type of date according to ISO 19115 standard: 002 - publication
 Code
 ^^^^
 
-Code of the geographical region covered by the product according to the ISO 3166-1 standard: CA – Canada
+Code of the geographical region covered by the product according to the ISO 3166-1 standard: 
+
+CA – Canada
 
 Extent type code
 ^^^^^^^^^^^^^^^^
@@ -357,7 +359,8 @@ Point) with which is associated a series of descriptive attributes such as, amon
 House Number, Street Name Body, Place Name, Functional Road Class, Pavement Status, Number Of Lanes, Structure Type, 
 Route Number, Route Name, Exit Number.
 
-Addressing information (address range, street name and place name) linked to Road Segment entities are also distributed in three distinct tables (Address Range, Street and Place Names and Alternate Name Link).
+Addressing information (address range, street name and place name) linked to Road Segment entities are also distributed 
+in three distinct tables (Address Range, Street and Place Names and Alternate Name Link).
 
 Data modelling schema used
 --------------------------
