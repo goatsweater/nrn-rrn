@@ -38,6 +38,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# Explicitely set the master document to ensure it is found consistently by 
+# both Sphinx and readthedocs.org
+master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 
