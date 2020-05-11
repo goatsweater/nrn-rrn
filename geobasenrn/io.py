@@ -1,5 +1,7 @@
 """Definitions for valid layers within the GPKG."""
 
+import fiona
+import geopandas as gpd
 import logging
 import osgeo.ogr as ogr
 import pandas as pd
@@ -77,8 +79,63 @@ def get_url(url, max_attempts=10, **kwargs):
                 logger.warning("Failed to get url response. Retrying...")
                 time.sleep(seconds_between_attempts)
 
+def get_gpkg_contents(gpkg_path: Path) -> dict:
+    """Load the entire contents of a GeoPackage into DataFrames so that they can be processed further.
 
-# Base class for layers in a dataset to provide common bits of functionality
+    This will create either a GeoDataFrame or a DataFrame, depending on if the layer in the GPKG file has a
+    spatial column or not.
+    """
+    # Each layer will be keyed by name.
+    dframes = dict()
+
+    # Layers to look for within a dataset.
+    spatial_layers = ['blkpassage', 'ferryseg', 'junction', 'roadseg', 'tollpoint']
+    attribute_layers = ['addrange', 'altnamlink', 'strplaname']
+
+    # Get a list of layers within the GPKG file
+    existing_layers = fiona.listlayers(gpkg_path)
+
+    # Look for matches, and store the layer as a DataFrame. Layer names in geopackages have names that include their
+    # version information. The name is always at the end though.
+    for layer_name in spatial_layers:
+        # Names should be in upper case
+        layer_slug = layer_name.upper()
+        
+        # Check each existing layer
+        for gpkg_layer in existing_layers:
+            if gpkg_layer.endswith(layer_slug):
+                dframes[layer_name] = gpd.read_file(gpkg_path, layer=gpkg_layer)
+
+    for layer_name in attribute_layers:
+        # Names should be in upper case
+        layer_slug = layer_name.upper()
+
+        try:
+            # Create sqlite connection.
+            conn = sqlite3.connect(gpkg_path)
+            
+            # Check each existing layer
+            for gpkg_layer in existing_layers:
+                if gpkg_layer.endswith(layer_slug):
+                    dframes[layer_name] = pd.read_sql_table(gpkg_layer, con=conn, coerce_float=False)
+            
+            conn.close()
+        except sqlite3.Error as err:
+            logger.exception("Unable to load GPKG attribute tables from: %s", gpkg_path)
+            raise err
+    
+    # Generate a warning for every table that could not be found
+    for layer in (spatial_layers + attribute_layers):
+        if layer not in dframes:
+            logger.warning("Layer not found: %s", layer)
+    
+    # Return everything that was found.
+    return dframes
+
+
+
+
+# Base class for layers in a dataset to provide common bits of functionality.
 class BaseTable:
     """A base class to provide some common functions for all layers.
 
