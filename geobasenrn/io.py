@@ -4,6 +4,7 @@ import logging
 import osgeo.ogr as ogr
 import pandas as pd
 from pathlib import Path
+import requests
 import sqlite3
 import tempfile
 import zipfile
@@ -56,7 +57,25 @@ def df_to_gpkg(gpkg: Path, df: pandas.DataFrame, table_name: str)
         logger.exception(f"Unable to write to {gpkg}")
         raise err
     
+def get_url(url, max_attempts=10, **kwargs):
+    """Attempts to retrieve a url."""
+    # how long to wait between failed attempts
+    seconds_between_attempts = 5
 
+    for attempt in range(max_attempts):
+        try:
+            logger.debug("Connecting to url (attempt %s of %s): %s", attempt, max_attempts, url)
+
+            # Get url response.
+            response = requests.get(url, **kwargs)
+            return response
+        except (TimeoutError, requests.exceptions.RequestException) as err:
+            if attempt < max_attempts:
+                logger.exception("Failed to retrieve file within %s attempts: %s", max_attempts, err)
+                raise err
+            else:
+                logger.warning("Failed to get url response. Retrying...")
+                time.sleep(seconds_between_attempts)
 
 
 # Base class for layers in a dataset to provide common bits of functionality
