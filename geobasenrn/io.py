@@ -124,7 +124,7 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
             logger.exception("Unable to load GPKG attribute tables from: %s", gpkg_path)
             raise err
     
-    # Generate a warning for every table that could not be found
+    # Generate a warning for every table that could not be found.
     for layer in (spatial_layers + attribute_layers):
         if layer not in dframes:
             logger.warning("Layer not found: %s", layer)
@@ -132,7 +132,26 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
     # Return everything that was found.
     return dframes
 
+def get_valid_layer_name(slug: str, identifier: str, major: int, minor: int, lang: str='en') -> str:
+    """Generate a valid layer name to be used in layered datasets.
+    
+    At the moment supported layered datasets are GPKG and SHP.
+    """
+    layer_name = ''
 
+    # If the slug or identifier are not valid strings an exception would be thrown.
+    if type(slug) is not str:
+        slug = str(slug)
+    if type(identifier) is not str:
+        identifier = str(identifier)
+
+    # Generate the layer name.
+    if lang='en':
+        layer_name = f'NRN_{identifier.upper()}_{major}_{minor}_{slug.upper()}'
+    elif lang='fr':
+        layer_name = f'RRN_{identifier.upper()}_{major}_{minor}_{slug.upper()}'
+    
+    return layer_name
 
 
 # Base class for layers in a dataset to provide common bits of functionality.
@@ -149,7 +168,8 @@ class AddressRangeTable(BaseTable):
     """Definition of the address range table."""
 
     def __init__(self):
-        name = 'addrange'
+        name_en = 'addrange'
+        name_fr = 'INTERVADR'
         fields = {
             "acqtech": ogr.FieldDefn("ACQTECH", ogr.OFTString),
             "metacover": ogr.FieldDefn("METACOVER", ogr.OFTString),
@@ -184,8 +204,20 @@ class AddressRangeTable(BaseTable):
             "r_rfsysind": ogr.FieldDefn("R_RFSYSIND", ogr.OFTString)
         }
     
-    def set_gpkg_name(self, source, major, minor):
-        return "NRN_<source>_<major_version>_<minor_version>_ADDRANGE"
+    def _set_field_widths(self):
+        """Set the width of each field in the table."""
+        #example
+        self.fields['acqtech'].SetWidth(24)
+    
+    def get_gpkg_name(self, source, major, minor, lang='en'):
+        """Generate a valid layer name to be used in GPKG outputs."""
+        if lang == 'en':
+            slug = self.name_en
+        else:
+            slug = self.name_fr
+
+        name = get_valid_layer_name(slug, source, major, minor, lang)
+        return name
     
         
 
