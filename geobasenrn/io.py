@@ -1,4 +1,4 @@
-"""Definitions for valid layers within the GPKG."""
+"""Definitions for valid layers within an NRN dataset."""
 
 import fiona
 import geopandas as gpd
@@ -19,8 +19,10 @@ def compress(inpath: Path, outfile: Path = None) -> None:
 
     If the outfile path does not contain a .zip extension, one is added.
     """
+    logger.debug("Compressing data in %s", inpath)
     # Do not try to compress an existing archive.
     if zipfile.is_zipfile(inpath):
+        logger.warning("Input file is already compressed")
         return None
 
     # If no output file was provided, use the path of the input file
@@ -32,17 +34,18 @@ def compress(inpath: Path, outfile: Path = None) -> None:
     # TODO: This is a crude check that can still end up creating invalid names.
     if not outfile.name.endswith('.zip'):
         outfile.name = f'{outfile.name}.zip'
+    logger.debug("Output file: %s", outfile)
     
     # Write all of the contents of the input to the zip archive
     try:
         with zipfile.ZipFile(outfile, 'w') as archive:
             for item in inpath.rglob('*'):
-                archive.write(item)
+                archive.write(item, arcname=item.name)
     except (zipfile.BadZipFile, zipfile.LargeZipFile) as err:
         logger.exception("Unable to create zip archive.")
         raise err
 
-def df_to_gpkg(gpkg: Path, df: pandas.DataFrame, table_name: str)
+def df_to_gpkg(gpkg: Path, df: pd.DataFrame, table_name: str):
     """Write a non-spatial DataFrame to a GeoPackage file."""
     try:
         # create a connection to the sqlite file
@@ -95,6 +98,7 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
 
     # Get a list of layers within the GPKG file
     existing_layers = fiona.listlayers(gpkg_path)
+    logger.debug("GPKG contains layers: %s", existing_layers)
 
     # Look for matches, and store the layer as a DataFrame. Layer names in geopackages have names that include their
     # version information. The name is always at the end though.
@@ -105,25 +109,22 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
         # Check each existing layer
         for gpkg_layer in existing_layers:
             if gpkg_layer.endswith(layer_slug):
+                logger.debug("Reading %s from GPKG", gpkg_layer)
                 dframes[layer_name] = gpd.read_file(gpkg_path, layer=gpkg_layer)
+
+    # Create sqlite connection string to load attribute tables directly.
+    conn_str = f'sqlite:///{gpkg_path}'
+    logger.debug("Loading attribute layers from %s", conn_str)
 
     for layer_name in attribute_layers:
         # Names should be in upper case
         layer_slug = layer_name.upper()
-
-        try:
-            # Create sqlite connection.
-            conn = sqlite3.connect(gpkg_path)
-            
-            # Check each existing layer
-            for gpkg_layer in existing_layers:
-                if gpkg_layer.endswith(layer_slug):
-                    dframes[layer_name] = pd.read_sql_table(gpkg_layer, con=conn, coerce_float=False)
-            
-            conn.close()
-        except sqlite3.Error as err:
-            logger.exception("Unable to load GPKG attribute tables from: %s", gpkg_path)
-            raise err
+        
+        # Check each existing layer
+        for gpkg_layer in existing_layers:
+            if gpkg_layer.endswith(layer_slug):
+                logger.debug("Reading %s from GPKG", gpkg_layer)
+                dframes[layer_name] = pd.read_sql_table(gpkg_layer, con=conn_str, coerce_float=False)
     
     # Generate a warning for every table that could not be found.
     for layer in (spatial_layers + attribute_layers):
@@ -139,9 +140,7 @@ def get_gpkg_filename(identifier: str, major: int, minor: int, lang: str='en') -
     if lang == 'fr':
         nrn_id = 'RRN'
 
-    # If the slug or identifier are not valid strings an exception would be thrown.
-    if type(slug) is not str:
-        slug = str(slug)
+    # If the identifier is not valid string an exception would be thrown.
     if type(identifier) is not str:
         identifier = str(identifier)
 
@@ -196,8 +195,11 @@ def get_kml_filename(identifier: str, lang: str='en') -> str:
 class BaseTable:
     """Superclass to layers within a dataset."""
     def __init__(self, name_en, name_fr):
-        self.name_en = name_en
-        self.name_fr = name_fr
+        logger.debug("BaseTable initialization started")
+
+        logger.debug("Table names: en=%s, fr=%s", name_en, name_fr)
+        self._name_en = name_en
+        self._name_fr = name_fr
 
         # Common fields
         self.fields = {
@@ -208,25 +210,28 @@ class BaseTable:
             'acqtech': ogr.FieldDefn('ACQTECH', ogr.OFTString),
             'specvers': ogr.FieldDefn('SPECVERS', ogr.OFTReal),
         }
+        logger.debug("Fields decalred: %s", self.fields.keys())
 
         self.shape_type = ogr.wkbNone
+        logger.debug("Shape type: %s", self.shape_type)
 
-        # Set the width of all the fields.
-        self._set_field_widths()
+        logger.debug("BaseTable initialization complete")
     
     def _set_field_width(self, field_name: str, width: int):
         """Set the field width for the given field."""
+        logger.debug("Setting field width for %s to %s", field_name, width)
 
         if field_name not in self.fields:
             raise ValueError("Cannot set width on undeclared field.")
 
-        self.fields[field_name].setWidth(width)
+        self.fields[field_name].SetWidth(width)
     
     def _set_field_name(self, field: str, name: str):
         """Set the name of a field."""
         if name == None or name == '':
             raise ValueError("Invalid field name.")
 
+        logger.debug("Setting field name on %s to %s", field, name)
         self.fields[field].SetName(name)
 
     def _set_field_widths(self):
@@ -247,10 +252,10 @@ class BaseTable:
     def get_gpkg_layer_name(self, source, major, minor, lang='en'):
         """Generate a valid name for the layer in GPKG outputs."""
         if lang == 'en':
-            slug = self.name_en
+            slug = self._name_en
             nrn_id = 'NRN'
         else:
-            slug = self.name_fr
+            slug = self._name_fr
             nrn_id = 'RRN'
 
         # Ensure source is a string to avoid any exceptions.
@@ -263,10 +268,10 @@ class BaseTable:
     def get_shp_layer_name(self, source, major, minor, lang='en'):
         """Generate a valid name to be used for each of the files in a shapefile."""
         if lang == 'en':
-            slug = self.name_en
+            slug = self._name_en
             nrn_id = 'NRN'
         else:
-            slug = self.name_fr
+            slug = self._name_fr
             nrn_id = 'RRN'
 
         # Ensure source is a string to avoid any exceptions.
@@ -329,6 +334,7 @@ class AddressRangeTable(BaseTable):
     """Definition of the address range table."""
 
     def __init__(self):
+        logger.debug("%s initialization started", self.__class__.__name__)
         super().__init__('addrange', 'INTERVADR')
 
         self.fields.update({
@@ -358,14 +364,17 @@ class AddressRangeTable(BaseTable):
             'l_rfsysind': ogr.FieldDefn('L_RFSYSIND', ogr.OFTString),
             'r_rfsysind': ogr.FieldDefn('R_RFSYSIND', ogr.OFTString)
         })
+        logger.debug("Fields: %s", self.fields.keys())
 
         self.shape_type = ogr.wkbNone
+        logger.debug("Shape type: %s", self.shape_type)
 
         # Set the width of all the fields.
         self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
+        super()._set_field_widths()
 
         widths = {
             'metacover': 8,
@@ -577,7 +586,7 @@ class FerrySegmentTable(BaseTable):
             'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
             'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
             'closing': ogr.FieldDefn('CLOSING', ogr.OFTString),
-            'ferrysegid': ogr.FieldDef('FERRYSEGID', ogr.OFTInteger),
+            'ferrysegid': ogr.FieldDefn('FERRYSEGID', ogr.OFTInteger),
             'roadclass': ogr.FieldDefn('ROADCLASS', ogr.OFTString),
             'rtename1en': ogr.FieldDefn('RTENAME1EN', ogr.OFTString),
             'rtename2en': ogr.FieldDefn('RTENAME2EN', ogr.OFTString),
@@ -995,7 +1004,7 @@ class StreetPlaceNameTable(BaseTable):
             'dirsuffix': 10,
             'muniquad': 10,
             'placename': 100,
-            'placetype': 100
+            'placetype': 100,
             'starticle': 20,
             'namebody': 50,
             'strtypre': 30,
