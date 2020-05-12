@@ -9,6 +9,7 @@ from pathlib import Path
 import requests
 import sqlite3
 import tempfile
+import warnings
 import zipfile
 
 logger = logging.getLogger(__name__)
@@ -132,12 +133,11 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
     # Return everything that was found.
     return dframes
 
-def get_valid_layer_name(slug: str, identifier: str, major: int, minor: int, lang: str='en') -> str:
-    """Generate a valid layer name to be used in layered datasets.
-    
-    At the moment supported layered datasets are GPKG and SHP.
-    """
-    layer_name = ''
+def get_gpkg_filename(identifier: str, major: int, minor: int, lang: str='en') -> str:
+    """Generate a name for a GPKG file that is conformant to NRN specifications."""
+    nrn_id = 'NRN'
+    if lang == 'fr':
+        nrn_id = 'RRN'
 
     # If the slug or identifier are not valid strings an exception would be thrown.
     if type(slug) is not str:
@@ -145,86 +145,519 @@ def get_valid_layer_name(slug: str, identifier: str, major: int, minor: int, lan
     if type(identifier) is not str:
         identifier = str(identifier)
 
-    # Generate the layer name.
-    if lang='en':
-        layer_name = f'NRN_{identifier.upper()}_{major}_{minor}_{slug.upper()}'
-    elif lang='fr':
-        layer_name = f'RRN_{identifier.upper()}_{major}_{minor}_{slug.upper()}'
+    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_GPKG_{lang}.gpkg'
+    return fname
+
+def get_shp_filename(identifier: str, major: int, minor: int, lang: str='en') -> str:
+    """Generate a name for a Shapefile file that is conformant to NRN specifications."""
+    nrn_id = 'NRN'
+    if lang == 'fr':
+        nrn_id = 'RRN'
+
+    # If the slug or identifier are not valid strings an exception would be thrown.
+    if type(slug) is not str:
+        slug = str(slug)
+    if type(identifier) is not str:
+        identifier = str(identifier)
+
+    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_SHP_{lang}.shp'
+    return fname
+
+def get_gml_filename(slug: str, identifier: str, major: int, minor: int, lang: str='en') -> str:
+    """Generate a name for a GML file that is conformant to NRN specifications."""
+    nrn_id = 'NRN'
+    if lang == 'fr':
+        nrn_id = 'RRN'
+
+    # If the slug or identifier are not valid strings an exception would be thrown.
+    if type(slug) is not str:
+        slug = str(slug)
+    if type(identifier) is not str:
+        identifier = str(identifier)
     
-    return layer_name
+    # Only 'GEOM' and 'ADDR' are considered valid slug values.
+    if slug not in ('GEOM', 'ADDR'):
+        raise ValueError("Invalid NRN GML file type")
 
+    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_{slug.upper()}.shp'
+    return fname
 
-# Base class for layers in a dataset to provide common bits of functionality.
+def get_kml_filename(identifier: str, lang: str='en') -> str:
+    """Generate a name for a KML file that is conformant to NRN specifications."""
+    nrn_id = 'nrn_rrn'
+
+    if type(identifier) is not str:
+        identifier = str(identifier)
+
+    fname = f'{nrn_id}_{identifier.lower()}_kml_{lang}.shp'
+    return fname
+
+# Table definitions that can exist in each dataset.
 class BaseTable:
-    """A base class to provide some common functions for all layers.
+    """Superclass to layers within a dataset."""
+    def __init__(self, name_en, name_fr):
+        self.name_en = name_en
+        self.name_fr = name_fr
 
-    This class is not meant to be used directly.
-    """
-    pass
+        # Common fields
+        self.fields = {
+            'nid': ogr.FieldDefn("NID", ogr.OFTString),
+            'credate': ogr.FieldDefn('CREDATE', ogr.OFTString),
+            'revdate': ogr.FieldDefn('REVDATE', ogr.OFTString),
+            'datasetnam': ogr.FieldDefn('DATASETNAM', ogr.OFTString),
+            'acqtech': ogr.FieldDefn('ACQTECH', ogr.OFTString),
+            'specvers': ogr.FieldDefn('SPECVERS', ogr.OFTReal),
+        }
 
-# Field definitions found in the different tables in each dataset.
+        self.shape_type = ogr.wkbNone
+    
+    def _set_field_width(self, field_name: str, width: int):
+        """Set the field width for the given field."""
+
+        if field_name not in self.fields:
+            raise ValueError("Cannot set width on undeclared field.")
+
+        self.fields[field_name].setWidth(width)
+
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+
+        widths = {
+            'nid': 32,
+            'credate': 8,
+            'revdate': 8,
+            'datasetnam': 25,
+            'acqtech': 23,
+            'specvers': 10,
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+    def get_gpkg_layer_name(self, source, major, minor, lang='en'):
+        """Generate a valid name for the layer in GPKG outputs."""
+        if lang == 'en':
+            slug = self.name_en
+            nrn_id = 'NRN'
+        else:
+            slug = self.name_fr
+            nrn_id = 'RRN'
+
+        # Ensure source is a string to avoid any exceptions.
+        if type(source) is not str:
+            source = str(source)
+        
+        name = f'{nrn_id}_{source.upper()}_{major}_{minor}_{slug.upper()}'
+        return name
+    
+    def get_shp_layer_name(self, source, major, minor, lang='en'):
+        """Generate a valid name to be used for each of the files in a shapefile."""
+        if lang == 'en':
+            slug = self.name_en
+            nrn_id = 'NRN'
+        else:
+            slug = self.name_fr
+            nrn_id = 'RRN'
+
+        # Ensure source is a string to avoid any exceptions.
+        if type(source) is not str:
+            source = str(source)
+        
+        name = f'{nrn_id}_{source.upper()}_{major}_{minor}_{slug.upper()}'
+        return name
+    
+    def get_gml_layer_name(self, source, major, minor, lang='en'):
+        """Generate a valid name to be used in GML files.
+        
+        This is an abstract implementation that is meant to be overridden.
+        """
+        warnings.warn("get_gml_name is meant to be overridden", ResourceWarning)
+        return ''
+
+    def get_kml_layer_name(self, source, major, minor, lang='en'):
+        """Generate a valid name to be used in KML files.
+        
+        This is an abstract implementation that is meant to be overridden.
+        """
+        warnings.warn("get_kml_name is meant to be overridden", ResourceWarning)
+        return ''
 
 class AddressRangeTable(BaseTable):
     """Definition of the address range table."""
 
     def __init__(self):
-        name_en = 'addrange'
-        name_fr = 'INTERVADR'
-        fields = {
-            "acqtech": ogr.FieldDefn("ACQTECH", ogr.OFTString),
-            "metacover": ogr.FieldDefn("METACOVER", ogr.OFTString),
-            "credate": ogr.FieldDefn("CREDATE", ogr.OFTDate),
-            "datasetnam": ogr.FieldDefn("DATASETNAM", ogr.OFTString),
-            "accuracy": ogr.FieldDefn("ACCURACY"),
-            "provider": ogr.FieldDefn("PROVIDER"),
-            "revdate": ogr.FieldDefn("REVDATE", ogr.OFTDate),
-            "specvers": ogr.FieldDefn("SPECVERS", ogr.OFTReal),
-            "l_altnamnid": ogr.FieldDefn("L_ALTNANID", ogr.OFTString),
-            "r_altnamnid": ogr.FieldDefn("R_ALTNANID", ogr.OFTString),
-            "l_digdirfg": ogr.FieldDefn("L_DIGDIRFG", ogr.OFTString),
-            "r_digdirfg": ogr.FieldDefn("R_DIGDIRFG", ogr.OFTString),
-            "l_hnumf": ogr.FieldDefn("L_HNUMF", ogr.OFTString),
-            "r_hnumf": ogr.FieldDefn("R_HNUMF", ogr.OFTString),
-            "l_hnumsuff": ogr.FieldDefn("L_HNUMSUFF", ogr.OFTString),
-            "r_hnumsuff": ogr.FieldDefn("R_HNUMSUFF", ogr.OFTString),
-            "l_hnumtypf": ogr.FieldDefn("L_HNUMTYPF", ogr.OFTString),
-            "r_hnumtypf": ogr.FieldDefn("R_HNUMTYPF", ogr.OFTString),
-            "l_hnumstr": ogr.FieldDefn("L_HNUMSTR", ogr.OFTString),
-            "r_hnumstr": ogr.FieldDefn("R_HNUMSTR", ogr.OFTString),
-            "l_hnuml": ogr.FieldDefn("L_HNUML", ogr.OFTString),
-            "r_hnuml": ogr.FieldDefn("R_HNUML", ogr.OFTString),
-            "nid": ogr.FieldDefn("NID", ogr.OFTString),
-            "l_hnumsufl": ogr.FieldDefn("L_HNUMSUFL", ogr.OFTString),
-            "r_hnumsufl": ogr.FieldDefn("R_HNUMSUFL", ogr.OFTString),
-            "l_hnumtypl": ogr.FieldDefn("L_HNUMTYPL", ogr.OFTString),
-            "r_hnumtypl": ogr.FieldDefn("R_HNUMTYPL", ogr.OFTString),
-            "l_offnanid": ogr.FieldDefn("L_OFFNANID", ogr.OFTString),
-            "r_offnanid": ogr.FieldDefn("R_OFFNANID", ogr.OFTString),
-            "l_rfsysind": ogr.FieldDefn("L_RFSYSIND", ogr.OFTString),
-            "r_rfsysind": ogr.FieldDefn("R_RFSYSIND", ogr.OFTString)
-        }
+        super().__init__('addrange', 'INTERVADR')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'l_altnamnid': ogr.FieldDefn('L_ALTNANID', ogr.OFTString),
+            'r_altnamnid': ogr.FieldDefn('R_ALTNANID', ogr.OFTString),
+            'l_digdirfg': ogr.FieldDefn('L_DIGDIRFG', ogr.OFTString),
+            'r_digdirfg': ogr.FieldDefn('R_DIGDIRFG', ogr.OFTString),
+            'l_hnumf': ogr.FieldDefn('L_HNUMF', ogr.OFTString),
+            'r_hnumf': ogr.FieldDefn('R_HNUMF', ogr.OFTString),
+            'l_hnumsuff': ogr.FieldDefn('L_HNUMSUFF', ogr.OFTString),
+            'r_hnumsuff': ogr.FieldDefn('R_HNUMSUFF', ogr.OFTString),
+            'l_hnumtypf': ogr.FieldDefn('L_HNUMTYPF', ogr.OFTString),
+            'r_hnumtypf': ogr.FieldDefn('R_HNUMTYPF', ogr.OFTString),
+            'l_hnumstr': ogr.FieldDefn('L_HNUMSTR', ogr.OFTString),
+            'r_hnumstr': ogr.FieldDefn('R_HNUMSTR', ogr.OFTString),
+            'l_hnuml': ogr.FieldDefn('L_HNUML', ogr.OFTString),
+            'r_hnuml': ogr.FieldDefn('R_HNUML', ogr.OFTString),
+            'l_hnumsufl': ogr.FieldDefn('L_HNUMSUFL', ogr.OFTString),
+            'r_hnumsufl': ogr.FieldDefn('R_HNUMSUFL', ogr.OFTString),
+            'l_hnumtypl': ogr.FieldDefn('L_HNUMTYPL', ogr.OFTString),
+            'r_hnumtypl': ogr.FieldDefn('R_HNUMTYPL', ogr.OFTString),
+            'l_offnanid': ogr.FieldDefn('L_OFFNANID', ogr.OFTString),
+            'r_offnanid': ogr.FieldDefn('R_OFFNANID', ogr.OFTString),
+            'l_rfsysind': ogr.FieldDefn('L_RFSYSIND', ogr.OFTString),
+            'r_rfsysind': ogr.FieldDefn('R_RFSYSIND', ogr.OFTString)
+        })
+
+        self.shape_type = ogr.wkbNone
     
     def _set_field_widths(self):
-        """Set the width of each field in the table."""
-        #example
-        self.fields['acqtech'].SetWidth(24)
-    
-    def get_gpkg_name(self, source, major, minor, lang='en'):
-        """Generate a valid layer name to be used in GPKG outputs."""
-        if lang == 'en':
-            slug = self.name_en
-        else:
-            slug = self.name_fr
+        """Set the width of each field in self.fields."""
 
-        name = get_valid_layer_name(slug, source, major, minor, lang)
-        return name
-    
-        
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider': 24,
+            'l_altnamnid': 32,
+            'r_altnamnid': 32,
+            'l_digdirfg': 18,
+            'r_digdirfg': 18,
+            'l_hnumf': 9,
+            'r_hnumf': 9,
+            'l_hnumsuff': 10,
+            'r_hnumsuff': 10,
+            'l_hnumtypf': 16,
+            'r_hnumtypf': 16,
+            'l_hnumstr': 9,
+            'r_hnumstr': 9,
+            'l_hnuml': 9,
+            'r_hnuml': 9,
+            'l_hnumsufl': 10,
+            'r_hnumsufl': 10,
+            'l_hnumtypl': 16,
+            'r_hnumtypl': 16,
+            'l_offnanid': 32,
+            'r_offnanid': 32,
+            'l_rfsysind': 18,
+            'r_rfsysind': 18
+        }
 
-# Common fields
-nid_field = ogr.FieldDefn("NID", ogr.OFTString)
-datasetnam_field = ogr.FieldDefn("DATASETNAM", ogr.OFTString)
-credate_field = ogr.FieldDefn("CREDATE", ogr.OFTDate)
-revdate_field = ogr.FieldDefn("REVDATE", ogr.OFTDate)
-specvers_field = ogr.FieldDefn("SPECVERS", ogr.OFTReal)
-acqtech_field = ogr.FieldDefn("ACQTECH", ogr.OFTString)
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+class AlternateNameLinkTable(BaseTable):
+    """Definition of the Alternate Name Link table."""
+    def __init__(self):
+        super().__init__('altnamlink', 'LIENNOFF')
+
+        self.fields.update({
+            'strnamenid': ogr.FieldDefn('STRNAMENID', ogr.OFTString)
+        })
+
+        self.shape_type = ogr.wkbNone
+
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        self._set_field_width('strnamenid', 32)
+
+class BlockedPassageTable(BaseTable):
+    """Definition of the Blocked Passage table."""
+    def __init__(self):
+        super().__init__('blkpassage', 'PASSAGEOBS')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'blkpassty': ogr.FieldDefn('BLKPASSTY', ogr.OFTString),
+            'roadnid': ogr.FieldDefn('ROADNID', ogr.OFTString)
+        })
+
+        self.shape_type = ogr.wkbPoint
+    
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider':24,
+            'blkpassty': 17,
+            'roadnid': 32,
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+class FerrySegmentTable(BaseTable):
+    """Definition of the Ferry Segment table."""
+    def __init__(self):
+        super().__init__('ferryseg', 'SLIAISONTR')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'closing': ogr.FieldDefn('CLOSING', ogr.OFTString),
+            'ferrysegid': ogr.FieldDef('FERRYSEGID', ogr.OFTInteger),
+            'roadclass': ogr.FieldDefn('ROADCLASS', ogr.OFTString),
+            'rtename1en': ogr.FieldDefn('RTENAME1EN', ogr.OFTString),
+            'rtename2en': ogr.FieldDefn('RTENAME2EN', ogr.OFTString),
+            'rtename3en': ogr.FieldDefn('RTENAME3EN', ogr.OFTString),
+            'rtename4en': ogr.FieldDefn('RTENAME4EN', ogr.OFTString),
+            'rtename1fr': ogr.FieldDefn('RTENAME1FR', ogr.OFTString),
+            'rtename2fr': ogr.FieldDefn('RTENAME2FR', ogr.OFTString),
+            'rtename3fr': ogr.FieldDefn('RTENAME3FR', ogr.OFTString),
+            'rtename4fr': ogr.FieldDefn('RTENAME4FR', ogr.OFTString),
+            'rtnumber1': ogr.FieldDefn('RTNUMBER1', ogr.OFTString),
+            'rtnumber2': ogr.FieldDefn('RTNUMBER2', ogr.OFTString),
+            'rtnumber3': ogr.FieldDefn('RTNUMBER3', ogr.OFTString),
+            'rtnumber4': ogr.FieldDefn('RTNUMBER4', ogr.OFTString),
+            'rtnumber5': ogr.FieldDefn('RTNUMBER5', ogr.OFTString),
+        })
+
+        self.shape_type = ogr.wkbLineString
+    
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider':24,
+            'closing': 7,
+            'ferrysegid': 9,
+            'roadclass': 21,
+            'rtename1en': 100,
+            'rtename2en': 100,
+            'rtename3en': 100,
+            'rtename4en': 100,
+            'rtename1fr': 100,
+            'rtename2fr': 100,
+            'rtename3fr': 100,
+            'rtename4fr': 100,
+            'rtnumber1': 10,
+            'rtnumber2': 10,
+            'rtnumber3': 10,
+            'rtnumber4': 10,
+            'rtnumber5': 10,
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+class JunctionTable(BaseTable):
+    """Definition of the Junction table."""
+    def __init__(self):
+        super().__init__('junction', 'JONCTION')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'exitnbr': ogr.FieldDefn('EXITNBR', ogr.OFTString),
+            'junctype': ogr.FieldDefn('JUNCTYPE', ogr.OFTString),
+        })
+
+        self.shape_type = ogr.wkbPoint
+    
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider':24,
+            'exitnbr': 10,
+            'junctype': 12,
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+class RoadSegmentTable(BaseTable):
+    """Definition of the road segment table."""
+    def __init__(self):
+        super().__init__('roadseg', 'SEGMROUT')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'l_adddirfg': ogr.FieldDefn('L_ADDDIRFG', ogr.OFTString),
+            'r_adddirfg': ogr.FieldDefn('R_ADDDIRFG', ogr.OFTString),
+            'adrangenid': ogr.FieldDefn('ADRANGENID', ogr.OFTString),
+            'closing': ogr.FieldDefn('CLOSING', ogr.OFTString),
+            'exitnbr': ogr.FieldDefn('EXITNBR', ogr.OFTString),
+            'l_hnumf': ogr.FieldDefn('L_HNUMF', ogr.OFTString),
+            'r_hnumf': ogr.FieldDefn('R_HNUMF', ogr.OFTString),
+            'roadclass': ogr.FieldDefn('ROADCLASS', ogr.OFTString),
+            'l_hnuml': ogr.FieldDefn('L_HNUML', ogr.OFTString),
+            'r_hnuml': ogr.FieldDefn('R_HNUML', ogr.OFTString),
+            'nbrlanes': ogr.FieldDefn('NBRLANES', ogr.OFTInteger),
+            'l_placenam': ogr.FieldDefn('L_PLACENAM', ogr.OFTString),
+            'r_placenam': ogr.FieldDefn('R_PLACENAM', ogr.OFTString),
+            'l_stname_c': ogr.FieldDefn('L_STNAME_C', ogr.OFTString),
+            'r_stname_c': ogr.FieldDefn('R_STNAME_C', ogr.OFTString),
+            'pavsurf': ogr.FieldDefn('PAVSURF', ogr.OFTString),
+            'pavstatus': ogr.FieldDefn('PAVSTATUS', ogr.OFTString),
+            'roadjuris': ogr.FieldDefn('ROADJURIS', ogr.OFTString),
+            'roadsegid': ogr.FieldDefn('ROADSEGID', ogr.OFTInteger),
+            'rtename1en': ogr.FieldDefn('RTENAME1EN', ogr.OFTString),
+            'rtename2en': ogr.FieldDefn('RTENAME2EN', ogr.OFTString),
+            'rtename3en': ogr.FieldDefn('RTENAME3EN', ogr.OFTString),
+            'rtename4en': ogr.FieldDefn('RTENAME4EN', ogr.OFTString),
+            'rtename1fr': ogr.FieldDefn('RTENAME1FR', ogr.OFTString),
+            'rtename2fr': ogr.FieldDefn('RTENAME2FR', ogr.OFTString),
+            'rtename3fr': ogr.FieldDefn('RTENAME3FR', ogr.OFTString),
+            'rtename4fr': ogr.FieldDefn('RTENAME4FR', ogr.OFTString),
+            'rtnumber1': ogr.FieldDefn('RTNUMBER1', ogr.OFTString),
+            'rtnumber2': ogr.FieldDefn('RTNUMBER2', ogr.OFTString),
+            'rtnumber3': ogr.FieldDefn('RTNUMBER3', ogr.OFTString),
+            'rtnumber4': ogr.FieldDefn('RTNUMBER4', ogr.OFTString),
+            'rtnumber5': ogr.FieldDefn('RTNUMBER5', ogr.OFTString),
+            'speed': ogr.FieldDefn('SPEED', ogr.OFTInteger),
+            'strunameen': ogr.FieldDefn('STRUNAMEEN', ogr.OFTString),
+            'strunamefr': ogr.FieldDefn('STRUNAMEFR', ogr.OFTString),
+            'structid': ogr.FieldDefn('STRUCTID', ogr.OFTString),
+            'structtype': ogr.FieldDefn('STRUCTTYPE', ogr.OFTString),
+            'trafficdir': ogr.FieldDefn('TRAFFICDIR', ogr.OFTString),
+            'unpavsurf': ogr.FieldDefn('UNPAVSURF', ogr.OFTString),
+        })
+
+        self.shape_type = ogr.wkbLineString
+    
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider':24,
+            'l_adddirfg': 18,
+            'r_adddirfg': 18,
+            'adrangenid': 32,
+            'closing': 7,
+            'exitnbr': 10,
+            'l_hnumf': 30,
+            'r_hnumf': 30,
+            'roadclass': 21,
+            'l_hnuml': 30,
+            'r_hnuml': 30,
+            'nbrlanes': 4,
+            'l_placenam': 100,
+            'r_placenam': 100,
+            'l_stname_c': 100,
+            'r_stname_c': 100,
+            'rtename1en': 100,
+            'rtename2en': 100,
+            'rtename3en': 100,
+            'rtename4en': 100,
+            'rtename1fr': 100,
+            'rtename2fr': 100,
+            'rtename3fr': 100,
+            'rtename4fr': 100,
+            'rtnumber1': 10,
+            'rtnumber2': 10,
+            'rtnumber3': 10,
+            'rtnumber4': 10,
+            'rtnumber5': 10,
+            'speed': 4,
+            'strunameen': 100),
+            'strunamefr': 100,
+            'structid': 32,
+            'structtype': 15,
+            'trafficdir': 18,
+            'unpavsurf': 7,
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+class StreetPlaceNameTable(BaseTable):
+    """Definition of the street and place name table."""
+    def __init__(self):
+        super().__init__('strplaname', 'NOMRUELIEU')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'dirprefix': ogr.FieldDefn('DIRPREFIX', ogr.OFTString),
+            'dirsuffix': ogr.FieldDefn('DIRSUFFIX', ogr.OFTString),
+            'muniquad': ogr.FieldDefn('MUNIQUAD', ogr.OFTString),
+            'placename': ogr.FieldDefn('PLACENAME', ogr.OFTString),
+            'placetype': ogr.FieldDefn('PLACETYPE', ogr.OFTString),
+            'province': ogr.FieldDefn('PROVINCE', ogr.OFTString),
+            'starticle': ogr.FieldDefn('STARTICLE', ogr.OFTString),
+            'namebody': ogr.FieldDefn('NAMEBODY', ogr.OFTString),
+            'strtypre': ogr.FieldDefn('STRTYPRE', ogr.OFTString),
+            'strtysuf': ogr.FieldDefn('STRTYSUF', ogr.OFTString),
+        })
+
+        self.shape_type = ogr.wkbNone
+    
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider':24,
+            'dirprefix': 10,
+            'dirsuffix': 10,
+            'muniquad': 10,
+            'placename': 100,
+            'placetype': 100
+            'starticle': 20,
+            'namebody': 50,
+            'strtypre': 30,
+            'strtysuf': 30
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
+
+class TollPointTable(BaseTable):
+    """Definition of the toll point table."""
+    def __init__(self):
+        super().__init__('tollpoint', 'POSTEPEAGE')
+
+        self.fields.update({
+            'metacover': ogr.FieldDefn('METACOVER', ogr.OFTString),
+            'accuracy': ogr.FieldDefn('ACCURACY', ogr.OFTInteger),
+            'provider': ogr.FieldDefn('PROVIDER', ogr.OFTString),
+            'roadnid': ogr.FieldDefn('ROADNID', ogr.OFTString),
+            'tollpttype': ogr.FieldDefn('TOLLPTTYPE', ogr.OFTString)
+        })
+
+        self.shape_type = ogr.wkbPoint
+    
+    def _set_field_widths(self):
+        """Set the width of each field in self.fields."""
+        super()._set_field_widths()
+
+        widths = {
+            'metacover': 8,
+            'accuracy': 4,
+            'provider':24,
+            'roadnid': 32,
+            'tollpttype': 22,
+        }
+
+        for fw in widths:
+            self._set_field_width(fw, widths[fw])
