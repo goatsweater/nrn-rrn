@@ -1,7 +1,7 @@
 from setuptools import setup
 
 requirements = ["Click==7.0",
-                "Fiona==1.8.13",
+                "Fiona>=1.8.13",
                 "geopandas==0.7.0",
                 "networkx==2.3",
                 "numpy==1.16.4",
