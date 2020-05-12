@@ -1,15 +1,15 @@
 """Create distributable files of NRN data."""
 
 import click
+import geobasenrn as nrn
+from geobasenrn.nrn import options
 import logging
 import numpy as np
 import pandas as pd
 from pathlib import Path
 import sys
+import tempfile
 import zipfile
-
-import geobasenrn
-from geobasenrn.nrn import options
 
 
 @click.command(short_help="Create distributable NRN data.")
@@ -49,23 +49,45 @@ def package(ctx, precision, infile, major_version, minor_version,
     """
     logger = logging.getLogger(__name__)
 
-    # no precision specified, so use the default
-    if precision == -1:
-        precision = geobasenrn.DEFAULT_PRECISION
+    # Retrieve the data from the conversion GPKG.
+    dframes = nrn.io.get_gpkg_contents(infile)
 
-    # The name of the driver to use when creating output
-    supported_drivers = {
-        'gpkg': 'GPKG',
-        'shp': 'Shapefile',
-        'gml': 'GML',
-        'kml': 'KML'
-    }
-    driver = supported_drivers.get(output_format)
+    # Create a temporary workspace within which to create all the data.
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Process outputs for the English version of the data.
+        if output_format == 'gpkg':
+            fname = nrn.io.get_gpkg_filename(identifier, major, minor, 'en')
+            out_path = Path(temp_dir).joinpath(fname)
+            write_gpkg_output(dframes, out_path)
+        
+        # Generate French copies of the items in dframes.
 
-    # The file name for the output
-    lang = 'en'.upper()
-    source = ctx['province_code'].upper()
-    en_filename = f'NRN_{source}_{major_version:02}_{minor_version:02}_GPKG_{lang}.gpkg'
+
+        # Process outputs for the French version of the data.
+
+
+        # Compress the data and delivery it to the desired output folder
+        if compress:
+            # Get an output compliant filename
+            zip_name = 'output.zip'
+            if output_format == 'gpkg':
+                format_fname = Path(nrn.io.get_gpkg_filename(identifier, major, minor, 'en'))
+                zip_fname = f'{format_fname.stem}.zip'
+            
+            # Compress the items found and write the output to where the user asked
+            out_file = out_path.joinpath(zip_fname)
+            nrn.io.compress(temp_dir, out_file)
+
+
+
+    # TODO: Implement all the processing steps
+    # Work should be done within a temporary directory to avoid any possible mixup with data in the current directory.
+    # 1. Load the input data, which is the output of the conversion process after being validated
+    # 2. Use OGR to build the layers for the chosen output format
+    # 3. Output the data to the chosen format for English data
+    # 4. Convert the intermediate data to French data
+    # 5. Output the French data
+    # 6. Compress the outputs
     
     print("Precision:", precision)
     print("Input:", infile)
@@ -73,17 +95,10 @@ def package(ctx, precision, infile, major_version, minor_version,
     print("Output folder:", out_path)
     print("Output filename:", en_filename)
 
-    self.load_gpkg()
-        self.configure_release_version()
-        self.compile_french_domain_mapping()
-        self.gen_french_dataframes()
-        self.gen_output_schemas()
-        self.define_kml_groups()
-        self.export_temp_data()
-        self.export_data()
-        self.zip_data()
 
-    # compress the data
-    if compress:
-        logger.info("Compressing output %s", out_path)
-        geobasenrn.io.compress(infile, out_path)
+def write_gpkg_output(dframes: dict, fname: Path) -> Path:
+    """Write the contents of dframes out to GeoPackage in the specified work directory.
+    
+    This creates both a French and English copy of the data.
+    """
+    pass
