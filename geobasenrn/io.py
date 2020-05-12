@@ -201,7 +201,7 @@ class BaseTable:
 
         # Common fields
         self.fields = {
-            'nid': ogr.FieldDefn("NID", ogr.OFTString),
+            'nid': ogr.FieldDefn('NID', ogr.OFTString),
             'credate': ogr.FieldDefn('CREDATE', ogr.OFTString),
             'revdate': ogr.FieldDefn('REVDATE', ogr.OFTString),
             'datasetnam': ogr.FieldDefn('DATASETNAM', ogr.OFTString),
@@ -210,6 +210,9 @@ class BaseTable:
         }
 
         self.shape_type = ogr.wkbNone
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_width(self, field_name: str, width: int):
         """Set the field width for the given field."""
@@ -218,6 +221,13 @@ class BaseTable:
             raise ValueError("Cannot set width on undeclared field.")
 
         self.fields[field_name].setWidth(width)
+    
+    def _set_field_name(self, field: str, name: str):
+        """Set the name of a field."""
+        if name == None or name == '':
+            raise ValueError("Invalid field name.")
+
+        self.fields[field].SetName(name)
 
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -281,6 +291,39 @@ class BaseTable:
         """
         warnings.warn("get_kml_name is meant to be overridden", ResourceWarning)
         return ''
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        # only languages supported are en and fr
+        if lang.lower() not in ('en', 'fr'):
+            raise ValueError(f'Unsupported language code: {lang}')
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'nid': 'NID',
+                'credate': 'CREDATE',
+                'revdate': 'REVDATE',
+                'datasetnam': 'DATASETNAM',
+                'acqtech': 'ACQTECH',
+                'specvers': 'SPECVERS',
+            },
+            'fr': {
+                'nid': 'IDN',
+                'credate': 'DATECRE',
+                'revdate': 'DATEREV',
+                'datasetnam': 'NOMJEUDONN',
+                'acqtech': 'TECHACQ',
+                'specvers': 'VERSNORMES',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class AddressRangeTable(BaseTable):
     """Definition of the address range table."""
@@ -317,6 +360,9 @@ class AddressRangeTable(BaseTable):
         })
 
         self.shape_type = ogr.wkbNone
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -351,6 +397,75 @@ class AddressRangeTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'l_altnamnid': 'L_ALTNANID',
+                'r_altnamnid': 'R_ALTNANID',
+                'l_digdirfg': 'L_DIGDIRFG',
+                'r_digdirfg': 'R_DIGDIRFG',
+                'l_hnumf': 'L_HNUMF',
+                'r_hnumf': 'R_HNUMF',
+                'l_hnumsuff': 'L_HNUMSUFF',
+                'r_hnumsuff': 'R_HNUMSUFF',
+                'l_hnumtypf': 'L_HNUMTYPF',
+                'r_hnumtypf': 'R_HNUMTYPF',
+                'l_hnumstr': 'L_HNUMSTR',
+                'r_hnumstr': 'R_HNUMSTR',
+                'l_hnuml': 'L_HNUML',
+                'r_hnuml': 'R_HNUML',
+                'l_hnumsufl': 'L_HNUMSUFL',
+                'r_hnumsufl': 'R_HNUMSUFL',
+                'l_hnumtypl': 'L_HNUMTYPL',
+                'r_hnumtypl': 'R_HNUMTYPL',
+                'l_offnanid': 'L_OFFNANID',
+                'r_offnanid': 'R_OFFNANID',
+                'l_rfsysind': 'L_RFSYSIND',
+                'r_rfsysind': 'R_RFSYSIND'
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'l_altnamnid': 'IDNOMNOF_G',
+                'r_altnamnid': 'IDNOMNOF_D',
+                'l_digdirfg': 'SENSNUM_G',
+                'r_digdirfg': 'SENSNUM_D',
+                'l_hnumf': 'NUMP_G',
+                'r_hnumf': 'NUMP_D',
+                'l_hnumsuff': 'SUFNUMP_G',
+                'r_hnumsuff': 'SUFNUMP_D',
+                'l_hnumtypf': 'TYPENUMP_G',
+                'r_hnumtypf': 'TYPENUMP_D',
+                'l_hnumstr': 'STRUNUM_G',
+                'r_hnumstr': 'STRUNUM_D',
+                'l_hnuml': 'NUMD_G',
+                'r_hnuml': 'NUMD_D',
+                'l_hnumsufl': 'SUFNUMD_G',
+                'r_hnumsufl': 'SUFNUMD_D',
+                'l_hnumtypl': 'TYPENUMD_G',
+                'r_hnumtypl': 'TYPENUMD_D',
+                'l_offnanid': 'IDNOMOFF_G',
+                'r_offnanid': 'IDNOMOFF_D',
+                'l_rfsysind': 'SYSREF_G',
+                'r_rfsysind': 'SYSREF_D'
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class AlternateNameLinkTable(BaseTable):
     """Definition of the Alternate Name Link table."""
@@ -363,11 +478,35 @@ class AlternateNameLinkTable(BaseTable):
 
         self.shape_type = ogr.wkbNone
 
+        # Set the width of all the fields.
+        self._set_field_widths()
+
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
         super()._set_field_widths()
 
         self._set_field_width('strnamenid', 32)
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'strnamenid': '',
+            },
+            'fr': {
+                'strnamenid': 'IDNOMRUE',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class BlockedPassageTable(BaseTable):
     """Definition of the Blocked Passage table."""
@@ -398,6 +537,35 @@ class BlockedPassageTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'blkpassty': 'BLKPASSTY',
+                'roadnid': 'ROADNID',
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'blkpassty': 'TYPEOBSTRU',
+                'roadnid': 'IDNELEMRTE',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class FerrySegmentTable(BaseTable):
     """Definition of the Ferry Segment table."""
@@ -427,6 +595,9 @@ class FerrySegmentTable(BaseTable):
         })
 
         self.shape_type = ogr.wkbLineString
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -456,6 +627,63 @@ class FerrySegmentTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'closing': 'CLOSING',
+                'ferrysegid': 'FERRYSEGID',
+                'roadclass': 'ROADCLASS',
+                'rtename1en': 'RTENAME1EN',
+                'rtename2en': 'RTENAME2EN',
+                'rtename3en': 'RTENAME3EN',
+                'rtename4en': 'RTENAME4EN',
+                'rtename1fr': 'RTENAME1FR',
+                'rtename2fr': 'RTENAME2FR',
+                'rtename3fr': 'RTENAME3FR',
+                'rtename4fr': 'RTENAME4FR',
+                'rtnumber1': 'RTNUMBER1',
+                'rtnumber2': 'RTNUMBER2',
+                'rtnumber3': 'RTNUMBER3',
+                'rtnumber4': 'RTNUMBER4',
+                'rtnumber5': 'RTNUMBER5',
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'closing': 'FERMETURE',
+                'ferrysegid': 'IDSEGMLTR',
+                'roadclass': 'CLASSROUTE',
+                'rtename1en': 'NOMRTE1AN',
+                'rtename2en': 'NOMRTE2AN',
+                'rtename3en': 'NOMRTE3AN',
+                'rtename4en': 'NOMRTE4AN',
+                'rtename1fr': 'NOMRTE1FR',
+                'rtename2fr': 'NOMRTE2FR',
+                'rtename3fr': 'NOMRTE3FR',
+                'rtename4fr': 'NOMRTE4FR',
+                'rtnumber1': 'NUMROUTE1',
+                'rtnumber2': 'NUMROUTE2',
+                'rtnumber3': 'NUMROUTE3',
+                'rtnumber4': 'NUMROUTE4',
+                'rtnumber5': 'NUMROUTE5',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class JunctionTable(BaseTable):
     """Definition of the Junction table."""
@@ -471,6 +699,9 @@ class JunctionTable(BaseTable):
         })
 
         self.shape_type = ogr.wkbPoint
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -486,6 +717,35 @@ class JunctionTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'exitnbr': 'EXITNBR',
+                'junctype': 'JUNCTYPE',
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'exitnbr': 'NUMSORTIE',
+                'junctype': 'TYPEJONC',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class RoadSegmentTable(BaseTable):
     """Definition of the road segment table."""
@@ -538,6 +798,9 @@ class RoadSegmentTable(BaseTable):
         })
 
         self.shape_type = ogr.wkbLineString
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -562,6 +825,10 @@ class RoadSegmentTable(BaseTable):
             'r_placenam': 100,
             'l_stname_c': 100,
             'r_stname_c': 100,
+            'pavsurf': 8,
+            'pavstatus': 7,
+            'roadjuris': 100,
+            'roadsegid': 9,
             'rtename1en': 100,
             'rtename2en': 100,
             'rtename3en': 100,
@@ -576,7 +843,7 @@ class RoadSegmentTable(BaseTable):
             'rtnumber4': 10,
             'rtnumber5': 10,
             'speed': 4,
-            'strunameen': 100),
+            'strunameen': 100,
             'strunamefr': 100,
             'structid': 32,
             'structtype': 15,
@@ -586,6 +853,109 @@ class RoadSegmentTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'l_adddirfg': 'L_ADDDIRFG',
+                'r_adddirfg': 'R_ADDDIRFG',
+                'adrangenid': 'ADRANGENID',
+                'closing': 'CLOSING',
+                'exitnbr': 'EXITNBR',
+                'l_hnumf': 'L_HNUMF',
+                'r_hnumf': 'R_HNUMF',
+                'roadclass': 'ROADCLASS',
+                'l_hnuml': 'L_HNUML',
+                'r_hnuml': 'R_HNUML',
+                'nbrlanes': 'NBRLANES',
+                'l_placenam': 'L_PLACENAM',
+                'r_placenam': 'R_PLACENAM',
+                'l_stname_c': 'L_STNAME_C',
+                'r_stname_c': 'R_STNAME_C',
+                'pavsurf': 'PAVSURF',
+                'pavstatus': 'PAVSTATUS',
+                'roadjuris': 'ROADJURIS',
+                'roadsegid': 'ROADSEGID',
+                'rtename1en': 'RTENAME1EN',
+                'rtename2en': 'RTENAME2EN',
+                'rtename3en': 'RTENAME3EN',
+                'rtename4en': 'RTENAME4EN',
+                'rtename1fr': 'RTENAME1FR',
+                'rtename2fr': 'RTENAME2FR',
+                'rtename3fr': 'RTENAME3FR',
+                'rtename4fr': 'RTENAME4FR',
+                'rtnumber1': 'RTNUMBER1',
+                'rtnumber2': 'RTNUMBER2',
+                'rtnumber3': 'RTNUMBER3',
+                'rtnumber4': 'RTNUMBER4',
+                'rtnumber5': 'RTNUMBER5',
+                'speed': 'SPEED',
+                'strunameen': 'STRUNAMEEN',
+                'strunamefr': 'STRUNAMEFR',
+                'structid': 'STRUCTID',
+                'structtype': 'STRUCTTYPE',
+                'trafficdir': 'TRAFFICDIR',
+                'unpavsurf': 'UNPAVSURF',
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'l_adddirfg': 'ADRSENS_G',
+                'r_adddirfg': 'ADRSENS_D',
+                'adrangenid': 'IDINTERVAD',
+                'closing': 'FERMETURE',
+                'exitnbr': 'NUMSORTIE',
+                'l_hnumf': 'NUMP_G',
+                'r_hnumf': 'NUMP_D',
+                'roadclass': 'CLASSROUTE',
+                'l_hnuml': 'NUMD_G',
+                'r_hnuml': 'NUMD_D',
+                'nbrlanes': 'NBRVOIES',
+                'l_placenam': 'NOMLIEU_G',
+                'r_placenam': 'NOMLIEU_D',
+                'l_stname_c': 'NOMRUE_C_G',
+                'r_stname_c': 'NOMRUE_C_D',
+                'pavsurf': 'TYPEREV',
+                'pavstatus': 'ETATREV',
+                'roadjuris': 'AUTORITE',
+                'roadsegid': 'IDSEGMRTE',
+                'rtename1en': 'NOMRTE1AN',
+                'rtename2en': 'NOMRTE2AN',
+                'rtename3en': 'NOMRTE3AN',
+                'rtename4en': 'NOMRTE4AN',
+                'rtename1fr': 'NOMRTE1FR',
+                'rtename2fr': 'NOMRTE2FR',
+                'rtename3fr': 'NOMRTE3FR',
+                'rtename4fr': 'NOMRTE4FR',
+                'rtnumber1': 'NUMROUTE1',
+                'rtnumber2': 'NUMROUTE2',
+                'rtnumber3': 'NUMROUTE3',
+                'rtnumber4': 'NUMROUTE4',
+                'rtnumber5': 'NUMROUTE5',
+                'speed': 'VITESSE',
+                'strunameen': 'NOMSTRUCAN',
+                'strunamefr': 'NOMSTRUCFR',
+                'structid': 'IDSTRUCT',
+                'structtype': 'TYPESTRUCT',
+                'trafficdir': 'SENSCIRCUL',
+                'unpavsurf': 'TYPENONREV',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class StreetPlaceNameTable(BaseTable):
     """Definition of the street and place name table."""
@@ -609,6 +979,9 @@ class StreetPlaceNameTable(BaseTable):
         })
 
         self.shape_type = ogr.wkbNone
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -631,6 +1004,51 @@ class StreetPlaceNameTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'dirprefix': 'DIRPREFIX',
+                'dirsuffix': 'DIRSUFFIX',
+                'muniquad': 'MUNIQUAD',
+                'placename': 'PLACENAME',
+                'placetype': 'PLACETYPE',
+                'province': 'PROVINCE',
+                'starticle': 'STARTICLE',
+                'namebody': 'NAMEBODY',
+                'strtypre': 'STRTYPRE',
+                'strtysuf': 'STRTYSUF'
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'dirprefix': 'PREDIR',
+                'dirsuffix': 'SUFDIR',
+                'muniquad': 'MUNIQUAD',
+                'placename': 'NOMLIEU',
+                'placetype': 'TYPELIEU',
+                'province': 'PROVINCE',
+                'starticle': 'ARTNOMRUE',
+                'namebody': 'CORPSNOM',
+                'strtypre': 'PRETYPRUE',
+                'strtysuf': 'SUFTYPRUE'
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
 
 class TollPointTable(BaseTable):
     """Definition of the toll point table."""
@@ -646,6 +1064,9 @@ class TollPointTable(BaseTable):
         })
 
         self.shape_type = ogr.wkbPoint
+
+        # Set the width of all the fields.
+        self._set_field_widths()
     
     def _set_field_widths(self):
         """Set the width of each field in self.fields."""
@@ -661,3 +1082,32 @@ class TollPointTable(BaseTable):
 
         for fw in widths:
             self._set_field_width(fw, widths[fw])
+    
+    def set_gpkg_field_names(self, lang: str='en'):
+        """Update the fields to use field names according to the GPKG definition."""
+        super().set_gpkg_field_names(lang)
+
+        # Define the name of each field for each language
+        field_names = {
+            'en': {
+                'metacover': 'METACOVER',
+                'accuracy': 'ACCURACY',
+                'provider': 'PROVIDER',
+                'roadnid': 'ROADNID',
+                'junctype': 'TOLLPTTYPE',
+            },
+            'fr': {
+                'metacover': 'COUVERMETA',
+                'accuracy': 'PRECISION',
+                'provider': 'FOURNISSR',
+                'roadnid': 'IDNELEMRTE',
+                'tollpttype': 'TYPEPTEPEA',
+            }
+        }
+
+        # Get the name map for the language
+        name_map = field_names.get(lang.lower())
+
+        # Set all the field names based on the name map
+        for field in name_map:
+            self._set_field_name(field, name_map[field])
