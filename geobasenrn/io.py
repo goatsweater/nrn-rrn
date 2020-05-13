@@ -135,13 +135,11 @@ def get_shp_filename(identifier: str, major: int, minor: int, lang: str='en') ->
     if lang == 'fr':
         nrn_id = 'RRN'
 
-    # If the slug or identifier are not valid strings an exception would be thrown.
-    if type(slug) is not str:
-        slug = str(slug)
+    # If the identifier is not valid strings an exception would be thrown.
     if type(identifier) is not str:
         identifier = str(identifier)
 
-    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_SHP_{lang}.shp'
+    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_SHP.shp'
     return fname
 
 def get_gml_filename(slug: str, identifier: str, major: int, minor: int, lang: str='en') -> str:
