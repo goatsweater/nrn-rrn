@@ -96,73 +96,90 @@ def package(ctx, precision, infile, major_version, minor_version,
 
     format_driver = ogr_drivers.get(output_format)
     logger.debug("Chosen output driver: %s", format_driver)
+    # Driver to be used by OGR
+    driver = ogr.GetDriverByName(format_driver)
 
     # Create a temporary workspace within which to create all the data.
     with tempfile.TemporaryDirectory() as temp_dir:
-        lang_en = 'en'
-        lang_fr = 'fr'
+        # Iterate over both languages to create the outputs for both
+        output_languages = ('en', 'fr')
+        for lang in output_languages:
+            # Process outputs for the chosen format
+            if output_format == 'gpkg' or output_format == 'shp':
+                # GPKG has layers in a single file, so create that data source now
+                if output_format == 'gpkg':
+                    # Get a proper output file name.
+                    fname = nrnio.get_gpkg_filename(pt_identifier, major_version, minor_version, lang)
+                    out_path = Path(temp_dir).joinpath(fname)
+                    logger.debug("File name for language %s: %s", lang, fname)
 
-        # Driver to be used by OGR
-        driver = ogr.GetDriverByName(format_driver)
+                    # Create the empty GeoPackage for data to be loaded in to.
+                    logger.debug("Creating data files.")
+                    # OGR doesn't understand pathlib paths, so force posix paths
+                    data_source = driver.CreateDataSource(out_path.as_posix())
 
-        # Process outputs for GPKG format
-        if output_format == 'gpkg' or output_format == 'shp':
-            # GPKG has layers in a single file, so create that data source now
-            if output_format == 'gpkg':
-                # Get a proper output file name.
-                fname_en = nrnio.get_gpkg_filename(pt_identifier, major_version, minor_version, lang_en)
-                out_path_en = Path(temp_dir).joinpath(fname_en)
-                logger.debug("English file name: %s", fname_en)
-                fname_fr = nrnio.get_gpkg_filename(pt_identifier, major_version, minor_version, lang_fr)
-                out_path_fr = Path(temp_dir).joinpath(fname_fr)
-                logger.debug("French file name: %s", fname_fr)
+                # Layer name functions are based on the output format. This creates the right function name to call.
+                layer_name_function = f'get_{output_format}_layer_name'
+                # Create outputs for the data
+                for layer_key in (nrn.spatial_layers + nrn.attribute_layers):
+                    if layer_key in dframes:
+                        logger.debug("Writing %s table", layer_key)
 
-                # Create the empty GeoPackage for data to be loaded in to.
-                logger.debug("Creating English and French data files.")
-                # OGR doesn't understand pathlib paths, so force posix paths
-                data_source_en = driver.CreateDataSource(out_path_en.as_posix())
-                data_source_fr = driver.CreateDataSource(out_path_fr.as_posix())
+                        tbl = class_map[layer_key]
+                        logger.debug("Creating layer from %s", tbl)
+                        layer_name = getattr(tbl, layer_name_function)(pt_identifier, major_version, minor_version, lang)
 
-            # Layer name functions are based on the output format. This creates the right function name to call.
-            layer_name_function = f'get_{output_format}_layer_name'
-            # Create outputs for the data
-            for layer_key in (nrn.spatial_layers + nrn.attribute_layers):
-                if layer_key in dframes:
-                    logger.debug("Writing %s table", layer_key)
+                        # shapefiles get a data source named after their layer names
+                        if output_format == 'shp':
+                            logger.debug("Creating shapefiles for %s", layer_key)
+                            if tbl.shape_type == ogr.wkbNone:
+                                file_extension = 'dbf'
+                            else:
+                                file_extension = 'shp'
+                            out_path = Path(temp_dir).joinpath(f'{layer_name}.{file_extension}')
+                            # OGR doesn't understand pathlib paths, so force posix paths
+                            data_source = driver.CreateDataSource(out_path.as_posix())
+                        
+                        # Create the layer within the data source
+                        create_layer(data_source, tbl, layer_name, output_format, lang)
+                        # Write the data to the new layer
+                        write_data_output(dframes[layer_key], layer_name, data_source, output_format, lang)
 
-                    tbl = class_map[layer_key]
-                    logger.debug("Creating layer from %s", tbl)
-                    layer_name_en = getattr(tbl, layer_name_function)(pt_identifier, major_version, minor_version, lang_en)
-                    layer_name_fr = getattr(tbl, layer_name_function)(pt_identifier, major_version, minor_version, lang_fr)
+                        # Release the Shapefile pointer to let go of the file handle
+                        if output_format == 'shp':
+                            data_source = None
 
-                    # shapefiles get a data source named after their layer names
-                    if output_format == 'shp':
-                        logger.debug("Creating shapefiles for %s", layer_key)
-                        if tbl.shape_type == ogr.wkbNone:
-                            file_extension = 'dbf'
-                        else:
-                            file_extension = 'shp'
-                        out_path_en = Path(temp_dir).joinpath(f'{layer_name_en}.{file_extension}')
-                        out_path_fr = Path(temp_dir).joinpath(f'{layer_name_fr}.{file_extension}')
+                # Release the GPKG pointer to let go of the file handle
+                data_source = None
+
+            elif output_format == 'gml':
+                # Create a GML file for each layer. GML files live within a parent folder named after their 
+                # language.
+                folder_name  = nrnio.get_gml_filename('GML', pt_identifier, major_version, minor_version, lang)[:-4]
+                folder_path = Path(temp_dir).joinpath(folder_name_en)
+                # Create the folder to hold the files
+                folder_path.mkdir()
+
+                # Iterate the layers, writing each to a file
+                for layer_key in (nrn.spatial_layers + nrn.attribute_layers):
+                    if layer_key in dframes:
+                        logger.debug("Writing %s to GML", layer_key)
+
+                        tbl = class_map[layer_key]
+                        layer_name = tbl.get_gml_layer_name(pt_identifier, major_version, minor_version, lang)
+                        logger.debug("Layer name: %s", layer_name)
+                        layer_path = folder_path.joinpath(layer_name)
+
                         # OGR doesn't understand pathlib paths, so force posix paths
-                        data_source_en = driver.CreateDataSource(out_path_en.as_posix())
-                        data_source_fr = driver.CreateDataSource(out_path_fr.as_posix())
-                    
-                    create_layer(data_source_en, tbl, layer_name_en, output_format, lang_en)
-                    create_layer(data_source_fr, tbl, layer_name_fr, output_format, lang_fr)
+                        data_source = driver.CreateDataSource(layer_path.as_posix())
 
-                    write_data_output(dframes[layer_key], layer_name_en, data_source_en, output_format, lang_en)
-                    # TODO: Until data is coming from an agnositic source, attempting to write french records will fail
-                    # write_geom_output(dframes[layer_key], layer_name_fr, data_source_fr, output_format, lang_fr)
+                        # Create the layers within the GML files
+                        create_layer(data_source, tbl, layer_name, output_format, lang)
+                        # Write the data to the new layer
+                        write_data_output(dframes[layer_key], layer_namee, data_sourcee, output_format, lang)
 
-                    # Release the Shapefile pointers to let go of the file handle
-                    if output_format == 'shp':
-                        data_source_en = None
-                        data_source_fr = None
-
-            # Release the GPKG pointers to let go of the file handle
-            data_source_en = None
-            data_source_fr = None
+                        # Release the GML pointers to let go of the file handle
+                        data_source = None
 
         # Compress the data and delivery it to the desired output folder
         temp_path = Path(temp_dir)
@@ -172,13 +189,18 @@ def package(ctx, precision, infile, major_version, minor_version,
             zip_name = 'output.zip'
             if output_format == 'gpkg' or output_format == 'shp':
                 fname_function = f'get_{output_format}_filename'
-                format_fname = Path(getattr(nrnio, fname_function)(pt_identifier, major_version, minor_version, 'en'))
+                format_fname = Path(getattr(nrnio, fname_function)(pt_identifier,
+                                                                   major_version,
+                                                                   minor_version,
+                                                                   lang_en))
                 zip_fname = format_fname.stem
 
                 # The gpkg name includes a language identifier on the stem. The zip file should include everything 
                 # up to that point.
                 if output_format == 'gpkg':
                     zip_fname = format_fname.stem[:-3]
+            elif output_format == 'gml':
+                zip_fname == f'NRN_RRN_{pt_identifier.upper()}_{major_version}_{minor_version}_GML'
             
             # Compress the items found and write the output to where the user asked
             out_file = Path(out_path).joinpath(f'{zip_fname}.zip')
@@ -200,7 +222,9 @@ def create_layer(data_source: ogr.DataSource, tbl, layer_name: str, output_forma
     # Define the SRS for output data
     srs = osr.SpatialReference()
     srs.ImportFromEPSG(nrn.SRS_EPSG_CODE)
-    logger.debug("Spatial reference being used:\n%s", srs)
+    # Don't define a spatial reference on data with no shape.
+    if tbl.shape_type == ogr.wkbNone:
+        srs = None
 
     # Create the layer
     logger.debug("Creating layer with name %s in %s", layer_name, data_source.GetName())

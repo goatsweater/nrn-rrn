@@ -153,12 +153,8 @@ def get_gml_filename(slug: str, identifier: str, major: int, minor: int, lang: s
         slug = str(slug)
     if type(identifier) is not str:
         identifier = str(identifier)
-    
-    # Only 'GEOM' and 'ADDR' are considered valid slug values.
-    if slug not in ('GEOM', 'ADDR'):
-        raise ValueError("Invalid NRN GML file type")
 
-    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_{slug.upper()}.shp'
+    fname = f'{nrn_id}_{identifier.upper()}_{major}_{minor}_{slug}.gml'
     return fname
 
 def get_kml_filename(identifier: str, lang: str='en') -> str:
@@ -228,12 +224,20 @@ class BaseTable:
         return name
     
     def get_gml_layer_name(self, source, major, minor, lang='en'):
-        """Generate a valid name to be used in GML files.
+        """Generate a valid name to be used in GML files."""
+        if lang == 'en':
+            slug = self._gml_name_en
+            nrn_id = 'NRN'
+        else:
+            slug = self._gml_name_fr
+            nrn_id = 'RRN'
         
-        This is an abstract implementation that is meant to be overridden.
-        """
-        warnings.warn("get_gml_name is meant to be overridden", ResourceWarning)
-        return ''
+        # Ensure source is a string to avoid any exceptions.
+        if type(source) is not str:
+            source = str(source)
+        
+        name = f'{nrn_id}_{source.upper()}_{major}_{minor}_{slug}.gml'
+        return name
 
     def get_kml_layer_name(self, source, major, minor, lang='en'):
         """Generate a valid name to be used in KML files.
@@ -250,6 +254,10 @@ class AddressRangeTable(BaseTable):
         logger.debug("%s initialization started", self.__class__.__name__)
         super().__init__('addrange', 'ADDRANGE', 'INTERVADR')
 
+        # Table names for GML
+        self._gml_name_en = 'AddressRange'
+        self._gml_name_fr = 'IntervalleAddresse'
+
         self.fields.extend(['metacover', 'accuracy', 'provider', 'l_altnamnid', 'r_altnamnid', 'l_digdirfg', 
                             'r_digdirfg', 'l_hnumf', 'r_hnumf', 'l_hnumsuff', 'r_hnumsuff', 'l_hnumtypf',
                             'r_hnumtypf', 'l_hnumstr', 'r_hnumstr', 'l_hnuml', 'r_hnuml', 'l_hnumsufl',
@@ -265,6 +273,10 @@ class AlternateNameLinkTable(BaseTable):
     def __init__(self):
         super().__init__('altnamlink', 'ALTNAMELINK', 'LIENNOFF')
 
+        # Table names for GML
+        self._gml_name_en = 'AlternateNameLink'
+        self._gml_name_fr = 'LieuNomNonOfficiel'
+
         self.fields.extend(['strnamenid'])
         logger.debug("Fields: %s", self.fields)
 
@@ -276,6 +288,10 @@ class BlockedPassageTable(BaseTable):
     def __init__(self):
         super().__init__('blkpassage', 'BLKPASSAGE', 'PASSAGEOBS')
 
+        # Table names for GML
+        self._gml_name_en = 'BlockedPassage'
+        self._gml_name_fr = 'PassageObstrue'
+
         self.fields.extend(['metacover', 'accuracy', 'provider', 'blkpassty', 'roadnid'])
         logger.debug("Fields: %s", self.fields)
 
@@ -286,6 +302,10 @@ class FerrySegmentTable(BaseTable):
     """Definition of the Ferry Segment table."""
     def __init__(self):
         super().__init__('ferryseg', 'FERRYSEG', 'SLIAISONTR')
+
+        # Table names for GML
+        self._gml_name_en = 'FerrySegment'
+        self._gml_name_fr = 'SegmentLiaisonTransbordeur'
 
         self.fields.extend(['metacover', 'accuracy', 'provider', 'closing', 'ferrysegid', 'roadclass',
                             'rtename1en', 'rtename2en', 'rtename3en', 'rtename4en',
@@ -301,6 +321,10 @@ class JunctionTable(BaseTable):
     def __init__(self):
         super().__init__('junction', 'JUNCTION', 'JONCTION')
 
+        # Table names for GML
+        self._gml_name_en = 'Junction'
+        self._gml_name_fr = 'Jonction'
+
         self.fields.extend(['metacover', 'accuracy', 'provider', 'exitnbr', 'junctype'])
         logger.debug("Fields: %s", self.fields)
 
@@ -311,6 +335,10 @@ class RoadSegmentTable(BaseTable):
     """Definition of the road segment table."""
     def __init__(self):
         super().__init__('roadseg', 'ROADSEG', 'SEGMROUT')
+
+        # Table names for GML
+        self._gml_name_en = 'RoadSegment'
+        self._gml_name_fr = 'SegmentRoutier'
 
         self.fields.extend(['metacover', 'accuracy', 'provider', 'l_adddirfg', 'r_adddirfg', 'adrangenid',
                             'closing', 'exitnbr', 'l_hnumf', 'r_hnumf', 'roadclass', 'l_hnuml', 'r_hnuml',
@@ -330,6 +358,10 @@ class StreetPlaceNameTable(BaseTable):
     def __init__(self):
         super().__init__('strplaname', 'STRPLANAME', 'NOMRUELIEU')
 
+        # Table names for GML
+        self._gml_name_en = 'StreetPlaceName'
+        self._gml_name_fr = 'NomRueLieu'
+
         self.fields.extend(['metacover', 'accuracy', 'provider', 'dirprefix', 'dirsuffix', 'muniquad', 'placename',
                             'placetype', 'province', 'starticle', 'namebody', 'strtypre', 'strtysuf'])
         logger.debug("Fields: %s", self.fields)
@@ -341,6 +373,10 @@ class TollPointTable(BaseTable):
     """Definition of the toll point table."""
     def __init__(self):
         super().__init__('tollpoint', 'TOLLPOINT', 'POSTEPEAGE')
+
+        # Table names for GML
+        self._gml_name_en = 'TollPoint'
+        self._gml_name_fr = 'PostePeage'
 
         self.fields.extend(['metacover', 'accuracy', 'provider', 'roadnid', 'tollpttype'])
         logger.debug("Fields: %s", self.fields)
