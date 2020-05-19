@@ -61,6 +61,7 @@ class DateCheck(ValidationCheck):
         self._validate_not_empty()
         self._validate_length()
         self._validate_year()
+        self._validate_month()
 
         # If nothing failed, just return None
         if len(self.failures) == 0:
@@ -94,6 +95,7 @@ class DateCheck(ValidationCheck):
     
     def _validate_year(self):
         """Check that the year value contains a valid value."""
+        # Nothing should be newer than the run date
         this_year = datetime.date.today().year
         # Dates before 1960 predate recordkeeping of the NRN, and are probably an error.
         oldest_year = 1960
@@ -120,3 +122,24 @@ class DateCheck(ValidationCheck):
         if not too_old.empty:
             msg = f"Year value should probably be before {oldest_year}."
             self._record_failure(too_old, self.failure_code, msg)
+    
+    def _validate_month(self):
+        """Check that all month values are within the range 1-12."""
+        lower_bound = 1
+        upper_bound = 12
+
+        # Make a copy of the data to be manipulated in the checks
+        df = self.df.copy()
+
+        # Drop any records that only have a year
+        df = df.drop(df[self.check_field].str.len() > 4)
+
+        # Calculate the month number from the records that have one
+        df['month'] = pd.to_numeric(df[self.check_field].str[4:6])
+
+        # Filter the months to any that fall outside the accetable range
+        non_compliant = df[(df['month'] < lower_bound) | (df['month'] > upper_bound)]
+
+        if not non_compliant.empty:
+            msg = "Invalid month provided for date."
+            self._record_failure(non_compliant, self.failure_code, msg)
