@@ -24,7 +24,7 @@ msgstr "Contenu:"
 
 #: ../../index.rst:4
 msgid "National Road Network's documentation"
-msgstr "Documentation de la Réseau routier national"
+msgstr "Documentation du Réseau routier national"
 
 #: ../../index.rst:20
 msgid "Contact Information"
