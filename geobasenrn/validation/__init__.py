@@ -10,6 +10,8 @@ _Result = namedtuple('result', ['layer', 'record', 'field', 'error', 'message'])
 class DataFrameChecker:
     """Manage running checks for a pandas DataFrame or geopandas GeoDataFrame and aggregate the results."""
 
+    max_failures_per_checker = 100
+
     def __init__(self, identifier, df, checks):
         """Initialize the DataFrame checkers."""
         self.identifier = identifier
@@ -31,21 +33,22 @@ class DataFrameChecker:
         self.results.append(result)
         return error_code
     
-    def run_check(self, check, **arguments):
-        """Run the check."""
-        logger.debug("Running %r with %r", check, arguments)
-    
     def run_checks(self):
         """Run checks against the DataFrame."""
         logger.debug("Running all registered checks on %s", self.identifier)
         # run each checker
         for checker in self.checks:
-            result = self.run_check(checker)
+            logger.debug("Running check %r", checker)
+            result = checker.run()
 
             # If no problems are reported checkers are expected to report None, otherwise add items to result set.
             if result is not None:
-                # Could be a single result or a list of results
-                pass
+                if len(result) > self.max_failures_per_checker:
+                    self.report(self.identifier, "-", checker.check_field, checker.failure_code, "Many records failed.")
+                    continue
+
+                for failure in result:
+                    self.report(self.identifier, failure[0], checker.check_field, failure[1], failure[2])
 
 class ValidationCheck:
     """Abstract implementation of a validation check."""
@@ -63,5 +66,5 @@ class ValidationCheck:
     def _record_failure(self, df, failure_code, msg):
         """Record items in the supplied DataFrame as a failure."""
         for failure in df.itertuples():
-            record_id = failure[self.id_field]
+            record_id = getattr(failure, self.id_field)
             self.failures.append((record_id, failure_code, msg))

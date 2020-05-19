@@ -32,7 +32,7 @@ class SpeedLimitCheck(ValidationCheck):
     def _speed_too_high(self):
         """Speeds must be less than 120 kph."""
         
-        non_compliant = self.df[self.df[self.check_field] > 120]]
+        non_compliant = self.df[self.df[self.check_field] > 120]
         
         # record anything that falls above 120 kph
         if not non_compliant.empty:
@@ -41,7 +41,7 @@ class SpeedLimitCheck(ValidationCheck):
     
     def _incorrect_speed_value(self):
         """Speed values must be divisible by 5, according to the specifications."""
-        non_compliant = self.df[self.check_field].mod(5) == 0]
+        non_compliant = self.df[self.df[self.check_field].mod(5) == 0]
 
         # record anything that falls above 120 kph
         if not non_compliant.empty:
@@ -60,6 +60,13 @@ class DateCheck(ValidationCheck):
         """Analyze the contents of the field to ensure it complies with the product specificaiton."""
         self._validate_not_empty()
         self._validate_length()
+        self._validate_year()
+
+        # If nothing failed, just return None
+        if len(self.failures) == 0:
+            return None
+        
+        return self.failures
     
     def _validate_not_empty(self):
         """Dates are not allowed to be empty in the NRN."""
@@ -79,7 +86,7 @@ class DateCheck(ValidationCheck):
         correct_dates = pd.concat([year_only, month_date, full_date])[self.check_field].unique()
 
         # Any dates that are not part of the compliant set have an invalid length
-        non_comliant = self.df[self.df[self.check_field] ~= correct_dates]
+        non_compliant = self.df[~self.df[self.check_field].isin(correct_dates)]
 
         if not non_compliant.empty:
             msg = "Invalid date length"
@@ -88,15 +95,28 @@ class DateCheck(ValidationCheck):
     def _validate_year(self):
         """Check that the year value contains a valid value."""
         this_year = datetime.date.today().year
+        # Dates before 1960 predate recordkeeping of the NRN, and are probably an error.
+        oldest_year = 1960
 
         # Make a copy of the data to be manipulated in the checks
         df = self.df.copy()
         # Isolate the year from the rest of the date
         df['year'] = pd.to_numeric(df[self.check_field].str[:4])
+        logger.debug("Minimum year in data %s", df['year'].min())
+        logger.debug("Maximum year in data %s", df['year'].max())
 
         # Look for any years that are in the future
+        logger.debug("Looking for records newer than %s", this_year)
         in_future = df[df['year'] > this_year]
 
         if not in_future.empty:
             msg = "Year value cannot be in the future."
             self._record_failure(in_future, self.failure_code, msg)
+        
+        # Look for years that predate NRN recordkeeping
+        logger.debug("Looking for records older than %s", oldest_year)
+        too_old = df[df['year'] < oldest_year]
+        
+        if not too_old.empty:
+            msg = f"Year value should probably be before {oldest_year}."
+            self._record_failure(too_old, self.failure_code, msg)
