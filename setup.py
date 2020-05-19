@@ -40,6 +40,7 @@ setup(
         nrn=geobasenrn.nrn.main:main_group
         [geobasenrn.nrn_commands]
         package=geobasenrn.nrn.package:package
+        validate=geobasenrn.nrn.validate:validate
         ls=geobasenrn.nrn.ls:ls
         ''',
     classifiers=[
