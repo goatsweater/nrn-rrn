@@ -57,7 +57,7 @@ class_map = {
               type=click.Path(dir_okay=False, file_okay=True,
                               resolve_path=True),
               required=True,
-              help="Directory of where to write the file.")
+              help="Path to the input GeoPackage.")
 @click.option('-mjr',
               '--major-version',
               type=int,
