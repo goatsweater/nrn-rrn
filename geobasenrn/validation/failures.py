@@ -142,3 +142,19 @@ class DateCheck(ValidationCheck):
         if not too_old.empty:
             msg = f"Year value should probably be before {oldest_year}."
             self._record_failure(too_old, self.failure_code, msg)
+
+class DuplicatePointGeometryCheck(ValidationCheck):
+    """Look for duplicated points within a geometry."""
+    failure_code = 'E103'
+
+    def run(self):
+        """Compare the coordinate values of the objects to determine which are duplicated."""
+        # Retrieve coordinates as tuples.
+        coords = self.df.geometry.map(lambda geom: geom.coords[0])
+
+        # Identify any duplicates as report them all.
+        non_compliant = coords.duplicated(keep=False)
+
+        if not non_compliant.empty:
+            msg = "Duplicate point geometry found."
+            self._record_failure(non_compliant, self.failure_code, msg)
