@@ -3,7 +3,6 @@
 Failure of one of these checks generally means the dataset should be rejected from publication.
 """
 
-import calendar
 import datetime
 import logging
 import pandas as pd
@@ -61,8 +60,34 @@ class DateCheck(ValidationCheck):
         """Analyze the contents of the field to ensure it complies with the product specificaiton."""
         self._validate_not_empty()
         self._validate_length()
-        self._validate_year()
-        self._validate_month()
+
+        # Make a copy of the data to be manipulated in the checks
+        df = self.df.copy()
+
+        # Break the date apart into separate year, month, and day fields.
+        df['year'] = df[self.check_field].str[:4]
+        df['month'] = df[self.check_field].str[4:6]
+        df['day'] = df[self.check_field].str[6:8]
+
+        # Dates that had no month or day now have emptry strings, so those need to be filled in with '01'.
+        # The pandas string replace is a regex, so this matches only empty string values.
+        df['month'] = df['month'].str.replace('^\s*$','01')
+        df['day'] = df['day'].str.replace('^\s*$','01')
+
+        # Assemble the dates into a datetime to perform further checks.
+        df['dt'] = pd.to_datetime(df[['year', 'month', 'day']], errors='coerce')
+
+        # Find any records that don't form a valid date
+        non_compliant = df[df['dt'].isna()]
+
+        if not non_compliant.empty:
+            msg = "Invalid date provided."
+            self._record_failure(non_compliant, self.failure_code, msg)
+        
+        # Continue with other checks for any records that are valid dates
+        df = df[df['dt'].notna()]
+
+        self._validate_year(df)
 
         # If nothing failed, just return None
         if len(self.failures) == 0:
@@ -94,23 +119,17 @@ class DateCheck(ValidationCheck):
             msg = "Invalid date length"
             self._record_failure(non_compliant, self.failure_code, msg)
     
-    def _validate_year(self):
+    def _validate_year(self, df):
         """Check that the year value contains a valid value."""
         # Nothing should be newer than the run date
-        this_year = datetime.date.today().year
-        # Dates before 1960 predate recordkeeping of the NRN, and are probably an error.
-        oldest_year = 1960
+        this_year = datetime.datetime.now()
 
-        # Make a copy of the data to be manipulated in the checks
-        df = self.df.copy()
-        # Isolate the year from the rest of the date
-        df['year'] = pd.to_numeric(df[self.check_field].str[:4])
-        logger.debug("Minimum year in data %s", df['year'].min())
-        logger.debug("Maximum year in data %s", df['year'].max())
+        # Dates before 1960 predate recordkeeping of the NRN, and are probably an error.
+        oldest_year = datetime.datetime(1960,1,1)
 
         # Look for any years that are in the future
         logger.debug("Looking for records newer than %s", this_year)
-        in_future = df[df['year'] > this_year]
+        in_future = df[df['dt'] > this_year]
 
         if not in_future.empty:
             msg = "Year value cannot be in the future."
@@ -118,85 +137,8 @@ class DateCheck(ValidationCheck):
         
         # Look for years that predate NRN recordkeeping
         logger.debug("Looking for records older than %s", oldest_year)
-        too_old = df[df['year'] < oldest_year]
+        too_old = df[df['dt'] < oldest_year]
         
         if not too_old.empty:
             msg = f"Year value should probably be before {oldest_year}."
             self._record_failure(too_old, self.failure_code, msg)
-    
-    def _validate_month(self):
-        """Check that all month values are within the range 1-12."""
-        lower_bound = 1
-        upper_bound = 12
-
-        # Make a copy of the data to be manipulated in the checks
-        df = self.df.copy()
-
-        # Drop any records that only have a year
-        df = df[df[self.check_field].str.len() > 4]
-
-        # Calculate the month number from the records that have one
-        df['month'] = pd.to_numeric(df[self.check_field].str[4:6])
-
-        # Filter the months to any that fall outside the accetable range
-        non_compliant = df[(df['month'] < lower_bound) | (df['month'] > upper_bound)]
-
-        if not non_compliant.empty:
-            msg = "Invalid month provided for date."
-            self._record_failure(non_compliant, self.failure_code, msg)
-    
-    def _validate_day(self):
-        """Check that all day values are within the range appropriate for their month."""
-        lower_bound = 1
-
-        # Make a copy of the data to be manipulated in the checks
-        df = self.df.copy()
-
-        # Drop any records that don't have a day provided
-        df = df[df[self.check_field].str.len() > 6]
-
-        # Extract the month and the day values to their own fields
-        df['year'] = pd.to_numeric(df[self.check_field].str[:4])
-        df['month'] = pd.to_numeric(df[self.check_field].str[4:6])
-        df['day'] = pd.to_numeric(df[self.check_field].str[6:8])
-
-        # There should be no dates less than the lower bound
-        non_compliant = df[df['day'] < lower_bound]
-        if not non_compliant.empty:
-            msg = f"Invalid day of the month - cannot be less than {lower_bound}"
-            self._record_failure(non_compliant, self.failure_code, msg)
-        
-        # Check that the end day does not exceed the number of days in that month
-        month_groups = df.groupby('month', sort=False)
-        # Iterate through the months, but ignore February
-        for month_number in [1,3,4,5,6,7,8,9,10,11,12]:
-            # Skip this month if it isn't in the data
-            if month_number not in month_groups:
-                continue
-
-            upper_bound = calendar.mdays[month_number]
-            
-            # Get the group data to be processed
-            group_data = month_groups.get_group(month_number)
-
-            # Check for any data out of the acceptable range
-            non_compliant = group_data[group_data['day'] > upper_bound]
-            if not non_compliant.empty:
-                msg = f"Invalid day of the month - cannot be more than {upper_bound} for {month_number}"
-                self._record_failure(non_compliant, self.failure_code, msg)
-
-        # February could contain a leap year. Break it down by year to check.
-        feb_data = month_groups.get_group(2)
-        year_groups = feb_data.groupby('year')
-        for year_number, year_data in year_groups:
-            # February normally has 28 days
-            upper_bound = 28
-            # If this is a leap year accept 29 days
-            if calendar.isleap(year_number):
-                upper_bound = 29
-            
-            # Check for any data with an unacceptable day
-            non_compliant = year_data[year_data['day'] > upper_bound]
-            if not non_compliant.empty:
-                msg = f"Invalid day of the month - cannot be more than {upper_bound} for {month_number}"
-                self._record_failure(non_compliant, self.failure_code, msg)
