@@ -3,6 +3,7 @@
 Failure of one of these checks generally means the dataset should be rejected from publication.
 """
 
+import calendar
 import datetime
 import logging
 import pandas as pd
@@ -132,7 +133,7 @@ class DateCheck(ValidationCheck):
         df = self.df.copy()
 
         # Drop any records that only have a year
-        df = df.drop(df[self.check_field].str.len() > 4)
+        df = df[df[self.check_field].str.len() > 4]
 
         # Calculate the month number from the records that have one
         df['month'] = pd.to_numeric(df[self.check_field].str[4:6])
@@ -143,3 +144,59 @@ class DateCheck(ValidationCheck):
         if not non_compliant.empty:
             msg = "Invalid month provided for date."
             self._record_failure(non_compliant, self.failure_code, msg)
+    
+    def _validate_day(self):
+        """Check that all day values are within the range appropriate for their month."""
+        lower_bound = 1
+
+        # Make a copy of the data to be manipulated in the checks
+        df = self.df.copy()
+
+        # Drop any records that don't have a day provided
+        df = df[df[self.check_field].str.len() > 6]
+
+        # Extract the month and the day values to their own fields
+        df['year'] = pd.to_numeric(df[self.check_field].str[:4])
+        df['month'] = pd.to_numeric(df[self.check_field].str[4:6])
+        df['day'] = pd.to_numeric(df[self.check_field].str[6:8])
+
+        # There should be no dates less than the lower bound
+        non_compliant = df[df['day'] < lower_bound]
+        if not non_compliant.empty:
+            msg = f"Invalid day of the month - cannot be less than {lower_bound}"
+            self._record_failure(non_compliant, self.failure_code, msg)
+        
+        # Check that the end day does not exceed the number of days in that month
+        month_groups = df.groupby('month', sort=False)
+        # Iterate through the months, but ignore February
+        for month_number in [1,3,4,5,6,7,8,9,10,11,12]:
+            # Skip this month if it isn't in the data
+            if month_number not in month_groups:
+                continue
+
+            upper_bound = calendar.mdays[month_number]
+            
+            # Get the group data to be processed
+            group_data = month_groups.get_group(month_number)
+
+            # Check for any data out of the acceptable range
+            non_compliant = group_data[group_data['day'] > upper_bound]
+            if not non_compliant.empty:
+                msg = f"Invalid day of the month - cannot be more than {upper_bound} for {month_number}"
+                self._record_failure(non_compliant, self.failure_code, msg)
+
+        # February could contain a leap year. Break it down by year to check.
+        feb_data = month_groups.get_group(2)
+        year_groups = feb_data.groupby('year')
+        for year_number, year_data in year_groups:
+            # February normally has 28 days
+            upper_bound = 28
+            # If this is a leap year accept 29 days
+            if calendar.isleap(year_number):
+                upper_bound = 29
+            
+            # Check for any data with an unacceptable day
+            non_compliant = year_data[year_data['day'] > upper_bound]
+            if not non_compliant.empty:
+                msg = f"Invalid day of the month - cannot be more than {upper_bound} for {month_number}"
+                self._record_failure(non_compliant, self.failure_code, msg)
