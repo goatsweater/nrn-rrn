@@ -12,6 +12,7 @@ import shutil
 import sys
 import uuid
 import zipfile
+from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import getmembers, isfunction
 from operator import itemgetter
@@ -70,41 +71,39 @@ class Stage:
         try:
 
             for table in self.target_gdframes:
-                logger.info("Applying field domains to {}.".format(table))
-
                 for field, domains in self.domains[table].items():
 
-                    logger.info("Target field \"{}\": Applying domain.".format(field))
+                    logger.info(f"Applying field domain to table: \"{table}\", field \"{field}\".")
+
+                    # Copy series as object dtype.
+                    series_orig = self.target_gdframes[table][field].copy(deep=True).astype(object)
 
                     # Apply domains to series via apply_functions.
-                    series_orig = self.target_gdframes[table][field].copy()
-                    series_new = series_orig.map(
-                        lambda val: eval("field_map_functions.apply_domain")(val, domain=domains["all"],
-                                                                             default=self.defaults[table][field]))
+                    series_new = field_map_functions.apply_domain(series_orig, domain=domains["lookup"],
+                                                                  default=self.defaults[table][field])
 
                     # Force adjust data type.
                     series_new = series_new.astype(self.dtypes[table][field])
 
                     # Store results to target dataframe.
-                    self.target_gdframes[table][field] = series_new.copy()
+                    self.target_gdframes[table][field] = series_new.copy(deep=True)
 
-                    # Compile and quantify modified values.
+                    # Compile and log modifications.
                     mods = series_orig.astype(str) != series_new.astype(str)
                     if mods.any():
-                        df = pd.DataFrame({"orig": series_orig[mods], "new": series_new[mods]})
-                        df.fillna(-99, inplace=True)
-                        df_grouped = df.groupby(["orig", "new"]).size().reset_index()
-                        df_grouped.replace(-99, pd.np.nan, inplace=True)
-                        df_grouped.sort_values(by=["orig", "new"], inplace=True)
-                        df_grouped = df_grouped[[0, "orig", "new"]]
-                        df_grouped = df_grouped.astype(object)
 
-                        # Log record modifications.
-                        for record in df_grouped.values:
-                            logger.warning("Modified {} instance(s) of \"{}\" to \"{}\".".format(*record))
+                        # Compile and quantify modifications.
+                        df = pd.DataFrame({"orig": series_orig[mods], "new": series_new[mods]})
+                        counts = Counter(series_orig[mods].fillna(-99))
+
+                        # Iterate and log record modifications.
+                        for vals in df[~df.duplicated(keep="first")].values:
+
+                            logger.warning(f"Modified {counts[-99] if pd.isna(vals[0]) else counts[vals[0]]} "
+                                           f"instance(s) of {vals[0]} to {vals[1]}.")
 
         except (AttributeError, KeyError, ValueError):
-            logger.exception("Invalid schema definition for table: {}, field: {}.".format(table, field))
+            logger.exception(f"Invalid schema definition for table: \"{table}\", field: \"{field}\".")
             sys.exit(1)
 
     def apply_field_mapping(self):
@@ -186,7 +185,7 @@ class Stage:
                                                                          self.domains[target_name], target_field)
 
                             # Store results.
-                            if isinstance(field_mapping_results["series"], pd.Series):
+                            if isinstance(results, pd.Series):
                                 results = field_mapping_results["series"].copy(deep=True)
                                 break
                             else:
@@ -196,23 +195,22 @@ class Stage:
                         if isinstance(results, pd.Series):
                             field_mapping_results["series"] = results.copy(deep=True)
                         else:
-                            field_mapping_results["series"] = results.apply(
-                                lambda row: row.values, axis=1, result_type="broadcast")
+                            field_mapping_results["series"] = results.apply(lambda row: row.values, axis=1)
 
                         # Update target dataframe.
                         target_gdf[target_field] = field_mapping_results["series"].copy(deep=True)
 
                         # Split records if required.
-                        if field_mapping_results["split_record"]:
+                        if field_mapping_results["split_records"]:
 
                             # Split records and store nid changes.
-                            target_gdf, nid_lookup = field_map_functions.split_record(target_gdf, target_field)
+                            target_gdf, nid_lookup = field_map_functions.split_records(target_gdf, target_field)
                             self.nid_lookup[target_name] = deepcopy(nid_lookup)
 
                     # Store updated target dataframe.
                     self.target_gdframes[target_name] = target_gdf.copy(deep=True)
 
-    def apply_functions(self, maps, series, func_list, table_domains, field, split_record=False):
+    def apply_functions(self, maps, series, func_list, table_domains, field, split_records=False):
         """Iterates and applies field mapping function(s) to a pandas series."""
 
         # Iterate functions.
@@ -220,8 +218,8 @@ class Stage:
             func_name = func["function"]
             params = {k: v for k, v in func.items() if k != "function"}
 
-            if func_name == "split_record":
-                split_record = True
+            if func_name == "split_records":
+                split_records = True
                 break
 
             logger.info("Applying field mapping function: {}.".format(func_name))
@@ -231,8 +229,8 @@ class Stage:
 
                 # Retrieve and iterate attribute functions and parameters.
                 for attr_field, attr_func_list in field_map_functions.copy_attribute_functions(maps, params).items():
-                    split_record, series = self.apply_functions(maps, series, attr_func_list, table_domains, attr_field,
-                                                                split_record).values()
+                    split_records, series = self.apply_functions(maps, series, attr_func_list, table_domains,
+                                                                 attr_field, split_records).values()
 
             else:
 
@@ -258,68 +256,53 @@ class Stage:
                     logger.exception("Invalid expression: \"{}\".".format(expr))
                     sys.exit(1)
 
-        return {"split_record": split_record, "series": series}
+        return {"split_records": split_records, "series": series}
 
     def compile_domains(self):
         """Compiles field domains for the target dataframes."""
 
         logging.info("Compiling field domains.")
-        self.domains = dict()
+        self.domains = defaultdict(dict)
 
-        for suffix in ("en", "fr"):
+        # Load domains yaml.
+        domains_yaml = {lng: helpers.load_yaml(os.path.abspath(f"../field_domains_{lng}.yaml")) for lng in ("en", "fr")}
 
-            # Load yaml.
-            logger.info("Loading \"{}\" field domains yaml.".format(suffix))
-            domains_yaml = helpers.load_yaml(os.path.abspath("../field_domains_{}.yaml".format(suffix)))
+        # Iterate tables and fields with domains.
+        for table in domains_yaml["en"]["tables"]:
+            for field in domains_yaml["en"]["tables"][table]:
 
-            # Compile domain values.
-            logger.info("Compiling \"{}\" domain values.".format(suffix))
+                try:
 
-            # Compile table values.
-            for table in domains_yaml["tables"]:
-                # Register table.
-                if table not in self.domains.keys():
-                    self.domains[table] = dict()
+                    # Compile domains.
+                    domain_en = domains_yaml["en"]["tables"][table][field]
+                    domain_fr = domains_yaml["fr"]["tables"][table][field]
 
-                for field, vals in domains_yaml["tables"][table].items():
-                    # Register field.
-                    if field not in self.domains[table].keys():
-                        self.domains[table][field] = {"values": list(), "all": None}
+                    # Resolve referenced domains.
+                    while isinstance(domain_en, str):
+                        table_ref, field_ref = domain_en.split(";") if domain_en.find(";") > 0 else [table, domain_en]
+                        domain_en = domains_yaml["en"]["tables"][table_ref][field_ref]
+                        domain_fr = domains_yaml["fr"]["tables"][table_ref][field_ref]
 
-                    try:
+                    # Compile all domain values and domain lookup table, separately.
+                    if domain_en is None:
+                        self.domains[table][field] = {"values": None, "lookup": None}
+                    elif isinstance(domain_en, list):
+                        self.domains[table][field] = {
+                            "values": sorted(list({*domain_en, *domain_fr}), reverse=True),
+                            "lookup": dict([*zip(domain_en, domain_en), *zip(domain_fr, domain_en)])
+                        }
+                    elif isinstance(domain_en, dict):
+                        self.domains[table][field] = {
+                            "values": sorted(list({*domain_en.values(), *domain_fr.values()}), reverse=True),
+                            "lookup": {**domain_en, **{v: v for v in domain_en.values()},
+                                       **{v: domain_en[k] for k, v in domain_fr.items()}}
+                        }
+                    else:
+                        raise TypeError
 
-                        # Configure reference domain.
-                        while isinstance(vals, str):
-                            table_ref, field_ref = vals.split(";") if vals.find(";") > 0 else [table, vals]
-                            vals = domains_yaml["tables"][table_ref][field_ref]
-
-                        # Compile all domain values including keys.
-                        if vals is None:
-                            self.domains[table][field]["values"] = self.domains[table][field]["all"] = None
-
-                        elif isinstance(vals, dict) or isinstance(vals, list):
-                            v_all, v_values = self.domains[table][field]["all"], self.domains[table][field]["values"]
-
-                            # Compile all domain values, including keys.
-                            if v_all is None:
-                                self.domains[table][field]["all"] = vals
-                            elif isinstance(v_all, dict):
-                                self.domains[table][field]["all"] = {k: [v, vals[k]] for k, v in v_all.items()}
-                            else:
-                                self.domains[table][field]["all"] = list(zip(v_all, vals))
-
-                            # Compile all domain values, excluding keys.
-                            # Additionally: 1) Remove duplicates. 2) Reverse sort to avoid false substring matching.
-                            v_values.extend(vals.values() if isinstance(vals, dict) else vals)
-                            self.domains[table][field]["values"] = sorted(list(set(v_values)), reverse=True)
-
-                        else:
-                            logger.exception("Invalid schema definition for table: {}, field: {}.".format(table, field))
-                            sys.exit(1)
-
-                    except (AttributeError, KeyError, ValueError):
-                        logger.exception("Invalid schema definition for table: {}, field: {}.".format(table, field))
-                        sys.exit(1)
+                except (AttributeError, KeyError, TypeError, ValueError):
+                    logger.exception(f"Invalid schema definition for table: {table}, field: {field}.")
+                    sys.exit(1)
 
         logging.info("Identifying field domain functions.")
         self.domains_funcs = list()

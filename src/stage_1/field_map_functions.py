@@ -23,43 +23,36 @@ cur.execute("insert into counter (idx) values (0);")
 db.commit()
 
 
-def apply_domain(val, domain, default):
+def apply_domain(series, domain, default):
     """
-    Applies a domain restriction to the given value based on the provided domain dictionary or list.
-    Returns the default parameter for missing or invalid values.
+    Applies a domain restriction to the given pandas series based on the provided domain dictionary.
+    Replaces missing or invalid values with the default parameter.
 
-    None domains should only represent free flow (unrestricted) fields, thus returning the default parameter only if the
-    value is of a valid none type.
+    Non-dictionary domains are treated as null. Values are left as-is excluding null types and empty strings, which are
+    replaced with the default parameter.
     """
-
-    # Validate against no domain.
-    if domain is None:
-
-        # Preserve value, unless none type.
-        if val == "" or pd.isna(val):
-            return default
-        else:
-            return val
-
-    val = str(val).lower()
 
     # Validate against domain dictionary.
     if isinstance(domain, dict):
 
-        # Validate against keys.
-        for key in domain:
-            if val == str(key).lower():
-                return domain[key][0]
+        # Convert keys to lowercase strings.
+        domain = {str(k).lower(): v for k, v in domain.items()}
 
-        # Validate values as list.
-        domain = domain.values()
+        # Configure lookup function, convert invalid values to default.
+        def get_value(val):
+            try:
+                return domain[str(val).lower()]
+            except KeyError:
+                return default
 
-    # Validate against domain list.
-    for values in domain:
-        if val in map(str.lower, map(str, values)):
-            return values[0]
+        # Get values.
+        return series.map(get_value)
 
-    return default
+    else:
+
+        # Convert empty strings and null types to default.
+        series.loc[(series.map(str).isin(["", "nan"])) | (series.isna())] = default
+        return series
 
 
 def conditional_values(vals, conditions_map, else_value=None):
@@ -325,17 +318,19 @@ def regex_sub(val, pattern_from, pattern_to, domain=None):
     return re.sub(pattern_from, pattern_to, val, flags=re.I)
 
 
-def split_record(df, field):
+def split_records(df, field):
     """
     Splits pandas dataframe records on a nested field.
     Returns 2 nid lookup tables, one for the first (left) and second (right) components in each record split, for the
     purposes of repairing table linkages.
     """
 
-    # Validate column count.
-    count = len(df[field][0])
-    if count != 2:
-        logger.exception("Invalid column count for split_records: {}. Only 2 columns are permitted.".format(count))
+    # Validate input type and column count.
+    test_value = df[field].iloc[0]
+    if not isinstance(test_value, np.ndarray) or len(test_value) != 2:
+        logger.exception(f"Invalid input for split_records. "
+                         f"The specified field \"{field}\" must be a series of type: ndarray, length: 2. "
+                         f"Current type: {type(test_value).__name__}, length: {len(test_value)}.")
         sys.exit(1)
 
     # Explode dataframe on field.

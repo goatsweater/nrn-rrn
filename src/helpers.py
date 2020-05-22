@@ -1,11 +1,17 @@
 import datetime
 import fiona
 import geopandas as gpd
+import geoparquet as gpq
+import json
 import logging
 import networkx as nx
 import os
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pyproj
 import requests
+import shapely.geometry
 import shutil
 import sqlite3
 import subprocess
@@ -19,6 +25,7 @@ from shapely.geometry import LineString, Point
 
 
 logger = logging.getLogger()
+ogr.UseExceptions()
 
 
 class TempHandlerSwap:
@@ -121,7 +128,7 @@ def compile_dtypes(length=False):
 
 
 def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../data/empty.gpkg")):
-    """Receives a dictionary of pandas dataframes and exports them as geopackage layers."""
+    """Receives a dictionary of (Geo)pandas (Geo)DataFrames and exports them as GeoPackage layers."""
 
     # Create gpkg from template if it doesn't already exist.
     if not os.path.exists(output_path):
@@ -132,33 +139,43 @@ def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../
 
         # Create sqlite and ogr GeoPackage connections.
         con = sqlite3.connect(output_path)
+        cur = con.cursor()
         con_ogr = ogr.GetDriverByName("GPKG").Open(output_path, update=1)
 
         # Iterate dataframes.
         for table_name, df in dataframes.items():
 
-            # Remove pre-existing layer from GeoPackage.
-            if table_name in [layer.GetName() for layer in con_ogr]:
-
-                logger.info("Layer already exists: \"{}\". Removing layer from GeoPackage.".format(table_name))
-                con_ogr.DeleteLayer(table_name)
-
-                # Remove metadata table.
-                con.cursor().execute("delete from gpkg_contents where table_name = '{}';".format(table_name))
-                con.commit()
-
-            # Write to GeoPackage.
-            logger.info("Writing to GeoPackage: \"{}\", layer: \"{}\".".format(output_path, table_name))
+            logger.info(f"Writing to GeoPackage: \"{output_path}\", layer: \"{table_name}\".")
 
             # Spatial data.
-            if "geometry" in dir(df):
+            if isinstance(df, gpd.GeoDataFrame):
 
-                # Open GeoPackage.
-                with fiona.open(output_path, "w", overwrite=True, layer=table_name, driver="GPKG", crs=df.crs.to_wkt(),
-                                schema=gpd.io.file.infer_schema(df)) as gpkg:
+                # Load GeoJSON attributes from GeoDataFrame.
+                properties = json.loads(df[df.columns.difference(["geometry"])].to_json(orient="index"))
+                geometry = {str(k): v for k, v in df["geometry"].map(shapely.geometry.mapping).to_dict().items()}
 
-                    # Write to GeoPackage.
-                    gpkg.writerecords(df.iterfeatures())
+                # Construct and open GeoJSON in ogr as layer.
+                ogr_data = ogr.Open("{{\"type\": \"FeatureCollection\", \"features\": [{}]}}".format(", ".join(map(
+                    lambda key: json.dumps({
+                        "type": "Feature",
+                        "properties": properties[key],
+                        "geometry": geometry[key]}), df.index.astype(str)))))
+                ogr_layer = ogr_data.GetLayer()
+
+                # Configure crs.
+                epsg = df.crs.to_epsg()
+                ogr_layer.GetSpatialRef().ImportFromEPSG(epsg)
+
+                # Write to GeoPackage.
+                con_ogr.CopyLayer(ogr_layer, table_name, ["OVERWRITE=YES"])
+
+                # Populate gpkg_contents.
+                bb = df.total_bounds
+                cur.execute(
+                    f"insert or replace into "
+                    f"gpkg_contents(table_name, data_type, identifier, min_x, min_y, max_x, max_y, srs_id) "
+                    f"values ('{table_name}', 'features', '{table_name}', {bb[0]}, {bb[1]}, {bb[2]}, {bb[3]}, {epsg});"
+                )
 
             # Tabular data.
             else:
@@ -166,20 +183,23 @@ def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../
                 # Write to GeoPackage.
                 df.to_sql(table_name, con, if_exists="replace", index=False)
 
-                # Add metedata record to gpkg_contents.
-                con.cursor().execute("insert or ignore into gpkg_contents (table_name, data_type) values "
-                                     "('{}', 'attributes');".format(table_name))
-                con.commit()
+                # Populate gpkg_contents.
+                cur.execute(
+                    f"insert or replace into gpkg_contents(table_name, data_type, identifier) "
+                    f"values ('{table_name}', 'attributes', '{table_name}');"
+                )
 
+            con.commit()
             logger.info("Successfully exported layer: \"{}\".".format(table_name))
 
-        # Commit and close db connection.
-        con.commit()
+        # Close db connection.
+        cur.close()
         con.close()
         del con_ogr
 
-    except (ValueError, fiona.errors.FionaValueError, fiona.errors.TransactionError, sqlite3.Error):
+    except (Exception, ValueError, sqlite3.Error) as e:
         logger.exception("Error raised when writing to GeoPackage: \"{}\".".format(output_path))
+        logger.exception(e)
         sys.exit(1)
 
 
@@ -446,3 +466,36 @@ def reproject_gdf(gdf, epsg_source, epsg_target):
     gdf.crs = "epsg:{}".format(epsg_target)
 
     return gdf
+
+def to_geoparquet(self: gpd.GeoDataFrame, path: str):
+    """
+    A copy of the geoparquet.to_geoparquet function as of commit: b09b12d.
+    Reference: https://github.com/darcy-r/geoparquet-python/blob/master/geoparquet/__init__.py
+
+    The current geoparquet release and, therefore, geopandas.GeoDataFrame.to_geoparquet, does not have the latest commit
+    which handles CRS in an acceptible way. This function overwrite geopandas.GeoDataFrame.to_parquet and should be
+    removed once GeoPandas updates to_parquet.
+    """
+
+    field_name = self.geometry.name
+    crs = pyproj.CRS.from_user_input(self.crs).to_wkt(version="WKT2_2018")
+    crs_format = "WKT2_2018"
+    geometry_types = self.geometry.geom_type.unique().tolist()
+    self = self._serialise_geometry(field_name)
+    self = pa.Table.from_pandas(self)
+    geometry_metadata = {
+        "geometry_fields": [
+            {
+                "field_name": field_name,
+                "geometry_format": "wkb",
+                "geometry_types": geometry_types,
+                "crs": crs,
+                "crs_format": crs_format,
+            }
+        ]
+    }
+    self = gpq._update_metadata(self, new_metadata=geometry_metadata)
+    pq.write_table(self, path)
+    return
+
+gpd.GeoDataFrame.to_parquet = to_geoparquet
