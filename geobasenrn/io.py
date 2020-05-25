@@ -67,6 +67,37 @@ def get_url(url, max_attempts=10, **kwargs):
                 logger.warning("Failed to get url response. Retrying...")
                 time.sleep(seconds_between_attempts)
 
+def source_layer_to_dataframe(source_path: Path, source_layer: str = None, source_driver: str = None, source_epsg: int = None, spatial: bool = True):
+    """Create a GeoDataFrame from a source dataset for spatial data, or a DataFrame for non-spatial data."""
+    # v0.7 of geopandas does not implement support for loading attribute data. It will be in a future release, but 
+    # until that happens we need to manually create a DataFrame for attribute tables inside a spatial container.
+    logger.debug("Creating DataFrame from %s, %s", source_path, source_layer)
+    df = None
+
+    if spatial:
+        # Set the CRS of incoming data
+        source_crs = source_epsg
+        if source_epsg:
+            source_crs = f'EPSG:{source_epsg}'
+        
+        # Load the data into a DataFrame and automatically convert all column names to lower case
+        df = (gpd.read_file(source_path, layer_name=source_layer, driver=source_driver, crs=source_crs)
+              .rename(colums=str.lower))
+
+        # Reproject the data to match what the NRN expects
+        df.to_crs(epsg=nrn.SRS_EPSG_CODE)
+
+        layer[layer] = df
+    else:
+        data = []
+        with fiona.open(source_path, layer=source_layer, driver=source_driver) as source:
+            for feature in source:
+                props = feature['properties']
+                data.append(props)
+        df = pd.DataFrame.from_records(data)
+    
+    return df
+
 def get_gpkg_contents(gpkg_path: Path) -> dict:
     """Load the entire contents of a GeoPackage into DataFrames so that they can be processed further.
 
@@ -90,13 +121,12 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
         # Check each existing layer
         for gpkg_layer in existing_layers:
             if gpkg_layer.endswith(layer_slug):
-                logger.debug("Reading %s from %s in GPKG", layer_slug, gpkg_layer)
-                dframes[layer_name] = gpd.read_file(gpkg_path, layer=gpkg_layer)
+                dframes[layer_name] = source_layer_to_dataframe(gpkg_path, gpkg_layer)
 
     # Create sqlite connection string to load attribute tables directly.
     # This is required because geopandas will throw an error on a dataset that has no geometry.
-    conn_str = f'sqlite:///{gpkg_path}'
-    logger.debug("Loading attribute layers from %s", conn_str)
+    # conn_str = f'sqlite:///{gpkg_path}'
+    # logger.debug("Loading attribute layers from %s", conn_str)
 
     for layer_name in attribute_layers:
         # Names should be in upper case
@@ -105,8 +135,9 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
         # Check each existing layer
         for gpkg_layer in existing_layers:
             if gpkg_layer.endswith(layer_slug):
-                logger.debug("Reading %s from %s in GPKG", layer_slug, gpkg_layer)
-                dframes[layer_name] = pd.read_sql_table(gpkg_layer, con=conn_str, coerce_float=False)
+                dframes[layer_name] = source_layer_to_dataframe(gpkg_path, gpkg_layer, spatial=False)
+                # logger.debug("Reading %s from %s in GPKG", layer_slug, gpkg_layer)
+                # dframes[layer_name] = pd.read_sql_table(gpkg_layer, con=conn_str, coerce_float=False)
     
     # Generate a warning for every table that could not be found.
     for layer in (spatial_layers + attribute_layers):

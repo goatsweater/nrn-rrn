@@ -42,6 +42,7 @@ setup(
         package=geobasenrn.nrn.package:package
         validate=geobasenrn.nrn.validate:validate
         ls=geobasenrn.nrn.ls:ls
+        convert=geobasenrn.nrn.convert:convert
         ''',
     classifiers=[
         "License :: OSI Approved :: MIT License"
