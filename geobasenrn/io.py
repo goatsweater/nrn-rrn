@@ -198,6 +198,60 @@ def get_kml_filename(identifier: str, lang: str='en') -> str:
     fname = f'{nrn_id}_{identifier.lower()}_kml_{lang}.shp'
     return fname
 
+def get_gpkg_layer_name(layer, source, major, minor, lang='en'):
+    """Generate a valid name for the layer in GPKG outputs."""
+    if lang == 'en':
+        nrn_id = 'NRN'
+    else:
+        nrn_id = 'RRN'
+    
+    slug = layer.get_table_name('gpkg', lang)
+
+    # Ensure source is a string to avoid any exceptions.
+    if type(source) is not str:
+        source = str(source)
+    
+    name = f'{nrn_id}_{source.upper()}_{major}_{minor}_{slug.upper()}'
+    return name
+
+def get_shp_layer_name(layer, source, major, minor, lang='en'):
+    """Generate a valid name to be used for each of the files in a shapefile."""
+    if lang == 'en':
+        nrn_id = 'NRN'
+    else:
+        nrn_id = 'RRN'
+    
+    slug = layer.get_table_name('shp', lang)
+
+    # Ensure source is a string to avoid any exceptions.
+    if type(source) is not str:
+        source = str(source)
+    
+    name = f'{nrn_id}_{source.upper()}_{major}_{minor}_{slug.upper()}'
+    return name
+
+def get_gml_layer_name(layer, source, major, minor, lang='en'):
+    """Generate a valid name to be used in GML files."""
+    if lang == 'en':
+        nrn_id = 'NRN'
+    else:
+        nrn_id = 'RRN'
+    
+    slug = layer.get_table_name('gml', lang)
+    
+    # Ensure source is a string to avoid any exceptions.
+    if type(source) is not str:
+        source = str(source)
+    
+    name = f'{nrn_id}_{source.upper()}_{major}_{minor}_{slug}.gml'
+    return name
+
+def get_kml_layer_name(layer, source, major, minor, lang='en'):
+    """Generate a valid name to be used in KML files.
+    """
+    warnings.warn("get_kml_name is not implemented yet", ResourceWarning)
+    pass
+
 # Table definitions that can exist in each dataset.
 class BaseTable:
     """Superclass to layers within a dataset."""

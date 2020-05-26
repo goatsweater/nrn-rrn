@@ -40,16 +40,7 @@ ogr_drivers = {
 }
 
 # Map table short names to their matching class
-class_map = {
-    'addrange': nrnio.AddressRangeTable(),
-    'altnamlink': nrnio.AlternateNameLinkTable(),
-    'blkpassage': nrnio.BlockedPassageTable(),
-    'ferryseg': nrnio.FerrySegmentTable(),
-    'junction': nrnio.JunctionTable(),
-    'roadseg': nrnio.RoadSegmentTable(),
-    'strplaname': nrnio.StreetPlaceNameTable(),
-    'tollpoint': nrnio.TollPointTable()
-}
+class_map = schema.class_map
 
 @click.command(short_help="Create distributable NRN data.")
 @options.precision_opt
@@ -94,6 +85,7 @@ def package(ctx, precision, infile, major_version, minor_version,
     logger.debug("Loading GPKG contents from %s", infile)
     dframes = nrnio.get_gpkg_contents(infile)
 
+    # TODO: Add support for multiple formats to be specified in a single command
     format_driver = ogr_drivers.get(output_format)
     logger.debug("Chosen output driver: %s", format_driver)
     # Driver to be used by OGR
@@ -127,7 +119,7 @@ def package(ctx, precision, infile, major_version, minor_version,
 
                         tbl = class_map[layer_key]
                         logger.debug("Creating layer from %s", tbl)
-                        layer_name = getattr(tbl, layer_name_function)(pt_identifier, major_version, minor_version, lang)
+                        layer_name = getattr(nrnio, layer_name_function)(tbl, pt_identifier, major_version, minor_version, lang)
 
                         # shapefiles get a data source named after their layer names
                         if output_format == 'shp':
@@ -213,7 +205,7 @@ def package(ctx, precision, infile, major_version, minor_version,
                 shutil.move(item, out_path)    
 
 def create_layer(data_source: ogr.DataSource, tbl, layer_name: str, output_format: str, lang: str='en'):
-    """Create a layer within the data source that conforms to GeoPackage specifications."""
+    """Create a layer within the data source that conforms to output format specifications."""
     logger.debug("Creating %s layer for %s", output_format, tbl.__class__.__name__)
 
     if data_source == None:
@@ -244,7 +236,7 @@ def create_layer(data_source: ogr.DataSource, tbl, layer_name: str, output_forma
         layer.CreateField(field_defn)
 
 def write_data_output(df, layer_name: str, data_source: ogr.DataSource, output_format: str, lang: str='en'):
-    """Write the contents of dframes out to GeoPackage in the specified work directory.
+    """Write the contents of dframes out to output format in the specified work directory.
     
     This creates either a French or English copy of the data, based on the supplied language.
     """
@@ -310,7 +302,7 @@ def write_geom_layer(df, layer: ogr.Layer):
         feature = None
 
 def write_attr_layer(df, layer: ogr.Layer):
-    """Write a GeoDataFrame to a layer."""
+    """Write a DataFrame to a layer."""
     # Iterate each feature in the dataframe and write it to the layer. This will produce a __geo_interface__ compliant
     # dictionary that can be used to get at the records.
     layer_name = layer.GetName()
