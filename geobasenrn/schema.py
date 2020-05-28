@@ -1,8 +1,11 @@
 """Define schema information for fields across each supported format."""
 
+import logging
 from osgeo import ogr
 
 __all__ = ['schema', 'class_map']
+
+logger = logging.getLogger(__name__)
 
 # Some fields have a restricted set of values.
 domains = {
@@ -850,7 +853,7 @@ class BaseTable:
     def __init__(self, key: str):
         logger.debug("BaseTable initialization started")
 
-        logger.debug("Table %s with names: en=%s, fr=%s", key, name_en, name_fr)
+        logger.debug("Initializing table %s", key)
         self.key = key
 
         # Common fields
@@ -1005,12 +1008,12 @@ class TollPointTable(BaseTable):
 
 # Map table short names to their matching class
 class_map = {
-    'addrange': schema.AddressRangeTable(),
-    'altnamlink': schema.AlternateNameLinkTable(),
-    'blkpassage': schema.BlockedPassageTable(),
-    'ferryseg': schema.FerrySegmentTable(),
-    'junction': schema.JunctionTable(),
-    'roadseg': schema.RoadSegmentTable(),
-    'strplaname': schema.StreetPlaceNameTable(),
-    'tollpoint': schema.TollPointTable()
+    'addrange': AddressRangeTable(),
+    'altnamlink': AlternateNameLinkTable(),
+    'blkpassage': BlockedPassageTable(),
+    'ferryseg': FerrySegmentTable(),
+    'junction': JunctionTable(),
+    'roadseg': RoadSegmentTable(),
+    'strplaname': StreetPlaceNameTable(),
+    'tollpoint': TollPointTable()
 }
