@@ -1,7 +1,7 @@
 """Definitions for valid layers within an NRN dataset."""
 
 import fiona
-from geobasenrn import attribute_layers, spatial_layers
+import geobasenrn as nrn
 from geobasenrn.schema import schema
 import geopandas as gpd
 import logging
@@ -82,12 +82,10 @@ def source_layer_to_dataframe(source_path: Path, source_layer: str = None, sourc
         
         # Load the data into a DataFrame and automatically convert all column names to lower case
         df = (gpd.read_file(source_path, layer_name=source_layer, driver=source_driver, crs=source_crs)
-              .rename(colums=str.lower))
+              .rename(columns=str.lower))
 
         # Reproject the data to match what the NRN expects
-        df.to_crs(epsg=nrn.SRS_EPSG_CODE)
-
-        layer[layer] = df
+        df = df.to_crs(epsg=nrn.SRS_EPSG_CODE)
     else:
         data = []
         with fiona.open(source_path, layer=source_layer, driver=source_driver) as source:
@@ -114,7 +112,7 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
     # Look for matches, and store the layer as a DataFrame. Layer names in geopackages have names that include their
     # version information. The name is always at the end though.
     logger.debug("Loading spatial layers.")
-    for layer_name in spatial_layers:
+    for layer_name in nrn.spatial_layers:
         # Names should be in upper case
         layer_slug = layer_name.upper()
         
@@ -128,7 +126,7 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
     # conn_str = f'sqlite:///{gpkg_path}'
     # logger.debug("Loading attribute layers from %s", conn_str)
 
-    for layer_name in attribute_layers:
+    for layer_name in nrn.attribute_layers:
         # Names should be in upper case
         layer_slug = layer_name.upper()
         
@@ -140,7 +138,7 @@ def get_gpkg_contents(gpkg_path: Path) -> dict:
                 # dframes[layer_name] = pd.read_sql_table(gpkg_layer, con=conn_str, coerce_float=False)
     
     # Generate a warning for every table that could not be found.
-    for layer in (spatial_layers + attribute_layers):
+    for layer in (nrn.spatial_layers + nrn.attribute_layers):
         if layer not in dframes:
             logger.warning("Layer not found: %s", layer)
     

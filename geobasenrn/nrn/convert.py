@@ -7,7 +7,7 @@ equivalents when a field has a domain applied to it.
 import click
 import geobasenrn as nrn
 import geobasenrn.io as nrnio
-from geobasenrn import schema
+from geobasenrn import junctions, schema, tools
 from geobasenrn.errors import ConfigurationError
 import geopandas as gpd
 import logging
@@ -16,12 +16,15 @@ from pathlib import Path
 import tempfile
 import yaml
 
+import pprint
+
 
 logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option('-p', '--previous', 'previous_vintage',
               type=click.Path(dir_okay=False, file_okay=True, resolve_path=True, exists=True),
+              required=True,
               help="Path to the previous vintage GPKG file.")
 @click.option('-c', '--config', 'config_files',
               type=click.Path(dir_okay=False, file_okay=True, resolve_path=True, exists=True),
@@ -53,16 +56,20 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path):
     # 12. save to output
 
     # Convert all the source configurations into an options dictionary to be referenced throughout conversion.
+    logger.debug("Reading source configuration...")
     config_paths = [Path(f) for f in config_files]
     source_config = get_source_config(config_paths)
 
     # Load all the source data
+    logger.debug("Loading source data...")
     source_data = get_source_data(source_config)
 
     # Convert all source data to interim format
+    logger.debug("Converting source data to internal representation...")
     dframes = map_source_to_target_dframes(source_config['conform'], source_data)
 
     # Recover any layers that aren't in the source from the previous vintage
+    logger.debug("Recovering previous vintage data not found in source data...")
     previous_dframes = nrnio.get_gpkg_contents(previous_vintage)
     for layer in previous_dframes:
         if layer not in dframes:
@@ -73,12 +80,19 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path):
     # 1. load boundaries
     # 2. compile target attributes
     # 3. generate target dataframe
-    # 4. generate junctions
-    # 5. generate attributes
+    # 4. generate junctions - done
+    # 5. generate attributes - done
     # 6. apply domains
 
     # Load the administrative boundary into a polygon
-    admin_boundary = get_admin_boundary_poly(ctx.source_prov, admin_boundary_path)
+    logger.debug("Loading administrative boundary polygon...")
+    admin_boundary_poly = junctions.get_statcan_admin_boundary_poly(ctx.obj['province_code'], admin_boundary_path)
+
+    # Fetch junctions
+    logger.debug("Generating junctions...")
+    dframes['junction'] = junctions.build_junctions(dframes.get('roadseg'), 
+                                                    admin_boundary_poly, 
+                                                    dframes.get('ferryseg'))
 
     # Stage 3
     # TODO:
@@ -171,6 +185,7 @@ def get_source_layer(layer_name: str, source_path: Path, source_layer: str, sour
 def get_source_data(layer_info: dict) -> dict:
     """Load all source data into a dictionary indexed by the appropriate target layer name."""
     # Keys used to define source data elements in the configuration file
+    logger.debug("Fetching source layer")
     source_data_path = 'filename'
     source_data_layer = 'layer'
     source_data_driver = 'driver'
@@ -185,7 +200,7 @@ def get_source_data(layer_info: dict) -> dict:
     for layer_name in conformance:
         # Gather the data source information
         source_index = conformance[layer_name].get('source_index')
-        source_data = layer_info.get('data')[source_index]
+        source_data = layer_info.get('source_layers')[source_index]
 
         # Get the DataFrame
         source_path = Path(source_data.get(source_data_path))
@@ -194,7 +209,7 @@ def get_source_data(layer_info: dict) -> dict:
         source_crs = source_data.get(source_data_crs)
         is_spatial = source_data.get(source_data_is_spatial, False)
 
-        dframes[layer_name] = get_source_layer(layer_name, source_path, source_layer, source_driver, source_crs)
+        dframes.update(get_source_layer(layer_name, source_path, source_layer, source_driver, source_crs))
     
     return dframes
 
@@ -214,7 +229,7 @@ def map_source_to_target_dframes(schema_map: dict, dframes: dict) -> dict:
         raw_values_fields = {}
         function_fields = {}
 
-        for k, v in field_map:
+        for k, v in field_map.items():
             # Skip any fields that don't have a defined value
             if v == None:
                 continue
@@ -236,7 +251,8 @@ def map_source_to_target_dframes(schema_map: dict, dframes: dict) -> dict:
         
         # Direct mapping is just a matter of taking the fields
         source_df = dframes[item_key]
-        target_df = source_df[direct_map_fields.values()].rename(columns=direct_map_fields)
+        # direct_map_field_list = [field for field in direct_map_fields.values()]
+        target_df = source_df.rename(columns=direct_map_fields)
         # TODO: remove any extraneous spaces in string data
 
         # Raw values just get set directly
@@ -244,70 +260,11 @@ def map_source_to_target_dframes(schema_map: dict, dframes: dict) -> dict:
             target_df[field_name] = raw_values_fields[field_name].strip()
         
         # Apply processing functions
-        for target_field, function_set in function_fields:
-            target_df = target_df.pipe(apply_functions_to_fields, target_field, function_set)
+        for target_field, function_set in function_fields.items():
+            target_df = target_df.pipe(tools.apply_functions_to_fields, target_field, function_set)
         
         # Save the target data to be returned
         result_dframes[item_key] = target_df
     
     return result_dframes
-        
-def apply_functions_to_fields(df, target_field, field_schema):
-    """Perform some processing on the values to properly extract the values."""
-    new_df = df.copy()
 
-    # define each possible type of function
-    def replace(col, pattern, replacement, is_regex: bool = True):
-        """Perform text replacement on each item in the column. Set is_regex to False to perform exact matches."""
-        return col.str.replace(pattern, replacement, is_regex)
-
-    def extract(col, pattern: str, expand: bool = True):
-        """Call re.search and extract a string using a regex pattern."""
-        return col.str.extract(pattern, expand)
-
-    def concat(df, join_cols: [str], join_chars: str =''):
-        """Combine multiple columns into a single string."""
-
-        # All the columns need to be strings or this will fail.
-        # TODO: verify that all columns are strings
-        return df[join_cols].agg(join_chars.join, axis=1)
-
-    # Functions that will be applied to entire DataFrames
-    df_dispatcher = {
-        'concat': concat
-    }
-    # Functions that will be applied to a Series
-    col_dispatcher = {
-        'replace': replace,
-        'extract': extract
-    }
-
-    # Call each defined transformation function in series
-    new_df[target_field] = new_df[field_schema['field']]
-    for func_call in field_schema['functions']:
-        func_name = func_call['function']
-        kwargs = func_call.get('args')
-
-        if func_name in df_dispatcher:
-            new_df[target_field] = df_dispatcher[func_name](new_df, **kwargs)
-        elif func_name in col_dispatcher:
-            new_df[target_field] = new_df[target_field].apply(dispatcher[func_name], **kwargs)
-    
-    return new_df
-
-def get_admin_boundary_poly(source_prov: str, boundary_file_path: Path):
-    """Extract the administrative boundary for the given province or territory."""
-    # StatCan uses codes instead of ISO identifiers for the area identifiers
-    prov_codes = {"ab": 48, "bc": 59, "mb": 46, "nb": 13, "nl": 10, "ns": 12, "nt": 61, "nu": 62, "on": 35, "pe": 11,
-                 "qc": 24, "sk": 47, "yt": 60}
-    
-    # Read the administrative boundaries file and filter it
-    query_string = f'pruid == {prov_codes[source_prov.lower()]}'
-    boundaries = (gpd.read_file(boundary_file_path)
-                  .to_crs(nrn.SRS_EPSG_CODE)
-                  .rename(columns=str.lower)
-                  .query(query_string))
-    # There should be only one boundary left - take the geometry
-    boundary_geom = boundaries.geometry[0]
-
-    return boundary_geom
