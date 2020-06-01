@@ -3,17 +3,18 @@ import fiona
 import geopandas as gpd
 import logging
 import math
+import networkx as nx
 import numpy as np
 import os
 import pandas as pd
 import pathlib
-import shapely.ops
 import sys
 import uuid
 from itertools import chain, compress
-from operator import itemgetter
+from operator import attrgetter, itemgetter
 from scipy.spatial import cKDTree
-from shapely.geometry import LineString, MultiPoint
+from shapely.geometry import LineString, MultiPoint, Point
+from shapely.ops import linemerge, split
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 import helpers
@@ -46,13 +47,13 @@ class Stage:
             sys.exit(1)
 
         # Compile match fields (fields which must be equal across records).
-        self.match_fields = ["namebody", "strtypre", "strtysuf", "dirprefix", "dirsuffix"]
+        self.match_fields = ["namebody", "strtypre", "strtysuf", "dirprefix", "dirsuffix", "starticle"]
 
         # Define change logs dictionary.
         self.change_logs = dict()
 
     def export_change_logs(self):
-        """Exports the dataset differences as logs."""
+        """Exports the dataset differences as logs - based on nids."""
 
         change_logs_dir = os.path.abspath("../../data/processed/{0}/{0}_change_logs".format(self.source))
         logger.info("Writing change logs to: \"{}\".".format(change_logs_dir))
@@ -78,6 +79,90 @@ class Stage:
 
         # Export target dataframes to GeoPackage layers.
         helpers.export_gpkg(self.dframes, self.data_path)
+
+    def gen_and_recover_structids(self):
+        """Recovers structids from the previous NRN vintage or generates new ones."""
+
+        logger.info("Generating structids for table: roadseg.")
+
+        # Load default field values.
+        defaults = helpers.compile_default_values()["roadseg"]
+
+        # Copy and filter dataframes.
+        roadseg = self.dframes["roadseg"][["uuid", "structid", "structtype", "geometry"]].copy(deep=True)
+        roadseg_old = self.dframes_old["roadseg"][["structid", "structtype", "geometry"]].copy(deep=True)
+
+        # Overwrite any pre-existing structid.
+        roadseg['structid'] = defaults["structid"]
+
+        # Subset dataframes to structures (where structtype is not the default value nor "None").
+        # For previous vintage, further subset to records where structid is not the default value.]
+        roadseg = roadseg[~roadseg["structtype"].isin(["None", defaults["structtype"]])]
+        roadseg_old = roadseg_old[(~roadseg_old["structtype"].isin(["None", defaults["structtype"]])) &
+                                  (roadseg_old["structid"] != defaults["structid"])]
+
+        # Group contiguous structures.
+        # Process: compile network x subgraphs, assign a structid to each list of subgraph uuids.
+        subgraphs = nx.connected_component_subgraphs(
+            helpers.gdf_to_nx(roadseg, keep_attributes=True, endpoints_only=True))
+        structids = dict()
+
+        for subgraph in subgraphs:
+            structids[uuid.uuid4().hex] = list(set(nx.get_edge_attributes(subgraph, "uuid").values()))
+
+        # Explode uuid groups and invert series-index such that the uuid is the index.
+        structids = pd.Series(structids).explode()
+        structids = pd.Series(structids.index.values, index=structids)
+
+        # Assign structids to dataframe.
+        roadseg["structid"] = structids
+
+        # Recovery old structids.
+        logger.info("Recovering old structids for table: roadseg.")
+
+        # Group by structid.
+        roadseg_grouped = self.groupby_to_list(roadseg, "structid", "geometry")
+        roadseg_old_grouped = self.groupby_to_list(roadseg_old, "structid", "geometry")
+
+        # Dissolve grouped geometries.
+        roadseg_grouped = roadseg_grouped.map(lambda geoms: geoms[0] if len(geoms) == 1 else linemerge(geoms))
+        roadseg_old_grouped = roadseg_old_grouped.map(lambda geoms: geoms[0] if len(geoms) == 1 else linemerge(geoms))
+
+        # Convert series to geodataframes.
+        # Restore structid index as column.
+        roadseg_grouped = gpd.GeoDataFrame({"structid": roadseg_grouped.index,
+                                            "geometry": roadseg_grouped.reset_index(drop=True)})
+        roadseg_old_grouped = gpd.GeoDataFrame({"structid": roadseg_old_grouped,
+                                                "geometry": roadseg_old_grouped.reset_index(drop=True)})
+
+        # Merge current and old dataframes on geometry.
+        merge = pd.merge(roadseg_old_grouped, roadseg_grouped, how="outer", on="geometry", suffixes=("_old", ""),
+                         indicator=True)
+
+        # Recover old structids via uuid index.
+        # Merge uuids onto recovery dataframe.
+        recovery = merge[merge["_merge"] == "both"].merge(roadseg[["structid", "uuid"]], how="left", on="structid")\
+            .drop_duplicates(subset="structid", keep="first")
+        recovery.index = recovery["uuid"]
+
+        # Recover old structids.
+        roadseg.loc[roadseg["structid"].isin(recovery["structid"]), "structid"] = recovery["structid_old"]
+
+        # Store results.
+        self.dframes["roadseg"].loc[roadseg.index, "structid"] = roadseg["structid"].copy(deep=True)
+
+    @staticmethod
+    def groupby_to_list(df, group_field, list_field):
+        """
+        Faster alternative to pandas groupby.apply/agg(list).
+        Groups records by one or more fields and compiles an output field into a list for each group.
+        """
+
+        keys, vals = df.sort_values(group_field)[[group_field, list_field]].values.T
+        keys_unique, keys_indexes = np.unique(keys, return_index=True)
+        vals_arrays = np.split(vals, keys_indexes[1:])
+
+        return pd.Series([list(vals_array) for vals_array in vals_arrays], index=keys_unique).copy(deep=True)
 
     def load_gpkg(self):
         """Loads input GeoPackage layers into dataframes."""
@@ -184,9 +269,12 @@ class Stage:
         # roadseg - previous vintage
 
         # Copy and filter dataframes.
+        # Filter duplicates (may exist due to differences between previous and current generation process).
         roadseg = self.dframes_old["roadseg"][["nid", "adrangenid", "geometry"]].copy(deep=True)
         addrange = self.dframes_old["addrange"][["nid", "r_offnanid"]].copy(deep=True)
+        addrange = addrange[~addrange.duplicated(keep="first")]
         strplaname = self.dframes_old["strplaname"][["nid", *self.match_fields]].copy(deep=True)
+        strplaname = strplaname[~strplaname.duplicated(keep="first")]
 
         # Merge dataframes to assemble full roadseg representation.
         self.roadseg_old = roadseg.merge(
@@ -203,10 +291,20 @@ class Stage:
         junction = self.dframes["junction"][["uuid", "geometry"]].copy(deep=True)
 
         # Group uuids and geometry by match fields.
-        grouped = roadseg.groupby(self.match_fields)[["uuid", "geometry"]].agg(list)
+        # To reduce processing, only duplicated records are grouped.
+        dups = roadseg[roadseg[self.match_fields].duplicated(keep=False)]
+        dups_geom_lookup = dups["geometry"].to_dict()
+        grouped = dups.groupby(self.match_fields)["uuid"].agg(list)
+        grouped = pd.DataFrame({"uuid": grouped,
+                                "geometry": grouped.map(lambda uuids: itemgetter(*uuids)(dups_geom_lookup))})
 
         # Dissolve geometries.
-        grouped["geometry"] = grouped["geometry"].map(lambda geoms: shapely.ops.linemerge(geoms))
+        grouped["geometry"] = grouped["geometry"].map(linemerge)
+
+        # Concatenate non-grouped groups (single uuid groups) to groups.
+        non_grouped = roadseg[~roadseg[self.match_fields].duplicated(keep=False)][["uuid", "geometry"]]
+        non_grouped["uuid"] = non_grouped["uuid"].map(lambda uid: [uid])
+        grouped = pd.concat([grouped.reset_index(drop=True), non_grouped], axis=0, ignore_index=True, sort=False)
 
         # Split multilinestrings into multiple linestring records.
         # Process: query and explode multilinestring records, then concatenate to linestring records.
@@ -216,27 +314,21 @@ class Stage:
         grouped_multi_exploded = grouped_multi.explode("geometry")
         grouped = pd.concat([grouped_single, grouped_multi_exploded], axis=0, ignore_index=False, sort=False)
 
-        # Compile associated junction indexes for each linestring.
-        # Process: use cKDTree to compile indexes of coincident junctions to each linestring point, excluding endpoints.
-        junction_tree = cKDTree(np.concatenate([geom.coords for geom in junction["geometry"]]))
-        grouped["junction"] = grouped["geometry"].map(
-            lambda geom: list(chain(*junction_tree.query_ball_point(geom.coords[1: -1], r=0))) if len(geom.coords) > 2
-            else [])
+        # Compile coincident junctions to each linestring point, excluding endpoints.
+        junction_pts = set(chain.from_iterable(junction["geometry"].map(attrgetter("coords"))))
+        grouped["junction"] = grouped["geometry"].map(lambda geom: set(list(geom.coords)[1: -1]))
+        grouped["junction"] = grouped["junction"].map(lambda coords: list(coords.intersection(junction_pts)))
 
-        # Convert associated junction indexes to junction geometries.
-        # Process: retrieve junction geometries for associated indexes and convert to multipoint.
+        # Separate groups with and without coincident junctions.
         grouped_no_junction = grouped[~grouped["junction"].map(lambda indexes: len(indexes) > 0)]
         grouped_junction = grouped[grouped["junction"].map(lambda indexes: len(indexes) > 0)]
 
-        junction_geometry = junction["geometry"].reset_index(drop=True).to_dict()
+        # Convert coords to shapely points.
         grouped_junction["junction"] = grouped_junction["junction"].map(
-            lambda indexes: itemgetter(*indexes)(junction_geometry)).copy(deep=True)
-        grouped_junction["junction"] = grouped_junction["junction"].map(
-            lambda pts: MultiPoint(pts) if isinstance(pts, tuple) else pts)
+            lambda pts: Point(pts) if len(pts) == 1 else MultiPoint(pts))
 
-        # Split linestrings on junctions.
-        grouped_junction["geometry"] = np.vectorize(
-            lambda line, pts: shapely.ops.split(line, pts), otypes=[LineString])(
+        # Split linestrings on junctions, only for groups with coincident junctions.
+        grouped_junction["geometry"] = np.vectorize(lambda line, pts: split(line, pts), otypes=[LineString])(
             grouped_junction["geometry"], grouped_junction["junction"])
 
         # Split multilinestrings into multiple linestring records, concatenate all split records to non-split records.
@@ -253,7 +345,6 @@ class Stage:
         # 1) geometry: represents the dissolved geometry of the now-reduced group.
         # 2) uuids: the original attribute grouping of uuids.
         # The uuid group now needs to be reduced to match the now-reduced geometry.
-
         grouped = pd.DataFrame({"uuids": grouped["uuid"], "geometry": grouped["geometry"].map(lambda g: set(g.coords))})
 
         # Retrieve roadseg geometries for associated uuids.
@@ -261,10 +352,13 @@ class Stage:
         grouped["uuids_geometry"] = grouped["uuids"].map(lambda uuids: itemgetter(*uuids)(roadseg_geometry))
         grouped["uuids_geometry"] = grouped["uuids_geometry"].map(lambda g: g if isinstance(g, tuple) else (g,))
 
-        # Filter associated uuids by coordinate set subtraction.
-        # Process: subtract the coordinate sets in the dissolved group geometry from the uuid geometry.
-        grouped_query = pd.Series(np.vectorize(lambda g1, g2: [g1, g2])(grouped["geometry"], grouped["uuids_geometry"]))
-        grouped_query = grouped_query.map(lambda row: list(map(lambda uuid_geom: len(uuid_geom - row[0]) == 0, row[1])))
+        # Filter associated uuids by validating coordinate subset.
+        # Process: for each coordinate set for each uuid in a group, test if the set is a subset of the
+        # complete group coordinate set.
+        grouped_query = pd.Series(np.vectorize(
+            lambda pts_group, pts_uuids: list(map(lambda pts_uuid: pts_uuid.issubset(pts_group), pts_uuids)),
+            otypes=[np.object])(
+            grouped["geometry"], grouped["uuids_geometry"]))
 
         # Handle exceptions 1.
         # Identify results without uuid matches. These represents lines which backtrack onto themselves.
@@ -312,17 +406,19 @@ class Stage:
         roadseg_old = self.roadseg_old[[*self.match_fields, "nid", "geometry"]].copy(deep=True)
 
         # Group by nid.
-        roadseg_grouped = roadseg.groupby("nid")["geometry"].apply(list)
-        roadseg_old_grouped = roadseg_old.groupby("nid")["geometry"].apply(list)
+        roadseg_grouped = self.groupby_to_list(roadseg, "nid", "geometry")
+        roadseg_old_grouped = self.groupby_to_list(roadseg_old, "nid", "geometry")
 
         # Dissolve grouped geometries.
-        roadseg_grouped = roadseg_grouped.map(lambda geoms: shapely.ops.linemerge(geoms))
-        roadseg_old_grouped = roadseg_old_grouped.map(lambda geoms: shapely.ops.linemerge(geoms))
+        roadseg_grouped = roadseg_grouped.map(lambda geoms: geoms[0] if len(geoms) == 1 else linemerge(geoms))
+        roadseg_old_grouped = roadseg_old_grouped.map(lambda geoms: geoms[0] if len(geoms) == 1 else linemerge(geoms))
 
         # Convert series to geodataframes.
         # Restore nid index as column.
-        roadseg_grouped = gpd.GeoDataFrame(roadseg_grouped.reset_index(drop=False))
-        roadseg_old_grouped = gpd.GeoDataFrame(roadseg_old_grouped.reset_index(drop=False))
+        roadseg_grouped = gpd.GeoDataFrame({"nid": roadseg_grouped.index,
+                                            "geometry": roadseg_grouped.reset_index(drop=True)})
+        roadseg_old_grouped = gpd.GeoDataFrame({"nid": roadseg_old_grouped,
+                                                "geometry": roadseg_old_grouped.reset_index(drop=True)})
 
         # Merge current and old dataframes on geometry.
         merge = pd.merge(roadseg_old_grouped, roadseg_grouped, how="outer", on="geometry", suffixes=("_old", ""),
@@ -389,7 +485,7 @@ class Stage:
                 (roadseg["geometry"]).max()
 
             # Generate roadseg kdtree.
-            roadseg_tree = cKDTree(np.concatenate([np.array(geom.coords) for geom in roadseg["geometry"]]))
+            roadseg_tree = cKDTree(np.concatenate(roadseg["geometry"].map(attrgetter("coords")).to_numpy()))
 
             # Compile an index-lookup dict for each coordinate associated with each roadseg record.
             roadseg_pt_indexes = np.concatenate([[index] * count for index, count in
@@ -439,6 +535,7 @@ class Stage:
         self.roadseg_recover_and_classify_nids()
         self.roadseg_update_linkages()
         self.recover_and_classify_nids()
+        self.gen_and_recover_structids()
         self.export_change_logs()
         self.export_gpkg()
 
