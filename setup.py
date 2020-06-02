@@ -1,16 +1,16 @@
 from setuptools import setup
 
-requirements = ["Click==7.0",
+requirements = ["Click>=7.0",
                 "Fiona>=1.8.13",
                 "geopandas==0.7.0",
                 "networkx>=2.3",
-                "numpy==1.16.4",
-                "pandas==0.25.0",
-                "PyYAML==5.1.1",
-                "requests==2.23.0",
+                "numpy>=1.16.4",
+                "pandas>=0.25.0",
+                "PyYAML>=5.1.1",
+                "requests>=2.23.0",
                 "rtree>=0.9.4",
-                "scipy==1.4.1",
-                "Shapely==1.7.0"]
+                "scipy>=1.4.1",
+                "Shapely>=1.7.0"]
 
 setup(
     name="geobasenrn",
