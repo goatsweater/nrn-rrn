@@ -12,7 +12,8 @@ from geobasenrn.nrn.options import verbose_opt, quiet_opt
 def configure_logging(verbosity):
     """Set the logging level based on verbosity switches."""
     log_level = max(10, 30 - 10 * verbosity)
-    logging.basicConfig(stream=sys.stderr, level=log_level)
+    log_format = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
+    logging.basicConfig(stream=sys.stderr, level=log_level, format=log_format)
 
 # valid province codes
 prcodes = ['AB', 'BC', 'MB', 'ON', 'NB', 'NL', 'NS', 'NT', 'NU', 'PE', 'QC',
