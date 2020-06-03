@@ -11,13 +11,11 @@ from geobasenrn import junctions, schema, tools
 from geobasenrn.errors import ConfigurationError
 import geopandas as gpd
 import logging
+from osgeo import ogr
 import pandas as pd
 from pathlib import Path
 import tempfile
 import yaml
-
-import pprint
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +33,21 @@ logger = logging.getLogger(__name__)
 @click.option('-b', '--boundary', 'admin_boundary_path',
               type=click.Path(dir_okay=False, file_okay=True, resolve_path=True, exists=True),
               help="Path to the administrative boundaries file from Statistics Canada.")
+@click.option('-o', '--output', 'output_path',
+              type=click.Path(dir_okay=False, file_okay=True, resolve_path=True, exists=False),
+              required=True,
+              help="Path to the output GeoPackage with converted data.")
 @click.pass_context
-def convert(ctx, previous_vintage, config_files, admin_boundary_path):
+def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_path):
     """Convert an input dataset into an NRN pre-release GPKG."""
     previous_vintage = Path(previous_vintage)
     admin_boundary_path = Path(admin_boundary_path)
+
+    # Ensure the output path points at a gpkg file
+    output_path = Path(output_path)
+    if not output_path.suffix.lower() == '.gpkg':
+        raise click.exceptions.BadOptionUsage("GeoPackage files must end with .gpkg")
+
     # Stage 1
     # TODO:
     # 1. download previous vintage - done (provided directly)
@@ -53,7 +61,6 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path):
     # 9. apply domains
     # 10. filter strplaname duplicates
     # 11. repair nid linkages
-    # 12. save to output
 
     # Convert all the source configurations into an options dictionary to be referenced throughout conversion.
     logger.debug("Reading source configuration...")
@@ -102,7 +109,32 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path):
     # 4. roadseg update linkages
     # 5. recover and classify nids
     # 6. export change logs
-    # 7. save output
+    # 7. save output - done
+
+    # Save the output GeoPackage
+    save_to_gpkg(output_path, dframes)
+
+def save_to_gpkg(gpkg_path: Path, data: dict):
+    """Save all DataFrames in the data dictionary to a GeoPackage."""
+    output_format = 'gpkg'
+
+    # Driver to be used by OGR
+    driver = ogr.GetDriverByName(output_format.upper())
+
+    # Create the empty GeoPackage for data to be loaded in to.
+    logger.debug("Creating output file")
+    # OGR doesn't understand pathlib paths, so force posix paths
+    data_source = driver.CreateDataSource(output_path.as_posix())
+
+    # Send each layer to the output file
+    logger.debug("Writing DataFrames to file")
+    for layer_key in dframes:
+        tbl = schema.class_map[layer_key]
+        nrnio.create_layer(data_source, tbl, layer_name, output_format, 'en')
+        nrnio.write_data_output(dframes[layer_key], layer_name, data_source, output_format, 'en')
+    
+    # Release the GPKG pointer to let go of the file handle
+    data_source = None
 
 def get_previous_vintage_data(previous_gpkg: Path) -> dict:
     """Convert the previous vintage data into a set dictionary of DataFrames."""
