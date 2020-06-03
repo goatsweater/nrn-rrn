@@ -37,21 +37,37 @@ def get_statcan_admin_boundary_poly(source_prov: str, boundary_file_path: Path):
 
 def _get_start_and_end_points(geo_df):
     """Extract all the start and end points for the GeoDataFrame."""
-    start_points = geo_df.geometry.apply(lambda geom: Point(geom.coords[0]))
-    end_points = geo_df.geometry.apply(lambda geom: Point(geom.coords[-1]))
-    # Concatenate all the points into one large series
-    all_points = (pd.concat([start_points, end_points])
-                  .dropna()
-                  .drop_duplicates())
-    # It is possible that somehow an empty geometry snuck in. Remove them.
-    # all_points = all_points[~all_points.isna()]
+    logger.debug("Finding all start points for given GeoDataFrame")
+    start_points = gpd.GeoSeries(geo_df.geometry.apply(lambda geom: Point(geom.coords[0])))
+    logger.debug("Finding all end points for given GeoDataFrame")
+    end_points = gpd.GeoSeries(geo_df.geometry.apply(lambda geom: Point(geom.coords[-1])))
 
+    # Concatenate all the points into one large series
+    logger.debug("Combining start and end points")
+    all_points = pd.concat([start_points, end_points]).to_frame().rename(columns={0: 'geom'}).set_geometry('geom')
+
+    logger.debug("Getting WKB for all points")
+    all_points['wkb'] = all_points.geometry.apply(lambda geom: geom.wkb)
+
+    logger.debug("Removing duplicates")
+    all_points = all_points.drop_duplicates(subset='wkb')
+
+    logger.debug("Unique points identified")
     return all_points
 
 def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame()):
     """Find all the junction points in the linear datasets and classify them according to NRN rules."""
     logger.debug("Calculating road intersections")
+
+    # Number of points at an intersection to be considered a junction
+    junction_min_point_count = 3
+    # Column name to set for the junction type
     type_field_name = 'junctype'
+    # Collect all the intersections into a list to be combined later
+    all_junctions = []
+    # Gather all the start and end points into a list for later
+    all_start_end_points = []
+
     # Look for road junctions first
     road_juncs = gpd.overlay(road_df, road_df, how='intersection', keep_geom_type=False)
     # Self intersections will create more than just points, but only the points are of interest
@@ -60,52 +76,56 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
     # There needs to be three or more points at an intersection.
     logger.debug("Getting road junctions")
     # You can't groupby on a geometry, so use the WKB representation
-    logger.debug("Calculating WKB for each shape")
     road_juncs['wkb'] = road_juncs.geometry.apply(lambda geom: geom.wkb)
     # Count how many items are in each group.
-    # The count only needs to look at one column, so the NID column is used as it should always have a value.
+    # The count only needs to look at one column, so the wkb column is used as it should always have a value.
     logger.debug("Finding intersection sizes")
-    road_juncs['intersection_size'] = road_juncs.groupby('wkb')['nid_1'].transform('size')
+    road_juncs['intersection_size'] = road_juncs.groupby('wkb')['wkb'].transform('size')
 
     # Filter to items that had at least three points at the intersection and remove any duplicates
-    logger.debug("Filtering to only valid intersections (count >= 3)")
-    road_juncs = (road_juncs[road_juncs['intersection_size'] > 2]
-                  .drop_duplicates(subset='wkb'))
+    logger.debug("Filtering to only valid intersections (count >= %s)", junction_min_point_count)
+    road_juncs = (road_juncs[road_juncs['intersection_size'] >= junction_min_point_count]
+                  .drop_duplicates(subset=['intersection_size','wkb']))
+    logger.debug("Assigning 'Intersection' type to junctions")
     road_juncs[type_field_name] = 'Intersection'
-    
-
-    # Gather all the start and end points into a list for later
-    all_start_end_points = [
-        _get_start_and_end_points(road_df)
-    ]
+    # Drop all the extra columns
+    road_juncs = road_juncs.filter(['geometry', type_field_name])
+    # Save the data out for reference later
+    all_junctions.append(road_juncs)
+    all_start_end_points.append(_get_start_and_end_points(road_df))
 
     # Now look for ferry junctions, if ferry routes are provided
     if not ferry_df.empty:
         logger.debug("Getting ferry junctions")
         ferry_juncs = gpd.overlay(road_df, ferry_df, how='intersection', keep_geom_type=False)
         ferry_juncs[type_field_name] = 'Ferry'
-        # Add the ferry start/end points to the all points list
+        # Drop all the extra columns
+        ferry_juncs = ferry_juncs.filter(['geometry', type_field_name])
+        # Save the data out for reference later
+        all_junctions.append(ferry_juncs)
         all_start_end_points.append(_get_start_and_end_points(ferry_df))
 
     # Dead-ends are the end of a line that does not intersect with anything else
     logger.debug("Finding dead-ends")
-
-    all_start_end_points = pd.concat(all_start_end_points)
-    dead_ends = gpd.GeoDataFrame({'geometry': all_start_end_points, 
-                                  type_field_name: ['DeadEnd'] * len(all_start_end_points)})
+    dead_ends = pd.concat(all_start_end_points)
+    dead_ends = dead_ends.set_geometry('geom')
+    dead_ends[type_field_name] = 'DeadEnd'
     
     # Remove already found road and ferry junctions
-    dead_ends = gpd.overlay(dead_ends, road_juncs, how='difference')
-    dead_ends = gpd.overlay(dead_ends, ferry_juncs, how='difference')
+    logger.debug("Removing junctions already found in roads")
+    dead_ends = gpd.overlay(dead_ends, road_juncs, how='symmetric_difference', keep_geom_type=False)
+    if not ferry_df.empty:
+        logger.debug("Removing junctions already found in ferrys")
+        dead_ends = gpd.overlay(dead_ends, ferry_juncs, how='symmetric_difference', keep_geom_type=False)
 
     # Dead-ends outside the administrative boundary are classed as NatProvTer since they connect to a neighbour dataset
     logger.debug("Getting junctions at administrative boundaries")
     dead_ends.loc[~dead_ends.geometry.within(admin_boundary_poly), type_field_name] = 'NatProvTer'
+    # Save the data out for reference later
+    all_junctions.append(dead_ends)
 
     logger.debug("Calculating junction attributes")
-    junctions = pd.concat([road_juncs.filter(['geometry', type_field_name]),
-                           ferry_juncs.filter(['geometry', type_field_name]),
-                           dead_ends])
+    junctions = pd.concat(all_junctions)
     junctions["acqtech"] = "Computed"
     junctions["metacover"] = "Complete"
     junctions["specvers"] = nrn.__spec_version__
@@ -114,17 +134,11 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
 
     # Retrive a given attribute from associated edges
     net_graph = get_graph_for_lines(road_df)
-    copy_attr_field = 'exitnbr'
-    logger.debug("Looking for %s values", copy_attr_field)
-    junctions[copy_attr_field] = junctions.geometry.apply(lambda geom: get_attribute_for_node(net_graph, 
-                                                                                        geom.coords[0], 
-                                                                                        copy_attr_field))
-                                                                                        
-    copy_attr_field = 'accuracy'
-    logger.debug("Looking for %s values", copy_attr_field)
-    junctions[copy_attr_field] = junctions.geometry.apply(lambda geom: get_attribute_for_node(net_graph, 
-                                                                                        geom.coords[0], 
-                                                                                        copy_attr_field))
+    for copy_attr_field in ('exitnbr', 'accuracy'):
+        logger.debug("Looking for %s values across %d records", copy_attr_field, len(junctions))
+        junctions[copy_attr_field] = junctions.geometry.apply(lambda geom: get_attribute_for_node(net_graph, 
+                                                                                                geom.coords[0], 
+                                                                                                copy_attr_field))
 
     return junctions
 
