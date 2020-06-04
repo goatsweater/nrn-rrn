@@ -9,3 +9,4 @@ requests>=2.23.0
 rtree>=0.9.4
 scipy>=1.4.1
 Shapely>=1.7.0
+tqdm >= 4.46.1
