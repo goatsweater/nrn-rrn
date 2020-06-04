@@ -189,12 +189,18 @@ def get_attribute_for_node(net: nx.DiGraph, node_id: tuple, attr: str, default: 
     """
     # The node may not be in the graph at all. Return the default in this case.
     if not net.has_node(node_id):
+        logger.debug("Node %r not found in graph", node_id)
         return default
 
-    attr_values = nx.get_edge_attributes(net, attr)
+    # We're only interested in edges attached to the node, so get a subgraph to make analysis quicker
+    subnet = net.subgraph(node_id)
+
+    # Get the attribute for all edges connected to this node
+    attr_values = nx.get_edge_attributes(subnet, attr)
+
     # Take the first value that isn't None.
     try:
-        result = next(val for val in attr_values.values() if val is not None)
+        result = next(val for val in attr_values.values() if val not in ('None', None))
     except StopIteration:
         # If no value was found use the default.
         result = default
