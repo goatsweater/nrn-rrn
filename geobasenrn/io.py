@@ -4,17 +4,27 @@ import fiona
 import geobasenrn as nrn
 from geobasenrn.schema import schema
 import geopandas as gpd
+import json
 import logging
-import osgeo.ogr as ogr
+from osgeo import ogr, osr
 import pandas as pd
 from pathlib import Path
 import requests
 import sqlite3
 import tempfile
+from tqdm import tqdm
 import warnings
 import zipfile
 
 logger = logging.getLogger(__name__)
+
+# The name of the driver to use when creating output
+ogr_drivers = {
+    'gpkg': 'GPKG',
+    'shp': 'Esri Shapefile',
+    'gml': 'GML',
+    'kml': 'KML'
+}
 
 def compress(inpath: Path, outfile: Path = None) -> None:
     """Given a directory or file path, create a zip compressed version of it.
@@ -71,7 +81,7 @@ def source_layer_to_dataframe(source_path: Path, source_layer: str = None, sourc
     """Create a GeoDataFrame from a source dataset for spatial data, or a DataFrame for non-spatial data."""
     # v0.7 of geopandas does not implement support for loading attribute data. It will be in a future release, but 
     # until that happens we need to manually create a DataFrame for attribute tables inside a spatial container.
-    logger.debug("Creating DataFrame from %s, %s", source_path, source_layer)
+    logger.debug("Creating DataFrame from file %s, layer %s", source_path, source_layer)
     df = None
 
     if spatial:
@@ -252,16 +262,18 @@ def get_kml_layer_name(layer, source, major, minor, lang='en'):
 
 def create_layer(data_source: ogr.DataSource, tbl, layer_name: str, output_format: str, lang: str='en'):
     """Create a layer within the data source that conforms to output format specifications."""
-    logger.debug("Creating %s layer for %s", output_format, tbl.__class__.__name__)
+    logger.debug("Creating layer %s for %s in %s", layer_name, tbl.__class__.__name__, output_format)
 
     if data_source == None:
         raise ValueError('Invalid data source provided')
 
     # Define the SRS for output data
+    logger.debug("Defining spatial reference for output layer")
     srs = osr.SpatialReference()
     srs.ImportFromEPSG(nrn.SRS_EPSG_CODE)
     # Don't define a spatial reference on data with no shape.
     if tbl.shape_type == ogr.wkbNone:
+        logger.debug("Output layer has no geometry. No spatial reference will be used.")
         srs = None
 
     # Create the layer
@@ -271,13 +283,14 @@ def create_layer(data_source: ogr.DataSource, tbl, layer_name: str, output_forma
     # Set the field names to match what is expected for the language
     logger.debug("Creating %s fields", lang)
     for field in tbl.fields:
-        name = schema[field][output_format][lang]
+        field_name = schema[field][output_format][lang]
         field_type = schema[field]['type']
-        width = schema[field]['width']
+        field_width = schema[field]['width']
 
+        logger.debug("Creating %s field %s", layer_name, field_name)
         # Create a field definiton object.
-        field_defn = ogr.FieldDefn(name, field_type)
-        field_defn.SetWidth(width)
+        field_defn = ogr.FieldDefn(field_name, field_type)
+        field_defn.SetWidth(field_width)
         # Create the field on the layer.
         layer.CreateField(field_defn)
 
@@ -287,6 +300,11 @@ def write_data_output(df, layer_name: str, data_source: ogr.DataSource, output_f
     This creates either a French or English copy of the data, based on the supplied language.
     """
     logger.debug("Writing %s data to %s", layer_name, data_source.GetName())
+
+    # Warn the user if some fields in the DataFrame will not be dumped
+    extra_columns = [col for col in df.columns if col not in schema]
+    if extra_columns:
+        logger.warning("The following columns will not be in the output: %r", extra_columns)
     
     # Map the column names in the dataframe to the appropriate language.
     # Build a name map for field names
@@ -300,13 +318,13 @@ def write_data_output(df, layer_name: str, data_source: ogr.DataSource, output_f
     df = df.rename(columns=column_map)
     
     # Dump the data to the corresponding table, using append since a skeleton table already exists.
-    format_driver = ogr_drivers.get(output_format)
     # The preferred way to do this would be with a call to geopandas .to_file(), but there is a bug in v0.7 that 
     # prevents appending data to an existing schema.
+    # format_driver = ogr_drivers.get(output_format)
     # df.to_file(out_path, layer=layer_name, driver=format_driver, mode="a", index=False)
 
     # Get the layer within the datasource
-    logger.debug("Getting reference to layer %s in data source", layer_name)
+    logger.debug("Getting reference to layer %s in output file", layer_name)
     # Some data sources don't use named layers and only have one layer
     if data_source.GetLayerCount() == 1:
         layer = data_source.GetLayerByIndex(0)
@@ -324,7 +342,7 @@ def write_geom_layer(df, layer: ogr.Layer):
     # Iterate each feature in the dataframe and write it to the layer. This will produce a __geo_interface__ compliant
     # dictionary that can be used to get at the records.
     layer_name = layer.GetName()
-    logger.debug("Iterating features in the GeoDataFrame and writing to the layer.")
+    logger.debug("Iterating features in the GeoDataFrame and writing to %s.", layer_name)
     for feat in tqdm(df.iterfeatures(), total=len(df), desc=f'Writing {layer_name}'):
         # Separate the geometry from the properties to make working with it easier.
         geom_json = json.dumps(feat['geometry'])
@@ -335,8 +353,17 @@ def write_geom_layer(df, layer: ogr.Layer):
 
         # Iterate all of the properties and add them to the feature.
         for prop in feature_properties:
+            # Skip the geometry field - it is intended for use only in setting the geometry
+            if prop == 'geometry':
+                continue
+
             # logger.debug("Setting %s=%s", prop, feature_properties[prop])
-            feature.SetField(prop, feature_properties[prop])
+            field_index = feature.GetFieldIndex(prop)
+            if field_index == -1:
+                # logger.warning("Field not found in output schema: %s", prop)
+                continue
+
+            feature.SetField(field_index, feature_properties[prop])
         
         geom = ogr.CreateGeometryFromJson(geom_json)
         feature.SetGeometry(geom)

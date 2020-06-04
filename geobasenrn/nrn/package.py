@@ -7,37 +7,21 @@ import geobasenrn.io as nrnio
 from geobasenrn.nrn import options
 from geobasenrn.schema import schema
 import geopandas as gpd
-import json
 import logging
 import numpy as np
+from osgeo import ogr
 import pandas as pd
 from pathlib import Path
 import shutil
-import sqlite3
 import sys
 import tempfile
-from tqdm import tqdm
 import zipfile
-
-# Make sure GDAL/OGR is available
-try:
-    from osgeo import ogr, osr
-except:
-    sys.exit('ERROR: cannot find GDAL/OGR modules')
 
 logger = logging.getLogger(__name__)
 
 # By default OGR will not throw exceptions, which can make problem detection harder. This tells OGR to always 
 # raise exceptions.
 ogr.UseExceptions()
-
-# The name of the driver to use when creating output
-ogr_drivers = {
-    'gpkg': 'GPKG',
-    'shp': 'Esri Shapefile',
-    'gml': 'GML',
-    'kml': 'KML'
-}
 
 # Map table short names to their matching class
 class_map = schema.class_map
@@ -86,7 +70,7 @@ def package(ctx, precision, infile, major_version, minor_version,
     dframes = nrnio.get_gpkg_contents(infile)
 
     # TODO: Add support for multiple formats to be specified in a single command
-    format_driver = ogr_drivers.get(output_format)
+    format_driver = nrnio.ogr_drivers.get(output_format)
     logger.debug("Chosen output driver: %s", format_driver)
     # Driver to be used by OGR
     driver = ogr.GetDriverByName(format_driver)

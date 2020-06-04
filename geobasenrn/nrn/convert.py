@@ -37,8 +37,12 @@ logger = logging.getLogger(__name__)
               type=click.Path(dir_okay=False, file_okay=True, resolve_path=True, exists=False),
               required=True,
               help="Path to the output GeoPackage with converted data.")
+@click.option('--skip-addrange', is_flag=True, default=False, help="Do not create the addrange table.")
+@click.option('--skip-strplaname', is_flag=True, default=False, help="Do not create the strplaname table.")
+@click.option('--skip-altnamlink', is_flag=True, default=False, help="Do not create the altnamlink table.")
 @click.pass_context
-def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_path):
+def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_path, skip_addrange, skip_strplaname, 
+            skip_altnamlink):
     """Convert an input dataset into an NRN pre-release GPKG."""
     previous_vintage = Path(previous_vintage)
     admin_boundary_path = Path(admin_boundary_path)
@@ -84,9 +88,9 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
 
     # Stage 2
     # TODO:
-    # 1. load boundaries
+    # 1. load boundaries - done
     # 2. compile target attributes
-    # 3. generate target dataframe
+    # 3. generate target dataframe - done
     # 4. generate junctions - done
     # 5. generate attributes - done
     # 6. apply domains
@@ -114,7 +118,7 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     # Save the output GeoPackage
     save_to_gpkg(output_path, dframes)
 
-def save_to_gpkg(gpkg_path: Path, data: dict):
+def save_to_gpkg(gpkg_path: Path, data_dict: dict):
     """Save all DataFrames in the data dictionary to a GeoPackage."""
     output_format = 'gpkg'
 
@@ -124,14 +128,14 @@ def save_to_gpkg(gpkg_path: Path, data: dict):
     # Create the empty GeoPackage for data to be loaded in to.
     logger.debug("Creating output file")
     # OGR doesn't understand pathlib paths, so force posix paths
-    data_source = driver.CreateDataSource(output_path.as_posix())
+    data_source = driver.CreateDataSource(gpkg_path.as_posix())
 
     # Send each layer to the output file
     logger.debug("Writing DataFrames to file")
-    for layer_key in dframes:
+    for layer_key in data_dict:
         tbl = schema.class_map[layer_key]
-        nrnio.create_layer(data_source, tbl, layer_name, output_format, 'en')
-        nrnio.write_data_output(dframes[layer_key], layer_name, data_source, output_format, 'en')
+        nrnio.create_layer(data_source, tbl, layer_key, output_format, 'en')
+        nrnio.write_data_output(data_dict[layer_key], layer_key, data_source, output_format, 'en')
     
     # Release the GPKG pointer to let go of the file handle
     data_source = None
@@ -196,28 +200,28 @@ def get_source_config(config_paths: [Path]) -> dict:
     
     return options
 
-def get_source_layer(layer_name: str, source_path: Path, source_layer: str, source_driver: str = None, 
+def get_source_layer(source_path: Path, source_layer: str, source_driver: str = None, 
                      source_epsg: int = None, spatial: bool = True):
     """Load a single layer from a data source.
     
     This builds a single key dictionary where the key is the layer name and the value is the DataFrame. This enables
     the data to be loaded into a collection of source tables for further processing.
     """
+    logger.debug("Reading layer %s from %s", source_layer, source_path)
     # This is just an attribute table, so no spatial operations to perform. The data could still be in a spatial
     # format container though (GPKG, FGDB). Support is also provided for loading directly from a CSV file.
     if source_path.suffix.lower() == '.csv':
         df = (pd.read_csv(source_path)
               .rename(columns=str.lower))
-        return {layer_name: df}
     else:
         df = (nrnio.source_layer_to_dataframe(source_path, source_layer, source_driver, source_epsg, spatial)
               .rename(columns=str.lower))
-        return {layer_name: df}
+
+    return df
 
 def get_source_data(layer_info: dict) -> dict:
     """Load all source data into a dictionary indexed by the appropriate target layer name."""
     # Keys used to define source data elements in the configuration file
-    logger.debug("Fetching source layer")
     source_data_path = 'filename'
     source_data_layer = 'layer'
     source_data_driver = 'driver'
@@ -230,6 +234,7 @@ def get_source_data(layer_info: dict) -> dict:
     # Use the layer names in 'conform' as the key for the source data
     conformance = layer_info.get('conform')
     for layer_name in conformance:
+        logger.debug("Fetching source layer %s", layer_name)
         # Gather the data source information
         source_index = conformance[layer_name].get('source_index')
         source_data = layer_info.get('source_layers')[source_index]
@@ -240,8 +245,13 @@ def get_source_data(layer_info: dict) -> dict:
         source_driver = source_data.get(source_data_driver)
         source_crs = source_data.get(source_data_crs)
         is_spatial = source_data.get(source_data_is_spatial, False)
+        logger.debug("Data source for %s in configuration: %s", layer_name, source_path)
 
-        dframes.update(get_source_layer(layer_name, source_path, source_layer, source_driver, source_crs))
+        source_df = get_source_layer(source_path, source_layer, source_driver, source_crs, is_spatial)
+        logger.debug("Loaded source data columns: %r", source_df.columns)
+
+        source_layer = {layer_name: source_df}
+        dframes.update(source_layer)
     
     return dframes
 
@@ -295,6 +305,19 @@ def map_source_to_target_dframes(schema_map: dict, dframes: dict) -> dict:
         for target_field, function_set in function_fields.items():
             target_df = target_df.pipe(tools.apply_functions_to_fields, target_field, function_set)
         
+        # Remove any excess columns and generally format as proper output schema/type
+        associated_table = schema.class_map.get(item_key)
+        # COPY the fields defined on the table to ensure they aren't mangled in some way
+        result_table_columns = associated_table.fields.copy()
+        # Add geometry column is this is a geometry table
+        if associated_table.shape_type != ogr.wkbNone:
+            result_table_columns.append('geometry')
+        
+        # Filter the columns and convert GeoDataFrame to DataFrame if there is no geometry
+        target_df = target_df.filter(result_table_columns)
+        if 'geometry' not in result_table_columns:
+            target_df = pd.DataFrame(target_df)
+
         # Save the target data to be returned
         result_dframes[item_key] = target_df
     
