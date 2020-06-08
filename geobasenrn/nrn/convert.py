@@ -67,20 +67,20 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     # 11. repair nid linkages
 
     # Convert all the source configurations into an options dictionary to be referenced throughout conversion.
-    logger.debug("Reading source configuration...")
+    logger.info("Reading source configuration...")
     config_paths = [Path(f) for f in config_files]
     source_config = get_source_config(config_paths)
 
     # Load all the source data
-    logger.debug("Loading source data...")
+    logger.info("Loading source data...")
     source_data = get_source_data(source_config)
 
     # Convert all source data to interim format
-    logger.debug("Converting source data to internal representation...")
+    logger.info("Converting source data to internal representation...")
     dframes = map_source_to_target_dframes(source_config['conform'], source_data)
 
     # Recover any layers that aren't in the source from the previous vintage
-    logger.debug("Recovering previous vintage data not found in source data...")
+    logger.info("Recovering previous vintage data not found in source data...")
     previous_dframes = nrnio.get_gpkg_contents(previous_vintage)
     for layer in previous_dframes:
         if layer not in dframes:
@@ -96,11 +96,11 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     # 6. apply domains
 
     # Load the administrative boundary into a polygon
-    logger.debug("Loading administrative boundary polygon...")
+    logger.info("Loading administrative boundary polygon...")
     admin_boundary_poly = junctions.get_statcan_admin_boundary_poly(ctx.obj['province_code'], admin_boundary_path)
 
     # Fetch junctions
-    logger.debug("Generating junctions...")
+    logger.info("Generating junctions...")
     dframes['junction'] = junctions.build_junctions(dframes.get('roadseg'), 
                                                     admin_boundary_poly, 
                                                     dframes.get('ferryseg'))
@@ -116,6 +116,7 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     # 7. save output - done
 
     # Save the output GeoPackage
+    logger.info("Saving results to %s", output_path)
     save_to_gpkg(output_path, dframes)
 
 def save_to_gpkg(gpkg_path: Path, data_dict: dict):

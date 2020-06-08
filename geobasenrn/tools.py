@@ -78,11 +78,11 @@ def apply_functions_to_fields(df, target_field, field_schema):
         kwargs = func_call.get('args')
 
         if func_name in df_dispatcher:
-            logger.debug("Calling %s on DataFrame", func_name)
+            logger.info("Calling %s on DataFrame", func_name)
             dispatcher = df_dispatcher[func_name]
             new_df[target_field] = dispatcher(new_df, **kwargs)
         elif func_name in series_dispatcher:
-            logger.debug("Calling %s on column %s", func_name, source_field)
+            logger.info("Calling %s on column %s", func_name, source_field)
             dispatcher = series_dispatcher[func_name]
             new_df[target_field] = dispatcher(new_df[target_field], **kwargs)
         else:
