@@ -61,62 +61,60 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
 
     # Column name to set for the junction type
     type_field_name = 'junctype'
-    # Collect all the intersections into a list to be combined later
-    all_junctions = []
-    # Gather all the start and end points into a list for later
-    all_start_end_points = []
+    # Junctions are when at least three roads meet
+    junction_min_point_count = 3
 
-    # Look for road junctions first
-    road_juncs = get_road_intersections(road_df, type_field_name)
-    # Save the data out for reference later
-    all_junctions.append(road_juncs)
-    all_start_end_points.append(_get_start_and_end_points(road_df))
+    # Create a network graph from the road network
+    road_graph = get_graph_for_lines(road_df)
 
-    # Now look for ferry junctions, if ferry routes are provided
+    # Set the intersection type on the nodes
+    logger.debug("Getting road junctions")
+    # Intersections are any node with a degree matching or higher than the junction minimum count
+    # Everything with only one connection is set to dead end for now (some will be boundary or ferry)
+    for node, degree in road_graph.degree():
+        if degree >= junction_min_point_count:
+            road_graph.nodes[node][type_field_name] = 'Intersection'
+        elif degree == 1:
+            road_graph.nodes[node][type_field_name] = 'DeadEnd'
+    
+    # If ferry data was provided, add those nodes to the road graph and update the end points accordingly
     if not ferry_df.empty:
         logger.debug("Getting ferry junctions")
-        ferry_juncs = gpd.overlay(road_df, ferry_df, how='intersection', keep_geom_type=False)
-        ferry_juncs[type_field_name] = 'Ferry'
-        # Drop all the extra columns
-        ferry_juncs = ferry_juncs.filter(['geometry', type_field_name])
-        # Save the data out for reference later
-        all_junctions.append(ferry_juncs)
-        all_start_end_points.append(_get_start_and_end_points(ferry_df))
-
-    # Dead-ends are the end of a line that does not intersect with anything else
-    logger.debug("Finding dead-ends")
-    dead_ends = pd.concat(all_start_end_points)
-    dead_ends = dead_ends.set_geometry('geom')
-    dead_ends[type_field_name] = 'DeadEnd'
+        ferry_graph = get_graph_for_lines(ferry_df)
+        # Look for the nodes in the road graph and set them to type ferry
+        for ferry_node in ferry_graph.nodes():
+            if road_graph.has_node(ferry_node):
+                road_graph.nodes[ferry_node][type_field_name] = 'Ferry'
+            else:
+                # If the node wasn't there, add it and don't bother connecting it to anything
+                road_graph.add_node(ferry_node, **{type_field_name: 'Ferry'})
     
-    # Remove already found road and ferry junctions
-    logger.debug("Removing junctions already found in roads")
-    dead_ends = gpd.overlay(dead_ends, road_juncs, how='symmetric_difference', keep_geom_type=False)
-    if not ferry_df.empty:
-        logger.debug("Removing junctions already found in ferrys")
-        dead_ends = gpd.overlay(dead_ends, ferry_juncs, how='symmetric_difference', keep_geom_type=False)
+    # Convert the graph into a point GeoDataFrame, keeping the node attributes
+    logger.debug("Gathering attributes for each junction")
+    points = []
+    for node, junctype in road_graph.nodes.data(type_field_name):
+        # Skip anything that wasn't assigned a junction type as they aren't valid junctions
+        if junctype is None:
+            continue
+        pnt = Point(node)
+        # Retrive a given attribute from associated edges
+        exitnbr = get_attribute_for_node(road_graph, node, 'exitnbr')
+        accuracy = get_attribute_for_node(road_graph, node, 'accuracy', default=-1)
+        # Save the data to be converted to a GeoDataFrame
+        record = {'geometry': pnt, type_field_name: junctype, 'exitnbr': exitnbr, 'accuracy': accuracy}
+        points.append(record)
+    logger.debug("Building junctions GeoDataFrame")
+    junctions = gpd.GeoDataFrame(points, crs=f'EPSG:{nrn.SRS_EPSG_CODE}')
 
-    # Dead-ends outside the administrative boundary are classed as NatProvTer since they connect to a neighbour dataset
-    logger.debug("Getting junctions at administrative boundaries")
-    dead_ends.loc[~dead_ends.geometry.within(admin_boundary_poly), type_field_name] = 'NatProvTer'
-    # Save the data out for reference later
-    all_junctions.append(dead_ends)
+    # Mark junctions along the admin boundary as a border crossing
+    junctions.loc[~junctions.geometry.within(admin_boundary_poly), type_field_name] = 'NatProvTer'
 
-    logger.debug("Calculating junction attributes")
-    junctions = pd.concat(all_junctions)
+    # Set remaining attributes on the data
     junctions["acqtech"] = "Computed"
     junctions["metacover"] = "Complete"
     junctions["specvers"] = nrn.__spec_version__
     junctions["credate"] = datetime.datetime.today().strftime("%Y%m%d")
     junctions["provider"] = "Federal"
-
-    # Retrive a given attribute from associated edges
-    net_graph = get_graph_for_lines(road_df)
-    for copy_attr_field in ('exitnbr', 'accuracy'):
-        logger.debug("Looking for %s values across %d records", copy_attr_field, len(junctions))
-        junctions[copy_attr_field] = junctions.geometry.apply(lambda geom: get_attribute_for_node(net_graph, 
-                                                                                                geom.coords[0], 
-                                                                                                copy_attr_field))
 
     return junctions
 
