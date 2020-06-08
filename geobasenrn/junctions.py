@@ -57,10 +57,8 @@ def _get_start_and_end_points(geo_df):
 
 def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame()):
     """Find all the junction points in the linear datasets and classify them according to NRN rules."""
-    logger.debug("Calculating road intersections")
+    logger.debug("Calculating junctions")
 
-    # Number of points at an intersection to be considered a junction
-    junction_min_point_count = 3
     # Column name to set for the junction type
     type_field_name = 'junctype'
     # Collect all the intersections into a list to be combined later
@@ -69,27 +67,7 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
     all_start_end_points = []
 
     # Look for road junctions first
-    road_juncs = gpd.overlay(road_df, road_df, how='intersection', keep_geom_type=False)
-    # Self intersections will create more than just points, but only the points are of interest
-    road_juncs = road_juncs[road_juncs.geometry.type == 'Point']
-
-    # There needs to be three or more points at an intersection.
-    logger.debug("Getting road junctions")
-    # You can't groupby on a geometry, so use the WKB representation
-    road_juncs['wkb'] = road_juncs.geometry.apply(lambda geom: geom.wkb)
-    # Count how many items are in each group.
-    # The count only needs to look at one column, so the wkb column is used as it should always have a value.
-    logger.debug("Finding intersection sizes")
-    road_juncs['intersection_size'] = road_juncs.groupby('wkb')['wkb'].transform('size')
-
-    # Filter to items that had at least three points at the intersection and remove any duplicates
-    logger.debug("Filtering to only valid intersections (count >= %s)", junction_min_point_count)
-    road_juncs = (road_juncs[road_juncs['intersection_size'] >= junction_min_point_count]
-                  .drop_duplicates(subset=['intersection_size','wkb']))
-    logger.debug("Assigning 'Intersection' type to junctions")
-    road_juncs[type_field_name] = 'Intersection'
-    # Drop all the extra columns
-    road_juncs = road_juncs.filter(['geometry', type_field_name])
+    road_juncs = get_road_intersections(road_df, type_field_name)
     # Save the data out for reference later
     all_junctions.append(road_juncs)
     all_start_end_points.append(_get_start_and_end_points(road_df))
@@ -141,6 +119,36 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
                                                                                                 copy_attr_field))
 
     return junctions
+
+def get_road_intersections(df: gpd.GeoDataFrame, type_field_name: str, junction_min_point_count: int=3):
+    """Extract intersections where three or more lines meet in a GeoDataFrame of linear features."""
+    logger.debug("Gathering intersections")
+    intersection = gpd.overlay(df, df, how='intersection', keep_geom_type=False)
+    # Self intersections will create more than just points, but only the points are of interest
+    intersection = intersection[intersection.geometry.type == 'Point']
+
+    # There needs to be three or more points at an intersection.
+    logger.debug("Calculating shape WKB")
+    # You can't groupby on a geometry, so use the WKB representation
+    intersection['wkb'] = intersection.geometry.apply(lambda geom: geom.wkb)
+    # Count how many items are in each group.
+    # The count only needs to look at one column, so the wkb column is used as it should always have a value.
+    logger.debug("Finding intersection sizes")
+    intersection['intersection_size'] = intersection.groupby('wkb')['wkb'].transform('size')
+
+    # Filter to items that had at least three points at the intersection and remove any duplicates
+    logger.debug("Filtering to only valid intersections (count >= %s)", junction_min_point_count)
+    intersection = (intersection[intersection['intersection_size'] >= junction_min_point_count]
+                    .drop_duplicates(subset=['intersection_size','wkb']))
+
+    # Classify each point as an intersection
+    logger.debug("Assigning 'Intersection' type to junctions")
+    intersection[type_field_name] = 'Intersection'
+
+    # Drop all the extra columns
+    intersection = intersection.filter(['geometry', type_field_name])
+
+    return intersection
 
 def get_graph_for_lines(df, simplify=True):
     """Convert a GeoDataFrame consisting of linear features into a DiGraph."""
