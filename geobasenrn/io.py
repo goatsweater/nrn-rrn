@@ -343,6 +343,8 @@ def write_geom_layer(df, layer: ogr.Layer):
     # dictionary that can be used to get at the records.
     layer_name = layer.GetName()
     logger.debug("Iterating features in the GeoDataFrame and writing to %s.", layer_name)
+    # Start a transaction to wrap all the writes. This means non will get written if any fail.
+    layer.StartTransaction()
     for feat in tqdm(df.iterfeatures(), total=len(df), desc=f'Writing {layer_name}'):
         # Separate the geometry from the properties to make working with it easier.
         geom_json = json.dumps(feat['geometry'])
@@ -373,6 +375,7 @@ def write_geom_layer(df, layer: ogr.Layer):
 
         # Clear the pointer before moving on to the next feature
         feature = None
+    layer.CommitTransaction()
 
 def write_attr_layer(df, layer: ogr.Layer):
     """Write a DataFrame to a layer."""
@@ -380,6 +383,8 @@ def write_attr_layer(df, layer: ogr.Layer):
     # dictionary that can be used to get at the records.
     layer_name = layer.GetName()
     logger.debug("Iterating features in the DataFrame and writing to the layer.")
+    # Start a transaction to wrap all the writes. This means non will get written if any fail.
+    layer.StartTransaction()
     for row in tqdm(df.itertuples(index=False), total=len(df), desc=f'Writing {layer_name}'):
         # OGR will write one field at a time, so make a dictionary to iterate through the keys
         feature_properties = row._asdict()
@@ -400,6 +405,7 @@ def write_attr_layer(df, layer: ogr.Layer):
 
         # Clear the pointer before moving on to the next feature
         feature = None
+    layer.CommitTransaction()
 
 # Table definitions that can exist in each dataset.
 class BaseTable:
