@@ -1,6 +1,7 @@
 """A collection of functions that form common operations."""
 
 from geobasenrn.errors import ConfigurationError
+from geobasenrn import schema
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,27 @@ def apply_functions_to_fields(df, target_field, field_schema):
     def extract(col, pattern: str, expand: bool=True):
         """Call re.search and extract the first string to match using a regex pattern."""
         return col.str.extract(pattern, expand)
+    
+    def extract_domain(col, domain_name: str, pattern: str='\b(domain)\b(?!$)', domain_type: str='name', lang: str='en'):
+        """Extract a substring based on the values in a domain."""
+        if lang.lower() not in ('en', 'fr'):
+            raise ConfigurationError(f"Invalid language {lang}")
+
+        if domain_name.lower() not in schema.domains:
+            raise ConfigurationError(f"Unknown domain {domain_name}")
+
+        domain = schema.domains.get(domain_name.lower(), {}).get(lang.lower())
+        
+        # The user can specify if extracting domain "name" values (strings) or "index" values (integers)
+        if domain_type == 'name':
+            values = '|'.join(domain.keys())
+        elif domain_type == 'index':
+            values = '|'.join(domain.values())
+        
+        pattern = pattern.replace('domain', values)
+        logger.debug("Extracting text with pattern %r", pattern)
+
+        return col.str.extract(pattern)
 
     def concat(df, join_cols: [str], join_chars: str=''):
         """Combine multiple columns into a single string."""
@@ -40,7 +62,8 @@ def apply_functions_to_fields(df, target_field, field_schema):
     # Functions that will be applied to a Series
     series_dispatcher = {
         'replace': replace,
-        'extract': extract
+        'extract': extract,
+        'extract_domain': extract_domain
     }
 
     # Figure out what field is being worked on from the source data
