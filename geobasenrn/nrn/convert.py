@@ -50,7 +50,9 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     # Ensure the output path points at a gpkg file
     output_path = Path(output_path)
     if not output_path.suffix.lower() == '.gpkg':
-        raise click.exceptions.BadOptionUsage("GeoPackage files must end with .gpkg")
+        raise click.exceptions.BadOptionUsage(option_name="output_path", 
+                                              message="GeoPackage files must end with .gpkg", 
+                                              ctx=ctx)
 
     # Stage 1
     # TODO:
@@ -107,7 +109,7 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
 
     # Stage 3
     # TODO:
-    # 1. roadseg generate full
+    # 1. roadseg generate full - done (data provided directly)
     # 2. roadseg generate nids
     # 3. roadseg recover and classify nids
     # 4. roadseg update linkages
