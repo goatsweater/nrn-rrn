@@ -79,13 +79,6 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     logger.info("Converting source data to internal representation...")
     dframes = map_source_to_target_dframes(source_config['conform'], source_data)
 
-    # Recover any layers that aren't in the source from the previous vintage
-    logger.info("Recovering previous vintage data not found in source data...")
-    previous_dframes = nrnio.get_gpkg_contents(previous_vintage)
-    for layer in previous_dframes:
-        if layer not in dframes:
-            dframes[layer] = previous_dframes[layer]
-
     # Stage 2
     # TODO:
     # 1. load boundaries - done
@@ -104,6 +97,13 @@ def convert(ctx, previous_vintage, config_files, admin_boundary_path, output_pat
     dframes['junction'] = junctions.build_junctions(dframes.get('roadseg'), 
                                                     admin_boundary_poly, 
                                                     dframes.get('ferryseg'))
+
+    # Recover any layers that aren't in the source from the previous vintage
+    logger.info("Recovering previous vintage data not found in source data...")
+    previous_dframes = nrnio.get_gpkg_contents(previous_vintage)
+    for layer in previous_dframes:
+        if layer not in dframes:
+            dframes[layer] = previous_dframes[layer]
 
     # Stage 3
     # TODO:
