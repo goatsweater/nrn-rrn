@@ -35,26 +35,6 @@ def get_statcan_admin_boundary_poly(source_prov: str, boundary_file_path: Path):
 
     return boundary_geom
 
-def _get_start_and_end_points(geo_df):
-    """Extract all the start and end points for the GeoDataFrame."""
-    logger.debug("Finding all start points for given GeoDataFrame")
-    start_points = gpd.GeoSeries(geo_df.geometry.apply(lambda geom: Point(geom.coords[0])))
-    logger.debug("Finding all end points for given GeoDataFrame")
-    end_points = gpd.GeoSeries(geo_df.geometry.apply(lambda geom: Point(geom.coords[-1])))
-
-    # Concatenate all the points into one large series
-    logger.debug("Combining start and end points")
-    all_points = pd.concat([start_points, end_points]).to_frame().rename(columns={0: 'geom'}).set_geometry('geom')
-
-    logger.debug("Getting WKB for all points")
-    all_points['wkb'] = all_points.geometry.apply(lambda geom: geom.wkb)
-
-    logger.debug("Removing duplicates")
-    all_points = all_points.drop_duplicates(subset='wkb')
-
-    logger.debug("Unique points identified")
-    return all_points
-
 def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame()):
     """Find all the junction points in the linear datasets and classify them according to NRN rules."""
     logger.debug("Calculating junctions")
@@ -78,7 +58,7 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
             road_graph.nodes[node][type_field_name] = 'DeadEnd'
     
     # If ferry data was provided, add those nodes to the road graph and update the end points accordingly
-    if not ferry_df.empty:
+    if ferry_df is not None and not ferry_df.empty:
         logger.debug("Getting ferry junctions")
         ferry_graph = get_graph_for_lines(ferry_df)
         # Look for the nodes in the road graph and set them to type ferry
@@ -117,36 +97,6 @@ def build_junctions(road_df, admin_boundary_poly, ferry_df = gpd.GeoDataFrame())
     junctions["provider"] = "Federal"
 
     return junctions
-
-def get_road_intersections(df: gpd.GeoDataFrame, type_field_name: str, junction_min_point_count: int=3):
-    """Extract intersections where three or more lines meet in a GeoDataFrame of linear features."""
-    logger.debug("Gathering intersections")
-    intersection = gpd.overlay(df, df, how='intersection', keep_geom_type=False)
-    # Self intersections will create more than just points, but only the points are of interest
-    intersection = intersection[intersection.geometry.type == 'Point']
-
-    # There needs to be three or more points at an intersection.
-    logger.debug("Calculating shape WKB")
-    # You can't groupby on a geometry, so use the WKB representation
-    intersection['wkb'] = intersection.geometry.apply(lambda geom: geom.wkb)
-    # Count how many items are in each group.
-    # The count only needs to look at one column, so the wkb column is used as it should always have a value.
-    logger.debug("Finding intersection sizes")
-    intersection['intersection_size'] = intersection.groupby('wkb')['wkb'].transform('size')
-
-    # Filter to items that had at least three points at the intersection and remove any duplicates
-    logger.debug("Filtering to only valid intersections (count >= %s)", junction_min_point_count)
-    intersection = (intersection[intersection['intersection_size'] >= junction_min_point_count]
-                    .drop_duplicates(subset=['intersection_size','wkb']))
-
-    # Classify each point as an intersection
-    logger.debug("Assigning 'Intersection' type to junctions")
-    intersection[type_field_name] = 'Intersection'
-
-    # Drop all the extra columns
-    intersection = intersection.filter(['geometry', type_field_name])
-
-    return intersection
 
 def get_graph_for_lines(df, simplify=True):
     """Convert a GeoDataFrame consisting of linear features into a DiGraph."""
