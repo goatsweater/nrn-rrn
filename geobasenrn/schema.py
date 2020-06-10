@@ -77,7 +77,7 @@ domains = {
         'en': {'Unknown': -1, 'None': 0, 'Gravel': 1, 'Dirt': 2},
         'fr': {'Inconnu': -1, 'Aucun': 0, 'Gravier': 1, 'Terre': 2}
     },
-    'directional_prefix': {
+    'directional_indicator': {
         'en': {'None': 0, 'North': 1, 'Nord': 2, 'South': 3, 'Sud': 4, 'East': 5, 'Est': 6, 'West': 7, 'Ouest': 8, 'Northwest': 9, 'Nord-ouest': 10, 'Northeast': 11, 'Nord-est': 12, 'Southwest': 13, 'Sud-ouest': 14, 'Southeast': 15, 'Sud-est': 16, 'Central': 17, 'Centre': 18},
         'fr': {'Aucun': 0, 'North': 1, 'Nord': 2, 'South': 3, 'Sud': 4, 'East': 5, 'Est': 6, 'West': 7, 'Ouest': 8, 'Northwest': 9, 'Nord-ouest': 10, 'Northeast': 11, 'Nord-est': 12, 'Southwest': 13, 'Sud-ouest': 14, 'Southeast': 15, 'Sud-est': 16, 'Central': 17, 'Centre': 18}
     },
@@ -93,7 +93,7 @@ domains = {
         'en': ['None', 'à', "à l'", 'à la', 'au', 'aux', 'by the', 'chez', "d'", 'de', "de l'", 'de la', 'des', 'du', "l'", 'la', 'le', 'les', 'of the', 'the'],
         'fr': ['Aucun', 'à', "à l'", 'à la', 'au', 'aux', 'by the', 'chez', "d'", 'de', "de l'", 'de la', 'des', 'du', "l'", 'la', 'le', 'les', 'of the', 'the']
     },
-    'street_type_prefix': {
+    'street_type': {
         'en': ['None', 'Abbey', 'Access', 'Acres', 'Aire', 'Allée', 'Alley', 'Autoroute', 'Avenue', 'Barrage', 'Bay', 'Beach', 'Bend', 'Bloc', 'Block', 'Boulevard', 'Bourg', 'Brook', 'By-pass', 'Byway', 'Campus', 'Cape', 'Carre', 'Carrefour', 'Centre', 'Cercle', 'Chase', 'Chemin', 'Circle', 'Circuit', 'Close', 'Common', 'Concession', 'Corners', 'Côte', 'Cour', 'Court', 'Cove', 'Crescent', 'Croft', 'Croissant', 'Crossing', 'Crossroads', 'Cul-de-sac', 'Dale', 'Dell', 'Desserte', 'Diversion', 'Downs', 'Drive', 'Droit de passage', 'Échangeur', 'End', 'Esplanade', 'Estates', 'Expressway', 'Extension', 'Farm', 'Field', 'Forest', 'Front', 'Gardens', 'Gate', 'Glade', 'Glen', 'Green', 'Grounds', 'Grove', 'Harbour', 'Haven', 'Heath', 'Heights', 'Highlands', 'Highway', 'Hill', 'Hollow', 'Île', 'Impasse', 'Island', 'Key', 'Knoll', 'Landing', 'Lane', 'Laneway', 'Limits', 'Line', 'Link', 'Lookout', 'Loop', 'Mall', 'Manor', 'Maze', 'Meadow', 'Mews', 'Montée', 'Moor', 'Mount', 'Mountain', 'Orchard', 'Parade', 'Parc', 'Park', 'Parkway', 'Passage', 'Path', 'Pathway', 'Peak', 'Pines', 'Place', 'Plateau', 'Plaza', 'Point', 'Port', 'Private', 'Promenade', 'Quay', 'Rang', 'Range', 'Reach', 'Ridge', 'Right of Way', 'Rise', 'Road', 'Rond Point', 'Route', 'Row', 'Rue', 'Ruelle', 'Ruisseau', 'Run', 'Section', 'Sentier', 'Sideroad', 'Square', 'Street', 'Stroll', 'Subdivision', 'Terrace', 'Terrasse', 'Thicket', 'Towers', 'Townline', 'Trace', 'Trail', 'Trunk', 'Turnabout', 'Vale', 'Via', 'View', 'Village', 'Vista', 'Voie', 'Walk', 'Way', 'Wharf', 'Wood', 'Woods', 'Wynd'],
         'fr': ['Aucun', 'Abbey', 'Access', 'Acres', 'Aire', 'Allée', 'Alley', 'Autoroute', 'Avenue', 'Barrage', 'Bay', 'Beach', 'Bend', 'Bloc', 'Block', 'Boulevard', 'Bourg', 'Brook', 'By-pass', 'Byway', 'Campus', 'Cape', 'Carre', 'Carrefour', 'Centre', 'Cercle', 'Chase', 'Chemin', 'Circle', 'Circuit', 'Close', 'Common', 'Concession', 'Corners', 'Côte', 'Cour', 'Court', 'Cove', 'Crescent', 'Croft', 'Croissant', 'Crossing', 'Crossroads', 'Cul-de-sac', 'Dale', 'Dell', 'Desserte', 'Diversion', 'Downs', 'Drive', 'Droit de passage', 'Échangeur', 'End', 'Esplanade', 'Estates', 'Expressway', 'Extension', 'Farm', 'Field', 'Forest', 'Front', 'Gardens', 'Gate', 'Glade', 'Glen', 'Green', 'Grounds', 'Grove', 'Harbour', 'Haven', 'Heath', 'Heights', 'Highlands', 'Highway', 'Hill', 'Hollow', 'Île', 'Impasse', 'Island', 'Key', 'Knoll', 'Landing', 'Lane', 'Laneway', 'Limits', 'Line', 'Link', 'Lookout', 'Loop', 'Mall', 'Manor', 'Maze', 'Meadow', 'Mews', 'Montée', 'Moor', 'Mount', 'Mountain', 'Orchard', 'Parade', 'Parc', 'Park', 'Parkway', 'Passage', 'Path', 'Pathway', 'Peak', 'Pines', 'Place', 'Plateau', 'Plaza', 'Point', 'Port', 'Private', 'Promenade', 'Quay', 'Rang', 'Range', 'Reach', 'Ridge', 'Right of Way', 'Rise', 'Road', 'Rond Point', 'Route', 'Row', 'Rue', 'Ruelle', 'Ruisseau', 'Run', 'Section', 'Sentier', 'Sideroad', 'Square', 'Street', 'Stroll', 'Subdivision', 'Terrace', 'Terrasse', 'Thicket', 'Towers', 'Townline', 'Trace', 'Trail', 'Trunk', 'Turnabout', 'Vale', 'Via', 'View', 'Village', 'Vista', 'Voie', 'Walk', 'Way', 'Wharf', 'Wood', 'Woods', 'Wynd']
     },
@@ -716,7 +716,7 @@ schema = {
         'kml': {'en': None, 'fr': None},
         'width': 10,
         'type': ogr.OFTString,
-        'domains': domains['directional_prefix']
+        'domains': domains['directional_indicator']
     },
     'dirsuffix': {
         'gpkg': {'en': 'DIRSUFFIX', 'fr': 'SUFDIR'},
@@ -784,7 +784,7 @@ schema = {
         'kml': {'en': None, 'fr': None},
         'width': 30,
         'type': ogr.OFTString,
-        'domains': domains['street_type_prefix']
+        'domains': domains['street_type']
     },
     'strtysuf': {
         'gpkg': {'en': 'STRTYSUF', 'fr': 'SUFTYPRUE'},
