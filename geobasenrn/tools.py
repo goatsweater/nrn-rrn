@@ -87,6 +87,6 @@ def apply_functions_to_fields(df, target_field, field_schema):
             new_df[target_field] = dispatcher(new_df[target_field], **kwargs)
         else:
             # The user could have put anything, so warn them if what they provided is being ignored.
-            logger.warning("Ignored column function %s. It is not a supported function.", func_name)
+            logger.warning("Ignored function %s on %s. It is not a supported function.", func_name, target_field)
     
     return new_df
