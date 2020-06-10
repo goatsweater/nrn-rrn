@@ -5,6 +5,7 @@ import geoparquet as gpq
 import json
 import logging
 import networkx as nx
+import numpy as np
 import os
 import pandas as pd
 import pyarrow as pa
@@ -266,6 +267,19 @@ def get_url(url, max_attempts=10, **kwargs):
                 continue
 
 
+def groupby_to_list(df, group_field, list_field):
+    """
+    Faster alternative to pandas groupby.apply/agg(list).
+    Groups records by one or more fields and compiles an output field into a list for each group.
+    """
+
+    keys, vals = df.sort_values(group_field)[[group_field, list_field]].values.T
+    keys_unique, keys_indexes = np.unique(keys, return_index=True)
+    vals_arrays = np.split(vals, keys_indexes[1:])
+
+    return pd.Series([list(vals_array) for vals_array in vals_arrays], index=keys_unique).copy(deep=True)
+
+
 def load_gpkg(gpkg_path, find=False, layers=None):
     """
     Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes.
@@ -428,7 +442,9 @@ def ogr2ogr(expression, log=None, max_attempts=5):
 
 
 def reproject_gdf(gdf, epsg_source, epsg_target):
-    """Transforms a GeoDataFrame's geometry column between EPSGs."""
+    """Transforms a GeoDataFrame's geometry column or GeoSeries between EPSGs."""
+
+    series_flag = True if isinstance(gdf, gpd.GeoSeries) else False
 
     # Return empty dataframe.
     if not len(gdf):
@@ -465,7 +481,10 @@ def reproject_gdf(gdf, epsg_source, epsg_target):
     # Update crs attribute.
     gdf.crs = "epsg:{}".format(epsg_target)
 
-    return gdf
+    if series_flag:
+        return gdf["geometry"]
+    else:
+        return gdf
 
 def to_geoparquet(self: gpd.GeoDataFrame, path: str):
     """
