@@ -29,11 +29,15 @@ def apply_functions_to_fields(df, target_field, field_schema):
 
         domain = schema.domains.get(domain_name.lower(), {}).get(lang.lower())
         
-        # The user can specify if extracting domain "name" values (strings) or "index" values (integers)
-        if domain_type == 'name':
-            values = '|'.join(domain.keys())
-        elif domain_type == 'index':
-            values = '|'.join(domain.values())
+        # Domains can be either a list or a dictionary
+        if isinstance(domain, list):
+            values = '|'.join(domain)
+        else:
+            # The user can specify if extracting domain "name" values (strings) or "index" values (integers)
+            if domain_type == 'name':
+                values = '|'.join(domain.keys())
+            elif domain_type == 'index':
+                values = '|'.join(domain.values())
         
         pattern = pattern.replace('domain', values)
         logger.debug("Extracting text with pattern %r", pattern)
@@ -82,7 +86,7 @@ def apply_functions_to_fields(df, target_field, field_schema):
             dispatcher = df_dispatcher[func_name]
             new_df[target_field] = dispatcher(new_df, **kwargs)
         elif func_name in series_dispatcher:
-            logger.info("Calling %s on column %s", func_name, source_field)
+            logger.info("Calling %s on source column %s for %s", func_name, source_field, target_field)
             dispatcher = series_dispatcher[func_name]
             new_df[target_field] = dispatcher(new_df[target_field], **kwargs)
         else:
