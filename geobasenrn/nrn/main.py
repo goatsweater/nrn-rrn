@@ -7,6 +7,7 @@ import sys
 import click
 from click_plugins import with_plugins
 from geobasenrn.nrn.options import verbose_opt, quiet_opt
+import geobasenrn as nrn
 
 
 def configure_logging(verbosity):
@@ -26,7 +27,7 @@ prcodes = ['AB', 'BC', 'MB', 'ON', 'NB', 'NL', 'NS', 'NT', 'NU', 'PE', 'QC',
 @quiet_opt
 @click.argument('province',
                 type=click.Choice(prcodes, case_sensitive=False))
-@click.version_option()
+@click.version_option(nrn.__spec_version__, '--nrn-version', prog_name='National Road Network')
 @click.pass_context
 def main_group(ctx, verbose, quiet, province):
     """NRN command line interface.
