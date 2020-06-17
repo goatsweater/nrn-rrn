@@ -5,7 +5,7 @@ import fiona
 import geobasenrn as nrn
 import geobasenrn.io as nrnio
 from geobasenrn.nrn import options
-from geobasenrn.schema import schema
+from geobasenrn import schema
 import geopandas as gpd
 import logging
 import numpy as np
@@ -132,7 +132,7 @@ def package(ctx, precision, infile, major_version, minor_version,
                 # Create a GML file for each layer. GML files live within a parent folder named after their 
                 # language.
                 folder_name  = nrnio.get_gml_filename('GML', pt_identifier, major_version, minor_version, lang)[:-4]
-                folder_path = Path(temp_dir).joinpath(folder_name_en)
+                folder_path = Path(temp_dir).joinpath(folder_name)
                 # Create the folder to hold the files
                 folder_path.mkdir()
 
@@ -150,9 +150,9 @@ def package(ctx, precision, infile, major_version, minor_version,
                         data_source = driver.CreateDataSource(layer_path.as_posix())
 
                         # Create the layers within the GML files
-                        create_layer(data_source, tbl, layer_name, output_format, lang)
+                        nrnio.create_layer(data_source, tbl, layer_name, output_format, lang)
                         # Write the data to the new layer
-                        write_data_output(dframes[layer_key], layer_namee, data_sourcee, output_format, lang)
+                        nrnio.write_data_output(dframes[layer_key], layer_name, data_source, output_format, lang)
 
                         # Release the GML pointers to let go of the file handle
                         data_source = None
@@ -162,13 +162,13 @@ def package(ctx, precision, infile, major_version, minor_version,
         if compress:
             logger.debug("Asked for data compression. Building zip file.")
             # Get an output compliant filename
-            zip_name = 'output.zip'
+            zip_fname = 'output.zip'
             if output_format == 'gpkg' or output_format == 'shp':
                 fname_function = f'get_{output_format}_filename'
                 format_fname = Path(getattr(nrnio, fname_function)(pt_identifier,
                                                                    major_version,
                                                                    minor_version,
-                                                                   lang_en))
+                                                                   lang))
                 zip_fname = format_fname.stem
 
                 # The gpkg name includes a language identifier on the stem. The zip file should include everything 
@@ -186,8 +186,4 @@ def package(ctx, precision, infile, major_version, minor_version,
             # no compress requested, so move the products directly to the output location
             artifacts = temp_path.glob('*')
             for item in artifacts:
-                shutil.move(item, out_path)    
-
-
-
-
+                shutil.move(item, out_path)
