@@ -2,7 +2,6 @@ import datetime
 import fiona
 import geopandas as gpd
 import geoparquet as gpq
-import json
 import logging
 import networkx as nx
 import numpy as np
@@ -11,9 +10,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pyproj
+import re
 import requests
-import shapely.geometry
-import shutil
 import sqlite3
 import subprocess
 import sys
@@ -21,9 +19,11 @@ import time
 import yaml
 from collections import defaultdict
 from copy import deepcopy
-from itertools import compress
+from operator import attrgetter
 from osgeo import ogr, osr
 from shapely.geometry import LineString, Point
+from shapely.wkt import loads
+from tqdm import tqdm
 
 
 logger = logging.getLogger()
@@ -47,7 +47,7 @@ class TempHandlerSwap:
 
     def __enter__(self):
         """Remove stream handlers and add file handler."""
-        logger.info("Temporarily redirecting stream logging to file: {}.".format(self.log_path))
+        logger.info(f"Temporarily redirecting stream logging to file: {self.log_path}.")
         for handler in self.stream_handlers:
             self.logger.removeHandler(handler)
         self.logger.addHandler(self.file_handler)
@@ -74,7 +74,7 @@ class Timer:
     def __exit__(self, exc_type, exc_val, exc_tb):
         total_seconds = time.time() - self.start_time
         delta = datetime.timedelta(seconds=total_seconds)
-        logger.info("Finished. Time elapsed: {}.".format(delta))
+        logger.info(f"Finished. Time elapsed: {delta}.")
 
 
 def apply_domain(series, domain, default):
@@ -112,7 +112,7 @@ def apply_domain(series, domain, default):
 def compile_default_values(lang="en"):
     """Compiles the default value for each field in each table."""
 
-    dft_vals = load_yaml(os.path.abspath("../field_domains_{}.yaml".format(lang)))["default"]
+    dft_vals = load_yaml(os.path.abspath(f"../field_domains_{lang}.yaml"))["default"]
     dist_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
     defaults = dict()
 
@@ -126,11 +126,13 @@ def compile_default_values(lang="en"):
             for field, dtype in dist_format[name]["fields"].items():
 
                 # Configure default value.
-                key = "label" if dtype[0] in ("bytes", "str", "unicode") else "code"
+                key = "label" if dtype[0] == "str" else "code"
                 defaults[name][field] = dft_vals[key]
 
     except (AttributeError, KeyError, ValueError):
-        logger.exception("Invalid schema definition for either \"{}\" or \"{}\".".format(dft_vals, dist_format))
+        logger.exception(f"Invalid schema definition for one or more yamls:"
+                         f"\nDefault values: {dft_vals}"
+                         f"\nDistribution format: {dist_format}")
         sys.exit(1)
 
     return defaults
@@ -216,84 +218,146 @@ def compile_dtypes(length=False):
                 dtypes[name][field] = dtype if length else dtype[0]
 
     except (AttributeError, KeyError, ValueError):
-        logger.exception("Invalid schema definition for \"{}\".".format(dist_format))
+        logger.exception(f"Invalid schema definition: {dist_format}.")
         sys.exit(1)
 
     return dtypes
 
 
-def export_gpkg(dataframes, output_path, empty_gpkg_path=os.path.abspath("../../data/empty.gpkg")):
-    """Receives a dictionary of (Geo)pandas (Geo)DataFrames and exports them as GeoPackage layers."""
+def explode_geometry(gdf):
+    """Explodes MultiLineStrings and MultiPoints to LineStrings and Points, respectively."""
 
-    # Create gpkg from template if it doesn't already exist.
-    if not os.path.exists(output_path):
-        shutil.copyfile(empty_gpkg_path, output_path)
+    logger.info("Exploding multi-type geometries.")
 
-    # Export target dataframes to GeoPackage layers.
+    multi_types = {"MultiLineString", "MultiPoint"}
+    if len(set(gdf.geom_type.unique()).intersection(multi_types)):
+
+        # Separate multi- and single-type records.
+        multi = gdf[gdf.geom_type.isin(multi_types)]
+        single = gdf[~gdf.index.isin(multi.index)]
+
+        # Explode multi-type geometries.
+        multi_exploded = multi.explode().reset_index(drop=True)
+
+        # Merge all records.
+        merged = gpd.GeoDataFrame(pd.concat([single, multi_exploded], ignore_index=True), crs=gdf.crs)
+        return merged.copy(deep=True)
+
+    else:
+        return gdf.copy(deep=True)
+
+
+def export_gpkg(dataframes, output_path, export_schemas=None):
+    """
+    Receives a dictionary of (Geo)pandas (Geo)DataFrames and exports them as GeoPackage layers.
+    Optionally accepts an export schemas yaml path which will override the default distribution format column names.
+    """
+
+    output_path = os.path.abspath(output_path)
+    logger.info(f"Exporting dataframe(s) to GeoPackage: {output_path}.")
+
     try:
 
-        # Create sqlite and ogr GeoPackage connections.
-        con = sqlite3.connect(output_path)
-        cur = con.cursor()
-        con_ogr = ogr.GetDriverByName("GPKG").Open(output_path, update=1)
+        logger.info(f"Creating / opening data source: {output_path}.")
+
+        # Create / open GeoPackage.
+        driver = ogr.GetDriverByName("GPKG")
+        if os.path.exists(output_path):
+            gpkg = driver.Open(output_path, update=1)
+        else:
+            # TODO: test this line.
+            gpkg = driver.CreateDataSource(output_path, ["FID=uuid"])
+
+        # Compile schemas.
+        schemas = load_yaml(os.path.abspath("../distribution_format.yaml"))
+        if export_schemas:
+            export_schemas = load_yaml(export_schemas)["conform"]
+        else:
+            export_schemas = defaultdict(dict)
+            for table in schemas:
+                export_schemas[table]["fields"] = {field: field for field in schemas[table]["fields"]}
 
         # Iterate dataframes.
         for table_name, df in dataframes.items():
 
-            logger.info(f"Writing to GeoPackage: \"{output_path}\", layer: \"{table_name}\".")
+            logger.info(f"Layer {table_name}: creating layer.")
 
-            # Spatial data.
-            if isinstance(df, gpd.GeoDataFrame):
+            # Configure layer shape type and spatial reference.
+            if hasattr(df, "__geo_interface__"):
 
-                # Load GeoJSON attributes from GeoDataFrame.
-                properties = json.loads(df[df.columns.difference(["geometry"])].to_json(orient="index"))
-                geometry = {str(k): v for k, v in df["geometry"].map(shapely.geometry.mapping).to_dict().items()}
+                srs = osr.SpatialReference()
+                srs.ImportFromEPSG(df.crs.to_epsg())
 
-                # Construct and open GeoJSON in ogr as layer.
-                ogr_data = ogr.Open("{{\"type\": \"FeatureCollection\", \"features\": [{}]}}".format(", ".join(map(
-                    lambda key: json.dumps({
-                        "type": "Feature",
-                        "properties": properties[key],
-                        "geometry": geometry[key]}), df.index.astype(str)))))
-                ogr_layer = ogr_data.GetLayer()
-
-                # Configure crs.
-                epsg = df.crs.to_epsg()
-                ogr_layer.GetSpatialRef().ImportFromEPSG(epsg)
-
-                # Write to GeoPackage.
-                con_ogr.CopyLayer(ogr_layer, table_name, ["OVERWRITE=YES"])
-
-                # Populate gpkg_contents.
-                bb = df.total_bounds
-                cur.execute(
-                    f"insert or replace into "
-                    f"gpkg_contents(table_name, data_type, identifier, min_x, min_y, max_x, max_y, srs_id) "
-                    f"values ('{table_name}', 'features', '{table_name}', {bb[0]}, {bb[1]}, {bb[2]}, {bb[3]}, {epsg});"
-                )
-
-            # Tabular data.
+                if len(df.geom_type.unique()) > 1:
+                    raise ValueError(f"Multiple geometry types detected for dataframe {table_name}: "
+                                     f"{', '.join(map(str, df.geom_type.unique()))}.")
+                elif df.geom_type[0] in {"Point", "MultiPoint", "LineString", "MultiLineString"}:
+                    shape_type = attrgetter(f"wkb{df.geom_type[0]}")(ogr)
+                else:
+                    raise ValueError(f"Invalid geometry type(s) for dataframe {table_name}: "
+                                     f"{', '.join(map(str, df.geom_type.unique()))}.")
             else:
+                shape_type = ogr.wkbNone
+                srs = None
 
-                # Write to GeoPackage.
-                df.to_sql(table_name, con, if_exists="replace", index=False)
+            # Create layer.
+            layer = gpkg.CreateLayer(name=table_name, srs=srs, geom_type=shape_type, options=["OVERWRITE=YES"])
 
-                # Populate gpkg_contents.
-                cur.execute(
-                    f"insert or replace into gpkg_contents(table_name, data_type, identifier) "
-                    f"values ('{table_name}', 'attributes', '{table_name}');"
-                )
+            logger.info(f"Layer {table_name}: configuring schema.")
 
-            con.commit()
-            logger.info("Successfully exported layer: \"{}\".".format(table_name))
+            # Configure layer schema (field definitions).
+            ogr_field_map = {"float": ogr.OFTReal, "int": ogr.OFTInteger, "str": ogr.OFTString}
 
-        # Close db connection.
-        cur.close()
-        con.close()
-        del con_ogr
+            for field_name, mapped_field_name in export_schemas[table_name]["fields"].items():
+                field_type, field_width = schemas[table_name]["fields"][field_name]
+                field_defn = ogr.FieldDefn(mapped_field_name, ogr_field_map[field_type])
+                field_defn.SetWidth(field_width)
+                layer.CreateField(field_defn)
 
-    except (Exception, ValueError, sqlite3.Error) as e:
-        logger.exception("Error raised when writing to GeoPackage: \"{}\".".format(output_path))
+            # Map dataframe column names (does nothing if already mapped).
+            df.rename(columns=export_schemas[table_name]["fields"], inplace=True)
+
+            # Add uuid field to schema, if available.
+            if "uuid" in df.columns:
+                field_defn = ogr.FieldDefn("uuid", ogr.OFTString)
+                field_defn.SetWidth(32)
+                layer.CreateField(field_defn)
+
+            # Filter invalid columns from dataframe.
+            invalid_cols = set(df.columns) - {*export_schemas[table_name]["fields"], "uuid", "geometry"}
+            if invalid_cols:
+                logger.warning(f"Layer {table_name}: extraneous columns detected and will not be written to output: "
+                               f"{', '.join(map(str, invalid_cols))}.")
+
+            # Write layer.
+            layer.StartTransaction()
+
+            for feat in tqdm(df.itertuples(index=False), total=len(df), desc=f"Layer {table_name}: writing to file."):
+
+                # Instantiate feature.
+                feature = ogr.Feature(layer.GetLayerDefn())
+
+                # Set feature properties.
+                properties = feat._asdict()
+                for prop in set(properties) - invalid_cols - {"geometry"}:
+                    field_index = feature.GetFieldIndex(prop)
+                    feature.SetField(field_index, properties[prop])
+
+                # Set feature geometry, if spatial.
+                if srs:
+                    geom = ogr.CreateGeometryFromWkb(properties["geometry"].wkb)
+                    feature.SetGeometry(geom)
+
+                # Create feature.
+                layer.CreateFeature(feature)
+
+                # Clear pointer for next iteration.
+                feature = None
+
+            layer.CommitTransaction()
+
+    except (Exception, KeyError, ValueError, sqlite3.Error) as e:
+        logger.exception(f"Error raised when writing to GeoPackage: {output_path}.")
         logger.exception(e)
         sys.exit(1)
 
@@ -340,7 +404,7 @@ def get_url(url, max_attempts=10, **kwargs):
 
         try:
 
-            logger.info("Connecting to url (attempt {} of {}): {}".format(attempt, max_attempts, url))
+            logger.info(f"Connecting to url (attempt {attempt} of {max_attempts}): {url}")
 
             # Get url response.
             response = requests.get(url, **kwargs)
@@ -384,15 +448,14 @@ def groupby_to_list(df, group_field, list_field):
 
 def load_gpkg(gpkg_path, find=False, layers=None):
     """
-    Returns a dictionary of geopackage layers loaded into pandas or geopandas (geo)dataframes.
+    Returns a dictionary of geopackage layers as pandas or geopandas (geo)dataframes.
     Parameter find will creating a mapping for geopackage layer names which contain, but do not exactly match the
     expected NRN layer names.
-    Parameter layers accepts a list of table names to load instead of loading all GeoPackage layers.
+    Parameter layers accepts an iterable of table names if only a subset of GeoPackage layers are required.
     """
 
     dframes = dict()
     distribution_format = load_yaml(os.path.abspath("../distribution_format.yaml"))
-    missing_flag = False
 
     if os.path.exists(gpkg_path):
 
@@ -404,66 +467,63 @@ def load_gpkg(gpkg_path, find=False, layers=None):
 
             # Create sqlite connection.
             con = sqlite3.connect(gpkg_path)
-
-            # Load gpkg table names.
             cur = con.cursor()
-            query = "select name from sqlite_master where type='table';"
-            layers = list(zip(*cur.execute(query).fetchall()))[0]
+
+            # Load GeoPackage table names.
+            gpkg_layers = list(zip(*cur.execute("select name from sqlite_master where type='table';").fetchall()))[0]
 
             # Create table name mapping.
-            gpkg_tables = dict()
+            layers_map = dict()
             if find:
                 for table_name in distribution_format:
-                    results = [name.lower().find(table_name) >= 0 for name in layers]
-                    if any(results):
-                        gpkg_tables[table_name] = list(compress(layers, results))[0]
+                    for layer_name in gpkg_layers:
+                        if layer_name.lower().find(table_name) >= 0:
+                            layers_map[table_name] = layer_name
+                            break
             else:
-                gpkg_tables = {name: name for name in layers}
+                layers_map = {name: name for name in set(distribution_format).intersection(set(gpkg_layers))}
 
         except sqlite3.Error:
-            logger.exception("Unable to connect to GeoPackage: \"{}\".".format(gpkg_path))
+            logger.exception(f"Unable to connect to GeoPackage: {gpkg_path}.")
             sys.exit(1)
 
-        # Load GeoPackage layers into pandas or geopandas.
-        for table_name in distribution_format:
+        # Compile missing layers.
+        missing_layers = set(distribution_format) - set(layers_map)
+        if missing_layers:
+            logger.warning(f"Missing one or more expected layers: {', '.join(map(str, sorted(missing_layers)))}. An "
+                           f"exception may be raised later on if any of these layers are required.")
 
-            logger.info("Loading layer: \"{}\".".format(table_name))
+        # Load GeoPackage layers as (geo)dataframes.
+        # Convert column names to lowercase on import.
+        for table_name in layers_map:
+
+            logger.info(f"Loading layer: {table_name}.")
 
             try:
 
-                if table_name in gpkg_tables:
+                # Spatial data.
+                if distribution_format[table_name]["spatial"]:
+                    df = gpd.read_file(gpkg_path, layer=layers_map[table_name], driver="GPKG").rename(columns=str.lower)
 
-                    # Spatial data.
-                    if distribution_format[table_name]["spatial"]:
-                        df = gpd.read_file(gpkg_path, layer=gpkg_tables[table_name], driver="GPKG")
-
-                    # Tabular data.
-                    else:
-                        df = pd.read_sql_query("select * from {}".format(gpkg_tables[table_name]), con)
-
-                    # Set index field: uuid.
-                    if "uuid" in df.columns:
-                        df.index = df["uuid"]
-
-                    # Store result.
-                    dframes[table_name] = df.copy(deep=True)
-                    logger.info("Successfully loaded layer into dataframe: \"{}\".".format(table_name))
-
+                # Tabular data.
                 else:
-                    logger.warning("GeoPackage layer not found: \"{}\".".format(table_name))
-                    missing_flag = True
+                    df = pd.read_sql_query(f"select * from {layers_map[table_name]}", con).rename(columns=str.lower)
+
+                # Set index field: uuid.
+                if "uuid" in df.columns:
+                    df.index = df["uuid"]
+
+                # Store result.
+                dframes[table_name] = df.copy(deep=True)
+                logger.info(f"Successfully loaded layer as dataframe: {table_name}.")
 
             except (fiona.errors.DriverError, pd.io.sql.DatabaseError, sqlite3.Error):
-                logger.exception("Unable to load GeoPackage layer: \"{}\".".format(table_name))
+                logger.exception(f"Unable to load layer: {table_name}.")
                 sys.exit(1)
 
     else:
-        logger.exception("GeoPackage does not exist: \"{}\".".format(gpkg_path))
+        logger.exception(f"GeoPackage does not exist: {gpkg_path}.")
         sys.exit(1)
-
-    # Provide warning for missing GeoPackage layers.
-    if missing_flag:
-        logger.warning("Missing tables indicated. An exception may be raised later on if the table is required.")
 
     return dframes
 
@@ -474,9 +534,11 @@ def load_yaml(path):
     with open(path, "r", encoding="utf8") as f:
 
         try:
+
             return yaml.safe_load(f)
+
         except (ValueError, yaml.YAMLError):
-            logger.exception("Unable to load yaml file: \"{}\".".format(path))
+            logger.exception(f"Unable to load yaml: {path}.")
 
 
 def nx_to_gdf(g, nodes=True, edges=True):
@@ -518,7 +580,7 @@ def ogr2ogr(expression, log=None, max_attempts=5):
         logger.info(log)
 
     # Format ogr2ogr command.
-    expression = "ogr2ogr {}".format(" ".join(map(str, expression.values())))
+    expression = f"ogr2ogr {' '.join(map(str, expression.values()))}"
 
     # Execute ogr2ogr.
     attempt = 1
@@ -534,17 +596,19 @@ def ogr2ogr(expression, log=None, max_attempts=5):
 
             if attempt == max_attempts:
                 logger.exception("Unable to transform data source.")
-                logger.exception("ogr2ogr error: {}".format(e))
+                logger.exception(f"ogr2ogr error: {e}")
                 logger.warning("Maximum attempts reached. Exiting program.")
                 sys.exit(1)
             else:
-                logger.warning("Attempt {} of {} failed. Retrying.".format(attempt, max_attempts))
+                logger.warning(f"Attempt {attempt} of {max_attempts} failed. Retrying.")
                 attempt += 1
                 continue
 
 
 def reproject_gdf(gdf, epsg_source, epsg_target):
     """Transforms a GeoDataFrame's geometry column or GeoSeries between EPSGs."""
+
+    logger.info(f"Reprojecting geometry from EPSG:{epsg_source} to EPSG:{epsg_target}.")
 
     series_flag = True if isinstance(gdf, gpd.GeoSeries) else False
 
@@ -581,12 +645,31 @@ def reproject_gdf(gdf, epsg_source, epsg_target):
         raise Exception("Geometry type not supported for EPSG transformation.")
 
     # Update crs attribute.
-    gdf.crs = "epsg:{}".format(epsg_target)
+    gdf.crs = f"epsg:{epsg_target}"
 
     if series_flag:
         return gdf["geometry"]
     else:
         return gdf
+
+
+def round_coordinates(gdf, precision=7):
+    """Rounds the coordinates of the geometry column to the specified decimal precision."""
+
+    logger.info(f"Rounding coordinates to decimal precision: {precision}.")
+
+    try:
+
+        gdf["geometry"] = gdf["geometry"].map(
+            lambda g: loads(re.sub(r"\d*\.\d+", lambda m: f"{float(m.group(0)):.{precision}f}", g.wkt)))
+
+        return gdf
+
+    except (TypeError, ValueError) as e:
+        logger.exception("Unable to round coordinates for GeoDataFrame.")
+        logger.exception(e)
+        sys.exit(1)
+
 
 def to_geoparquet(self: gpd.GeoDataFrame, path: str):
     """
