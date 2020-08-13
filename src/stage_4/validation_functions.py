@@ -10,7 +10,7 @@ import string
 import sys
 from collections import Counter
 from datetime import datetime
-from itertools import chain, permutations
+from itertools import chain, groupby, permutations, tee
 from operator import attrgetter, itemgetter
 from scipy.spatial import cKDTree
 from shapely.geometry import Point
@@ -231,12 +231,14 @@ def deadend_proximity(junction, roadseg):
 
 
 def duplicated_lines(df):
-    """Identifies the uuids of duplicate line geometries."""
+    """Identifies the uuids of duplicate and overlapping line geometries."""
 
-    errors = {1: list()}
+    errors = {i: list() for i in range(1, 3+1)}
 
     # Keep only required fields.
     series = df["geometry"]
+
+    # Validation 1: ensure line segments are not duplicated.
 
     # Filter geometries to those with duplicate lengths.
     s_filtered = series[series.length.duplicated(keep=False)]
@@ -254,9 +256,56 @@ def duplicated_lines(df):
             # Compile uuids of flagged records.
             errors[1] = s_filtered[mask].index.values
 
+    # Validation 2: ensure line segments do not have repeated adjacent points.
+
+    # Filter geometries to those with duplicated coordinates.
+    s_filtered = series[series.map(lambda g: len(g.coords) != len(set(g.coords)))]
+
+    if len(s_filtered):
+
+        # Identify geometries with repeated adjacent coordinates.
+        mask = s_filtered.map(lambda g: len(g.coords) != len(list(groupby(g.coords))))
+
+        # Compile uuids of flagged records.
+        errors[2] = s_filtered[mask].index.values
+
+    # Validation 3: ensure line segments do not overlap (i.e. contain duplicated adjacent points).
+
+    # Extract coordinates from geometries (used multiple times).
+    series_coords = series.map(attrgetter("coords")).map(tuple)
+
+    # Create ordered coordinate pairs, sorted.
+    def ordered_pairs(coords):
+        coords_1, coords_2 = tee(coords)
+        next(coords_2, None)
+        return sorted(zip(coords_1, coords_2))
+    coord_pairs = series_coords.map(ordered_pairs).explode()
+
+    # Remove invalid pairs (duplicated adjacent coordinates).
+    coord_pairs = coord_pairs[coord_pairs.map(lambda pair: pair[0] != pair[1])]
+
+    # Group uuids of matching pairs.
+    coord_pairs_df = coord_pairs.reset_index(drop=False)
+    coord_pairs_grouped = helpers.groupby_to_list(coord_pairs_df, "geometry", "uuid")
+    coord_pairs_grouped = pd.DataFrame({"pairs": coord_pairs_grouped.index, "uuid": coord_pairs_grouped.values})
+
+    # Filter to duplicated pairs.
+    coord_pairs_dup = coord_pairs_grouped[coord_pairs_grouped["uuid"].map(len) > 1]
+    if len(coord_pairs_dup):
+
+        # Group duplicated pairs by sorted uuid groups.
+        coord_pairs_dup["uuid"] = coord_pairs_dup["uuid"].map(sorted).map(tuple)
+        coord_pairs_dup_grouped = helpers.groupby_to_list(coord_pairs_dup, "uuid", "pairs")
+
+        # Compile error properties.
+        if len(coord_pairs_dup_grouped):
+            for uuid_group, pairs in coord_pairs_dup_grouped.iteritems():
+                vals = ", ".join(map(lambda val: f"'{val}'", uuid_group))
+                errors[3].append(f"Overlap identified for uuids: {vals}; number of overlapping segments: {len(pairs)}.")
+
     # Compile error properties.
     for code, vals in errors.items():
-        if len(vals):
+        if code in {1, 2} and len(vals):
             errors[code] = list(map(lambda val: f"uuid: '{val}'", vals))
 
     return errors

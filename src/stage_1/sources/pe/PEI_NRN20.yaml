@@ -108,7 +108,7 @@ conform:
     r_hnuml:
       fields: R_HNUML
       functions: *l_hnumf
-    nid: NID
+    nid: uuid
     nbrlanes: NBRLANES
     l_placenam:
       fields: PLACE_L
@@ -132,11 +132,6 @@ conform:
     pavstatus: PAVSTATUS
     roadjuris: ROADJURIS
     roadsegid:
-      fields: uuid
-      functions:
-        - function: incrementor
-          start: 1
-          step: 1
     rtename1en:
       fields: RTENAME1EN
       functions: &rtename1en

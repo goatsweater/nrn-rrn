@@ -264,12 +264,16 @@ class Stage:
 
             return df.copy(deep=True)
 
-        def overwrite_roadsegid(series):
-            """Populates the series with incrementing integer values from 1-n."""
+        def overwrite_segment_ids(table, df):
+            """Populates the DataFrame's 'ferrysegid' or 'roadsegid' with incrementing integer values from 1-n."""
 
-            logger.info(f"Applying data cleanup \"overwrite roadsegid\" to dataset: roadseg.")
+            logger.info(f"Applying data cleanup \"overwrite segment IDs\" to dataset: {table}.")
 
-            return pd.Series(range(1, len(series) + 1), index=series.index)
+            # Overwrite column.
+            col = {"ferryseg": "ferrysegid", "roadseg": "roadsegid"}[table]
+            df[col] = range(1, len(df) + 1)
+
+            return df.copy(deep=True)
 
         def strip_whitespace(table, df):
             """Strips leading, trailing, and multiple internal whitespace for each dataframe column."""
@@ -325,22 +329,24 @@ class Stage:
 
             return df.copy(deep=True)
 
-        # Cleanup: lower case IDs.
+        # Apply cleanup functions.
         for table, df in self.target_gdframes.items():
-            self.target_gdframes.update({table: lower_case_ids(table, df.copy(deep=True))})
 
-        # Cleanup: overwrite roadsegid.
-        roadsegid = self.target_gdframes["roadseg"]["roadsegid"].copy(deep=True)
-        self.target_gdframes["roadseg"].loc[roadsegid.index, "roadsegid"] = overwrite_roadsegid(roadsegid)
-
-        # Cleanup: strip whitespace.
-        for table, df in self.target_gdframes.items():
-            self.target_gdframes.update({table: strip_whitespace(table, df.copy(deep=True))})
-
-        # Cleanup: title case route text.
-        for table in ("ferryseg", "roadseg"):
             df = self.target_gdframes[table].copy(deep=True)
-            self.target_gdframes.update({table: title_case_route_names(table, df)})
+
+            # Cleanup: lower case IDs.
+            self.target_gdframes.update({table: lower_case_ids(table, df)})
+
+            # Cleanup: strip whitespace.
+            self.target_gdframes.update({table: strip_whitespace(table, df)})
+
+            # Cleanup: overwrite segment IDs.
+            if table in {"ferryseg", "roadseg"}:
+                self.target_gdframes.update({table: overwrite_segment_ids(table, df)})
+
+            # Cleanup: title case route text.
+            if table in {"ferryseg", "roadseg"}:
+                self.target_gdframes.update({table: title_case_route_names(table, df)})
 
     def compile_source_attributes(self):
         """Compiles the yaml files in the sources' directory into a dictionary."""
@@ -382,17 +388,26 @@ class Stage:
 
         logger.info("Retrieving previous NRN vintage.")
 
-        # Retrieve metadata for previous NRN vintage.
         logger.info("Retrieving metadata for previous NRN vintage.")
+
+        # Retrieve metadata for previous NRN vintage.
         source = helpers.load_yaml("../downloads.yaml")["previous_nrn_vintage"]
-        metadata_url = source["metadata_url"].replace("<id>", source["ids"][self.source])
+        metadata_url = source["metadata_url"]
+        nrn_id = source["ids"][self.source]
 
         # Get metadata from url.
         metadata = helpers.get_url(metadata_url, timeout=30)
+        metadata = json.loads(metadata.content)
 
         # Extract download url from metadata.
-        metadata = json.loads(metadata.content)
-        download_url = metadata["result"]["resources"][0]["url"]
+        download_url = None
+        for product in metadata["result"]["resources"]:
+            if product["id"] == nrn_id:
+                download_url = product["url"]
+
+        if not download_url:
+            logger.exception(f"Unable to find previous NRN product from metadata: {metadata_url}.")
+            sys.exit(1)
 
         # Download previous NRN vintage.
         logger.info("Downloading previous NRN vintage.")
@@ -415,7 +430,7 @@ class Stage:
         logger.info("Extracting zipped data for previous NRN vintage.")
 
         gpkg_path = [f for f in zipfile.ZipFile(f"{self.nrn_old_path}.zip", "r").namelist() if
-                     f.endswith(".gpkg")][0]
+                     f.lower().endswith("en.gpkg")][0]
 
         with zipfile.ZipFile(f"{self.nrn_old_path}.zip", "r") as zip_f:
             with zip_f.open(gpkg_path) as zsrc, open(f"{self.nrn_old_path}.gpkg", "wb") as zdest:
@@ -620,6 +635,9 @@ class Stage:
 
                     # Add uuid field.
                     df["uuid"] = [uuid.uuid4().hex for _ in range(len(df))]
+
+                    # Overwrite nid field.
+                    df["nid"] = [uuid.uuid4().hex for _ in range(len(df))]
 
                     if isinstance(df, gpd.GeoDataFrame):
 
